@@ -39,24 +39,19 @@
 
 <style>
   :root {
-    --bg: #ffffff;
-    --ink: #24292f;
-    --muted: #5f6a73;
-    --accent: #0b6663;
-    --line: #dfe3e6;
-    --chip: #e4eeed;
-    --panel: #f7f9f9;
-    --measure: 58ch;
+    --bg: #fcfbf9;      /* warm paper, not clinical white */
+    --ink: #23262b;
+    --muted: #71767c;
+    --accent: #16564f;  /* deep pine — used only on links and the one number */
+    --line: #e4e1db;    /* warm hairline */
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #16191c;
-      --ink: #e6e8ea;
-      --muted: #9aa4ad;
-      --accent: #5cc0ba;
-      --line: #333b41;
-      --chip: #24312f;
-      --panel: #1c2124;
+      --bg: #1a1b1b;    /* warm charcoal, not blue-black */
+      --ink: #e7e5e1;
+      --muted: #979a97;
+      --accent: #6fbfb4;
+      --line: #2e302f;
     }
   }
   * { box-sizing: border-box; }
@@ -64,70 +59,59 @@
     margin: 0;
     background: var(--bg);
     color: var(--ink);
-    font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-    padding: 0 20px;
+    font: 17px/1.75 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    padding: 0 22px;
+    -webkit-font-smoothing: antialiased;
   }
-  .wrap { max-width: 760px; margin: 0 auto; padding: 52px 0 80px; }
-  p, .news li, ul li { max-width: var(--measure); }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 68px 0 88px; }
 
-  header { display: flex; gap: 26px; align-items: center; flex-wrap: wrap; }
-  .avatar {
-    width: 118px; height: 118px; border-radius: 50%;
-    border: 1px solid var(--line); flex: none; object-fit: cover;
-  }
-  h1 { font-size: 31px; line-height: 1.2; margin: 0 0 4px; letter-spacing: -0.015em; }
-  .tagline { color: var(--ink); margin: 0 0 6px; max-width: 42ch; font-size: 16.5px; }
-  .avail { color: var(--muted); font-size: 14px; margin: 0 0 12px; max-width: 52ch; }
-  .links { display: flex; gap: 16px; flex-wrap: wrap; font-size: 14.5px; }
-  .links a { color: var(--accent); text-decoration: none; font-weight: 500; }
+  header { display: flex; gap: 22px; align-items: center; }
+  .avatar { width: 92px; height: 92px; border-radius: 50%; flex: none; object-fit: cover; }
+  h1 { font-size: 27px; line-height: 1.25; margin: 0 0 5px; letter-spacing: -0.015em; font-weight: 650; }
+  .role { color: var(--muted); margin: 0; font-size: 16px; }
+
+  .links { display: flex; gap: 18px; flex-wrap: wrap; margin: 26px 0 0; font-size: 15px; }
+  .links a { color: var(--accent); text-decoration: none; }
   .links a:hover, .links a:focus-visible { text-decoration: underline; }
 
+  p { margin: 18px 0; }
+  .lede { margin-top: 30px; }
+
   h2 {
-    font-size: 20px; margin: 46px 0 14px; padding-bottom: 7px;
-    border-bottom: 1px solid var(--line); letter-spacing: 0.005em;
+    font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--muted); margin: 64px 0 20px;
   }
+
+  figure { margin: 34px 0; }
+  figure img { width: 100%; height: auto; display: block; border-radius: 6px; }
+  figcaption { color: var(--muted); font-size: 13.5px; line-height: 1.6; margin-top: 10px; }
+
+  .item { margin: 0 0 30px; }
+  .item:last-child { margin-bottom: 0; }
+  .item .t { font-weight: 600; }
+  .item .m { color: var(--muted); font-size: 14px; margin: 1px 0 7px; }
+  .item p { margin: 0; font-size: 16px; }
+  .item .go { margin-top: 8px; font-size: 14.5px; display: flex; gap: 16px; flex-wrap: wrap; }
   a { color: var(--accent); }
-  a:focus-visible, .card:focus-within { outline: 2px solid var(--accent); outline-offset: 3px; }
-  ul { padding-left: 1.2em; margin: 8px 0; }
-  li { margin: 7px 0; }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
-  .news { list-style: none; padding: 0; }
-  .news li { display: flex; gap: 16px; margin: 11px 0; max-width: none; }
-  .news .date {
-    color: var(--muted); flex: none; width: 84px; font-variant-numeric: tabular-nums;
-    font-size: 14px; padding-top: 2px;
-  }
-  .news .body { max-width: var(--measure); }
+  .rows { list-style: none; padding: 0; margin: 0; }
+  .rows li { display: flex; gap: 18px; margin: 0 0 14px; font-size: 16px; }
+  .rows .d { color: var(--muted); flex: none; width: 76px; font-size: 14px; padding-top: 2px; font-variant-numeric: tabular-nums; }
 
-  figure { margin: 18px 0; }
-  figure img {
-    width: 100%; height: auto; display: block;
-    border: 1px solid var(--line); border-radius: 8px;
-  }
-  figcaption { color: var(--muted); font-size: 13.5px; margin-top: 7px; max-width: var(--measure); }
+  .plain { font-size: 16px; }
+  .plain span { color: var(--muted); }
 
-  .card {
-    border: 1px solid var(--line); border-radius: 8px;
-    padding: 16px 20px; margin: 14px 0; background: var(--panel);
-  }
-  .card.lead { border-left: 3px solid var(--accent); }
-  .card h3 { margin: 0 0 3px; font-size: 16.5px; }
-  .card .meta { color: var(--muted); font-size: 13.5px; margin-bottom: 7px; }
-  .card p { margin: 7px 0; font-size: 15px; }
-  .card .more { font-size: 14px; margin-top: 9px; }
-  .card .more a { margin-right: 14px; white-space: nowrap; }
-  .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-  .chip { background: var(--chip); color: var(--accent); font-size: 12.5px; padding: 3px 10px; border-radius: 4px; }
+  footer { margin-top: 76px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13.5px; }
+  footer em { display: block; margin-bottom: 8px; }
 
-  .skills p { margin: 5px 0; font-size: 15px; max-width: var(--measure); }
-  footer { margin-top: 62px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); padding-top: 15px; }
-
-  @media (max-width: 560px) {
-    .news li { display: block; }
-    .news .date { width: auto; display: block; margin-bottom: 2px; font-size: 13px; }
-    .avatar { width: 96px; height: 96px; }
-    h1 { font-size: 27px; }
-    .wrap { padding-top: 36px; }
+  @media (max-width: 540px) {
+    .wrap { padding-top: 44px; }
+    header { gap: 18px; }
+    .avatar { width: 76px; height: 76px; }
+    h1 { font-size: 24px; }
+    .rows li { display: block; }
+    .rows .d { width: auto; display: block; }
   }
 </style>
 </head>
@@ -135,222 +119,122 @@
 <main class="wrap">
 
 <header>
-  <img class="avatar" src="assets/avatar.jpg" width="118" height="118" alt="Yiping Yin">
+  <img class="avatar" src="assets/avatar.jpg" width="92" height="92" alt="Yiping Yin">
   <div>
     <h1>Yiping Yin</h1>
-    <p class="tagline">Systematic quantitative trading and AI quantitative research</p>
-    <p class="avail">Sydney, Australia · UNSW Sydney, graduating Aug 2026 · looking for graduate and intern roles in quantitative research and trading</p>
-    <nav class="links" aria-label="Profile and contact links">
-      <a href="assets/Yiping-Yin-CV.pdf">CV (PDF)</a>
-      <a href="https://github.com/Yiping-Yin">GitHub</a>
-      <a href="https://www.linkedin.com/in/yiping-yin/">LinkedIn</a>
-      <a href="mailto:yiping_yin0521@outlook.com">Email</a>
-    </nav>
+    <p class="role">Quantitative research and trading · UNSW Sydney</p>
   </div>
 </header>
 
-<h2>About</h2>
-<p>
-  Hi! I work on systematic trading and AI-driven quantitative research, currently
-  finishing a Bachelor of Commerce (Finance) at <strong>UNSW Sydney</strong>.
-  I care about one unglamorous thing above all: <em>the effective sample is
-  smaller than it looks</em> — so I price selection luck before believing a
-  backtest, and ship the simplest thing that survives falsification.
+<nav class="links" aria-label="Profile and contact links">
+  <a href="assets/Yiping-Yin-CV.pdf">CV</a>
+  <a href="https://github.com/Yiping-Yin">GitHub</a>
+  <a href="https://www.linkedin.com/in/yiping-yin/">LinkedIn</a>
+  <a href="mailto:yiping_yin0521@outlook.com">Email</a>
+</nav>
+
+<p class="lede">
+  I work on systematic trading and AI-driven quantitative research, and I care
+  about one unglamorous thing above all: <em>the effective sample is smaller
+  than it looks</em>. So I price selection luck before believing a backtest, and
+  ship the simplest thing that survives falsification.
 </p>
 <p>
-  Most recently my team placed <strong>1st of 253 teams</strong> on the
-  <a href="https://www.algothon.au/leaderboard">General-round leaderboard</a> of
-  Algothon 2026 (Susquehanna International Group × UNSW FinTech Society), and
-  <strong>3rd in the Final round</strong>, scored on 500 days of market data
-  nobody had seen. The full 69-page research record — every constant derived
-  from the published rules before any data was read, every claim graded by
-  evidence class — is
-  <a href="https://github.com/Yiping-Yin/algothon-2026">public</a>.
+  Graduating from UNSW Sydney in August 2026, based in Sydney, and looking for
+  graduate and intern roles in quantitative research and trading.
 </p>
 
 <figure>
-  <img src="assets/algothon-results.png"
-       alt="Algothon 2026 results: team abc123 first of 253 teams on the General-round official leaderboard with 984.62, and third on the Final-round technical score leaderboard with 1,085.17">
-  <figcaption>
-    Left: the official live leaderboard, captured 3 August 2026 (still live and
-    verifiable <a href="https://www.algothon.au/leaderboard">here</a>).
-    Right: the Final-round technical board as displayed at the awards
-    presentation, transcribed row by row — a photographed display, not an
-    official export, and graded as such in the report.
-  </figcaption>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/results-dark.png">
+    <img src="assets/results-light.png" width="1500" height="520"
+         alt="Algothon 2026 results: team abc123 first of 253 teams on the General-round leaderboard with 984.62, and third on the Final-round technical board with 1,085.17">
+  </picture>
+  <figcaption>Algothon 2026 · Susquehanna International Group × UNSW FinTech Society</figcaption>
 </figure>
 
-<h2>News</h2>
-<ul class="news">
-  <li><span class="date">Aug 2026</span><span class="body">🥉 <strong>3rd in the Final round of Algothon 2026</strong> — technical score 1,085.17 on 500 hidden days. It landed within 0.4 standard errors of the mean we had predicted before submitting, against a threshold fixed in advance.</span></li>
-  <li><span class="date">Aug 2026</span><span class="body">📄 Published <em><a href="https://github.com/Yiping-Yin/algothon-2026/blob/main/Algothon-Research-Report.pdf">Forecasting Under a Limited Effective Sample</a></em>, the complete 69-page research record, with a postscript reading the verified outcome against thresholds fixed before any hidden-window result existed.</span></li>
-  <li><span class="date">Aug 2026</span><span class="body">🥇 <strong>1st of 253 teams</strong> on the Algothon 2026 General-round leaderboard (984.62, public data, as of 3 Aug).</span></li>
-  <li><span class="date">Jul 2026</span><span class="body">Completed the UNSW FAIC AI-engineering training — RAG, LangGraph, MCP, multi-agent workflows, and a 4-bit QLoRA adaptation of Llama-3.1-Nemotron-Nano-8B.</span></li>
-  <li><span class="date">Jun 2026</span><span class="body">PittsAI, a multi-agent customer-simulation prototype, was selected as a <strong>Peter Farrell Cup 2026 finalist</strong> and joined <strong>Antler Australia AUS16</strong>.</span></li>
-  <li><span class="date">Feb 2025</span><span class="body">Started reconstructing trade-aligned L2 order books from nanosecond ASX/Cboe prints — the project that turned into my main line of microstructure work.</span></li>
-</ul>
+<h2>Selected work</h2>
 
-<h2>Systematic quantitative trading</h2>
-
-<div class="card lead">
-  <h3><a href="https://github.com/Yiping-Yin/algothon-2026">Algothon 2026 — systematic multi-asset strategy</a></h3>
-  <div class="meta">Competition · team captain and quant strategy developer · Jun – Aug 2026</div>
+<div class="item">
+  <div class="t">Algothon 2026 — 1st of 253 teams, 3rd in the Final round</div>
+  <div class="m">Team captain and quant strategy developer · 2026</div>
   <p>
-    A lead–lag and reversal core in a four-horizon pair portfolio, calibrated on
-    full-history, 500-, 420- and 360-day windows with ADF, AR(1), correlation and
-    mean-crossing filters. Code and configuration hashes were locked before each
-    cutoff, local traces reconciled against the official evaluator, and every
-    candidate falsified against a threshold fixed in advance.
-  </p>
-  <p>
-    Seven near-relatives beat the submitted engine on nominal score; the best
-    margin was +1.14 points against a selection price of +166, so none were
-    submitted. What shipped was the version with the simplest structure and the
-    fewest unverified parts — and out of sample it landed inside the noise band
+    A lead–lag pair portfolio with every threshold fixed before candidates were
+    compared. Seven near-relatives scored higher during development; none cleared
+    the +166-point price of having looked, so none were submitted. What shipped
+    was the simplest version — and out of sample it landed inside the noise band
     the analysis had priced for it.
   </p>
-  <div class="more">
-    <a href="https://github.com/Yiping-Yin/algothon-2026/blob/main/Algothon-Research-Report.pdf">69-page report (PDF)</a>
-    <a href="https://github.com/Yiping-Yin/algothon-2026/blob/main/strategy/abc123.py">Strategy code</a>
-    <a href="https://www.algothon.au/leaderboard">Official leaderboard</a>
+  <div class="go">
+    <a href="https://github.com/Yiping-Yin/algothon-2026/blob/main/Algothon-Research-Report.pdf">Report, 69pp</a>
+    <a href="https://github.com/Yiping-Yin/algothon-2026/blob/main/strategy/abc123.py">Code</a>
+    <a href="https://www.algothon.au/leaderboard">Leaderboard</a>
   </div>
-  <div class="chips"><span class="chip">selection-bias pricing</span><span class="chip">leakage-controlled validation</span><span class="chip">reproducible research</span></div>
 </div>
 
-<figure>
-  <img src="assets/fig-selection-price.png"
-       alt="Distribution of block scores under a zero-skill null: the best of 600 zero-skill variants sits +166 points above the null mean, well to the right of the submitted book's score">
-  <figcaption>
-    From the report: what it costs to have looked. Picking the best of a few
-    hundred zero-skill variants is worth about +166 points of score for free —
-    which is why a +1.14 margin is not evidence of anything. Fixing this
-    threshold before comparing candidates is the whole discipline.
-  </figcaption>
-</figure>
-
-<div class="card">
-  <h3>Market microstructure and intraday cross-asset trading</h3>
-  <div class="meta">Self-directed research · team lead · Feb 2025 – Jul 2026</div>
+<div class="item">
+  <div class="t">Market microstructure and intraday cross-asset trading</div>
+  <div class="m">Self-directed · 2025 – 2026</div>
   <p>
-    Reconstructed trade-aligned L2 snapshots from nanosecond ASX/Cboe prints
-    under same-venue, strictly-prior-timestamp matching — a deliberately severe
-    rule that discards far more candidate pairs than it keeps, because a
-    single lookahead match contaminates everything downstream. Built 5-second
-    ETF cross-asset fair-value signals and 1-minute/1-second microstructure
-    features from Nasdaq-100 futures, AUD/USD, spread, depth, order imbalance
-    and time-of-day, then ran chronologically split, cost-aware simulations with
-    ablation and stress testing to separate signal value from execution
-    assumptions.
+    Trade-aligned L2 reconstruction from nanosecond ASX/Cboe prints under
+    strictly-prior-timestamp matching, then cost-aware, chronologically split
+    simulation to separate signal from execution assumptions.
   </p>
-  <div class="chips"><span class="chip">L2 order books</span><span class="chip">microprice</span><span class="chip">adverse selection</span></div>
 </div>
 
-<div class="card">
-  <h3>Algorithmic market making and execution</h3>
-  <div class="meta">Self-directed project on the Optibook simulated exchange · May – Aug 2026</div>
+<div class="item">
+  <div class="t">Algorithmic market making</div>
+  <div class="m">Self-directed, Optibook simulated exchange · 2026</div>
   <p>
-    An automated market-making loop over five-level books: equal-volume IOC legs
-    for cross-book spreads, inventory-aware passive quotes, EWMA-volatility
-    adaptive thresholds, self-trade protection, fill confirmation, covariance
-    risk gating and automatic flattening. Sessions ended flat rather than
-    carrying inventory, which is the property I was optimising for; a next-trade
-    model reduced RMSE against the mid-price benchmark by 4.4%.
+    Inventory-aware two-sided quoting with EWMA-volatility thresholds, self-trade
+    protection, covariance risk gating and automatic flattening — sessions end
+    flat by design rather than by luck.
   </p>
-  <div class="chips"><span class="chip">IOC and passive quoting</span><span class="chip">inventory control</span><span class="chip">execution</span></div>
 </div>
 
-<h2>AI quantitative research</h2>
-
-<div class="card">
-  <h3>Point-in-time multi-asset, news and event pricing</h3>
-  <div class="meta">Self-directed research · Jul 2026 – present</div>
+<div class="item">
+  <div class="t">Point-in-time data and event pricing</div>
+  <div class="m">Self-directed · 2026 – present</div>
   <p>
-    I build point-in-time panels covering 50 US equities, 10 cryptocurrencies
-    and 149,683 news headlines, with ETL, deduplication, source provenance,
-    timezone and publication-time alignment — so that out-of-sample multi-asset
-    and sentiment research cannot quietly consume the future. The panels are
-    served through Modal and FastAPI with signed webhooks and idempotent event
-    handling, and I am building an earnings-event agent that freezes its
-    point-in-time inputs and submits abnormal-return percentiles for live
-    evaluation.
+    Point-in-time panels across 50 equities, 10 cryptocurrencies and 149,683
+    headlines, aligned to publication time so that out-of-sample research cannot
+    quietly consume the future.
   </p>
-  <div class="chips"><span class="chip">point-in-time data</span><span class="chip">leakage control</span><span class="chip">event pricing</span></div>
 </div>
 
-<div class="card">
-  <h3>Evidence-grounded financial agents</h3>
-  <div class="meta">AI Mockathon and UNSW FAIC AI-engineering training · Jul 2026</div>
+<div class="item">
+  <div class="t">Multi-agent simulation and AI safety</div>
+  <div class="m">Research assistant, UNSW Sydney · 2025 – present</div>
   <p>
-    A financial agent bounded to RBA, ASX and AFR sources, using deterministic
-    queries, structured tool traces and evidence-constrained synthesis that
-    links sources, parameters and intermediate outputs to its conclusions. The
-    design treats agent output as a hypothesis to audit rather than an answer to
-    trust, and reports disagreement, uncertainty and drift instead of hiding
-    them behind fluent prose.
+    A public agent-network dataset of roughly 1.5M posts, and game-theoretic
+    experiments that separate autonomous strategy from prompting and scripted
+    automation.
   </p>
-  <div class="chips"><span class="chip">RAG</span><span class="chip">tool traces</span><span class="chip">LLM evaluation</span></div>
 </div>
 
-<h2>Multi-agent simulation and AI safety</h2>
-
-<div class="card">
-  <h3>Multi-agent behaviour, game theory and AI safety</h3>
-  <div class="meta">Research assistant, UNSW Sydney · Nov 2025 – present</div>
-  <p>
-    I built a research-grade public agent-network dataset — roughly 1.5M posts
-    and 13.4M comments across 762,644 profiles and 32,081 communities — with
-    incremental deduplication and integrity checks. On top of it I run
-    game-theoretic multi-agent experiments that vary information structure,
-    memory, repeated interaction and market rules to separate autonomous
-    strategy from prompting and scripted automation, with counterfactual
-    interventions for reward misspecification, unsafe exploration, distribution
-    shift and correlated failure.
-  </p>
-  <div class="chips"><span class="chip">multi-agent systems</span><span class="chip">game theory</span><span class="chip">AI safety</span></div>
-</div>
-
-<div class="card">
-  <h3>PittsAI — multi-agent customer simulation</h3>
-  <div class="meta">Startup, pre-seed · founder and research lead · Nov 2025 – Jul 2026</div>
-  <p>
-    A prototype that converts company materials and user-defined operating
-    assumptions into comparable scenarios for product, pricing, channel and
-    service decisions. Customer types and behavioural rules are varied in
-    controlled scenarios, and synthetic results are never treated as direct
-    market evidence. Peter Farrell Cup 2026 finalist; Antler Australia AUS16.
-  </p>
-  <div class="chips"><span class="chip">agent simulation</span><span class="chip">founder</span></div>
-</div>
-
-<h2>Education</h2>
-<ul>
-  <li>
-    <strong>UNSW Sydney</strong> — Bachelor of Commerce (Finance), Aug 2023 – Aug 2026 (expected).
-    UNSW International Student Award (20% tuition).
-    Coursework in trading and market making, data and algorithms in trading,
-    derivatives and risk, financial market data design and analysis, numerical
-    methods, mathematical economics, and data and machine learning.
-  </li>
+<h2>Recent</h2>
+<ul class="rows">
+  <li><span class="d">Aug 2026</span><span>3rd in the Algothon 2026 Final round — the out-of-sample score landed within 0.4 standard errors of what we had predicted before submitting.</span></li>
+  <li><span class="d">Aug 2026</span><span>Published <a href="https://github.com/Yiping-Yin/algothon-2026">the full research record</a>: every constant derived before touching data, every claim graded by evidence class.</span></li>
+  <li><span class="d">Jul 2026</span><span>Completed the UNSW FAIC AI-engineering training — RAG, LangGraph, MCP, and a 4-bit QLoRA adaptation of Llama-3.1-Nemotron-Nano-8B.</span></li>
 </ul>
 
-<h2>Competitions and awards</h2>
-<ul>
-  <li><strong>Algothon 2026</strong> (Susquehanna International Group × UNSW FinTech Society) — 1st of 253 teams in the General round, 3rd in the Final round; team captain of team abc123.</li>
-  <li><strong>Peter Farrell Cup 2026</strong> — finalist, with PittsAI.</li>
-  <li><strong>Antler Australia</strong> — AUS16 cohort, with PittsAI.</li>
-  <li><strong>UNSW International Student Award</strong> — 20% tuition scholarship.</li>
-</ul>
+<h2>Education and awards</h2>
+<p class="plain">
+  <strong>UNSW Sydney</strong> — Bachelor of Commerce (Finance), 2023 – 2026.<br>
+  <span>UNSW International Student Award, 20% tuition.</span><br>
+  <span>Peter Farrell Cup 2026 finalist and Antler Australia AUS16, with PittsAI —
+  a multi-agent customer simulation I founded.</span>
+</p>
 
-<h2>Technical skills</h2>
-<div class="skills">
-  <p><b>Programming and data:</b> Python, SQL/SQLite, FastAPI, pandas, NumPy, scikit-learn, Jupyter; reading-level C++.</p>
-  <p><b>Quantitative trading:</b> L2 order books, microprice, IOC and passive quoting, market making, execution, backtesting, inventory and risk controls.</p>
-  <p><b>AI and agents:</b> RAG, LangGraph, PEFT/QLoRA, MCP, LLM evaluation, multi-agent simulation, AI safety.</p>
-</div>
+<h2>Tools</h2>
+<p class="plain">
+  Python, pandas, NumPy, scikit-learn, SQL, FastAPI · RAG, LangGraph, QLoRA, MCP
+</p>
 
 <footer>
-  <p style="max-width:none"><em>We went where fancy led us, and returned when the mood had passed.</em></p>
-  © 2026 Yiping Yin · <a href="mailto:yiping_yin0521@outlook.com">yiping_yin0521@outlook.com</a> · plain HTML on GitHub Pages
+  <em>We went where fancy led us, and returned when the mood had passed.</em>
+  © 2026 Yiping Yin
 </footer>
 
 </main>
