@@ -14,8 +14,10 @@
     --line: #e8eaed;
     --chip: #f2f6f5;
   }
+  /* Dark tokens are declared twice on purpose: once for the OS preference when
+     the visitor has made no explicit choice, once for the manual toggle. */
   @media (prefers-color-scheme: dark) {
-    :root {
+    :root:not([data-theme="light"]) {
       --bg: #16191c;
       --ink: #e6e8ea;
       --muted: #9aa4ad;
@@ -24,7 +26,17 @@
       --chip: #1f2529;
     }
   }
+  :root[data-theme="dark"] {
+    --bg: #16191c;
+    --ink: #e6e8ea;
+    --muted: #9aa4ad;
+    --accent: #5cc0ba;
+    --line: #2b3137;
+    --chip: #1f2529;
+  }
   * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
   body {
     margin: 0;
     background: var(--bg);
@@ -32,7 +44,45 @@
     font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
     padding: 0 20px;
   }
-  .wrap { max-width: 780px; margin: 0 auto; padding: 56px 0 80px; }
+
+  /* ---- sticky top bar ---- */
+  .topbar {
+    position: sticky; top: 0; z-index: 20;
+    margin: 0 -20px; padding: 0 20px;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: saturate(180%) blur(10px);
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s ease;
+  }
+  .topbar.scrolled { border-bottom-color: var(--line); }
+  .topbar-in {
+    max-width: 780px; margin: 0 auto; height: 56px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  }
+  .brand { font-weight: 650; font-size: 16.5px; color: var(--ink); text-decoration: none; letter-spacing: -0.01em; }
+  .topnav { display: flex; align-items: center; gap: 6px; }
+  .topnav a {
+    color: var(--muted); text-decoration: none; font-size: 14.5px;
+    padding: 6px 10px; border-radius: 6px;
+  }
+  .topnav a:hover, .topnav a:focus-visible { color: var(--ink); background: var(--chip); }
+  .topnav a.cv { color: var(--ink); background: var(--chip); font-weight: 550; }
+  .topnav a.cv:hover { color: var(--accent); }
+  #theme {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 34px; height: 32px; margin-left: 4px; padding: 0;
+    border: 1px solid var(--line); border-radius: 6px;
+    background: var(--chip); color: var(--muted); cursor: pointer;
+  }
+  #theme:hover { color: var(--ink); }
+  #theme svg { width: 16px; height: 16px; }
+  @media (max-width: 620px) {
+    .topnav a:not(.cv) { display: none; }
+    .topbar-in { height: 52px; }
+  }
+
+  .wrap { max-width: 780px; margin: 0 auto; padding: 40px 0 80px; }
+  h2[id] { scroll-margin-top: 74px; }
   header { display: flex; gap: 28px; align-items: center; flex-wrap: wrap; }
   .avatar {
     width: 128px; height: 128px; border-radius: 50%;
@@ -70,9 +120,30 @@
   .skills b { font-weight: 600; }
   footer { margin-top: 60px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); padding-top: 14px; }
 </style>
+<script>
+  // Applied before first paint so a manual dark choice never flashes white.
+  (function () {
+    var t = localStorage.getItem('theme');
+    if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t;
+  })();
+</script>
 </head>
 <body>
-<div class="wrap">
+
+<div class="topbar" id="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="#top">Yiping Yin</a>
+    <nav class="topnav" aria-label="Sections">
+      <a href="#about">About</a>
+      <a href="#work">Work</a>
+      <a href="#news">News</a>
+      <a class="cv" href="assets/Yiping-Yin-CV.pdf">CV</a>
+      <button id="theme" type="button" aria-label="Switch theme" title="Theme: system"></button>
+    </nav>
+  </div>
+</div>
+
+<div class="wrap" id="top">
 
 <header>
   <img class="avatar" src="assets/avatar.jpg" alt="Yiping Yin">
@@ -88,7 +159,7 @@
   </div>
 </header>
 
-<h2>About</h2>
+<h2 id="about">About</h2>
 <p>
   Hi! I am a Bachelor of Commerce (Finance) student at <strong>UNSW Sydney</strong>
   (2023 – 2026), working across systematic trading, AI-driven quantitative
@@ -106,7 +177,7 @@
   <a href="https://github.com/Yiping-Yin/algothon-2026">public</a>.
 </p>
 
-<h2>News</h2>
+<h2 id="news">News</h2>
 <ul class="news">
   <li><span class="date">Aug 2026</span><span>🥉 <strong>3rd, Algothon 2026 Final round</strong> — technical score 1,085.17 on 500 hidden days, 0.4 of one block's standard error from our public-data replay mean.</span></li>
   <li><span class="date">Aug 2026</span><span>📄 Published <em><a href="https://github.com/Yiping-Yin/algothon-2026/blob/main/Algothon-Research-Report.pdf">Forecasting Under a Limited Effective Sample</a></em> — every constant derived before touching data, every claim graded by evidence class, with a postscript reading the verified outcome against thresholds fixed in advance.</span></li>
@@ -115,7 +186,7 @@
   <li><span class="date">2026</span><span>🏆 <strong>Peter Farrell Cup 2026 finalist</strong> and <strong>Antler Australia AUS16</strong> with PittsAI, a multi-agent customer-simulation prototype.</span></li>
 </ul>
 
-<h2>Systematic quantitative trading</h2>
+<h2 id="work">Systematic quantitative trading</h2>
 
 <div class="card">
   <h3><a href="https://github.com/Yiping-Yin/algothon-2026">SIG Algothon 2026 — systematic multi-asset strategy</a></h3>
@@ -258,5 +329,37 @@
 </footer>
 
 </div>
+
+<script>
+(function () {
+  var ICON = {
+    system: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>',
+    light:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.5 1.5M17.6 17.6l1.5 1.5M19.1 4.9l-1.5 1.5M6.4 17.6l-1.5 1.5"/></svg>',
+    dark:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.6A8.6 8.6 0 1 1 9.4 3.5a6.8 6.8 0 0 0 11.1 11.1z"/></svg>'
+  };
+  var order = ['system', 'light', 'dark'];
+  var btn = document.getElementById('theme');
+  var mode = localStorage.getItem('theme') || 'system';
+
+  function apply(m) {
+    if (m === 'system') { delete document.documentElement.dataset.theme; localStorage.removeItem('theme'); }
+    else { document.documentElement.dataset.theme = m; localStorage.setItem('theme', m); }
+    btn.innerHTML = ICON[m];
+    btn.title = 'Theme: ' + m;
+    btn.setAttribute('aria-label', 'Theme: ' + m + '. Click to change.');
+  }
+  apply(mode);
+  btn.addEventListener('click', function () {
+    mode = order[(order.indexOf(mode) + 1) % order.length];
+    apply(mode);
+  });
+
+  // Hairline under the bar only once the page has moved.
+  var bar = document.getElementById('topbar');
+  var onScroll = function () { bar.classList.toggle('scrolled', window.scrollY > 8); };
+  onScroll();
+  addEventListener('scroll', onScroll, { passive: true });
+})();
+</script>
 </body>
 </html>
