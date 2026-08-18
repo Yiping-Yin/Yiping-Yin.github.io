@@ -1,0 +1,16 @@
+Assets: algothon-wordmark.svg, susquehanna-logo-white.svg, unsw-fintech-logo-white.png
+
+Source: https://www.algothon.au/assets/ (official Algothon 2026 site, retrieved 2026-08-19)
+Also present byte-identical in the retained presentation asset set
+  /Users/yinyiping/dev/Algothon/.tmp-ppt-preview-a/assets/
+
+Mechanical transform: none. Files are used verbatim, unresized and unrecoloured;
+display size is set in CSS only.
+
+SHA-256:
+  4a93e859508d6ebc743f8ae8cd3c7409755f70ddea8595e8264a31fdb0052877  algothon-wordmark.svg
+  3ec7a4cb9db03c3a9cb5375f36c3e6796db7a2a109160ade1b41efbc3f37e21b  susquehanna-logo-white.svg
+  6e793beeb244a611ec40b696422e948b5118272c65654a1f24cc60b120717ae4  unsw-fintech-logo-white.png
+
+Use: the marks identify the competition and its hosts on the Algothon work card.
+No affiliation with or endorsement by Susquehanna or the UNSW FinTech Society is implied.

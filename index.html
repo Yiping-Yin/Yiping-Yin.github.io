@@ -7,32 +7,36 @@
 <meta name="description" content="Yiping Yin — systematic quantitative trading, AI quantitative research, multi-agent simulation & AI safety. UNSW Sydney. 3rd, Algothon 2026 Final (SIG × UNSW).">
 <style>
   :root {
+    /* Neutrals are lifted from the CV (assets/Yiping-Yin-CV.pdf) so the two read
+       as one document: ink #202A33, muted #58636B, panel #F2F6F8. The accent is
+       the Apple system blue (#0071E3 on white, the value Apple uses for body links,
+       since #007AFF only reaches 4.0:1 there; #0A84FF on black). */
     --bg: #ffffff;
-    --ink: #24292f;
-    --muted: #6a737d;
-    --accent: #0b6663;
-    --line: #e8eaed;
-    --chip: #f2f6f5;
+    --ink: #202a33;
+    --muted: #58636b;
+    --accent: #0071e3;
+    --line: #dde5ea;
+    --chip: #f2f6f8;
   }
   /* Dark tokens are declared twice on purpose: once for the OS preference when
      the visitor has made no explicit choice, once for the manual toggle. */
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --bg: #16191c;
-      --ink: #e6e8ea;
-      --muted: #9aa4ad;
-      --accent: #5cc0ba;
-      --line: #2b3137;
-      --chip: #1f2529;
+      --bg: #000000;
+      --ink: #e4e8ea;
+      --muted: #93a0a8;
+      --accent: #0a84ff;
+      --line: #222a2f;
+      --chip: #101619;
     }
   }
   :root[data-theme="dark"] {
-    --bg: #16191c;
-    --ink: #e6e8ea;
-    --muted: #9aa4ad;
-    --accent: #5cc0ba;
-    --line: #2b3137;
-    --chip: #1f2529;
+    --bg: #000000;
+    --ink: #e4e8ea;
+    --muted: #93a0a8;
+    --accent: #0a84ff;
+    --line: #222a2f;
+    --chip: #101619;
   }
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
@@ -110,12 +114,62 @@
   }
   .card h3 { margin: 0 0 2px; font-size: 16px; }
   .card .meta { color: var(--muted); font-size: 13.5px; margin-bottom: 6px; }
+  /* Role, dates and the event marks are the same kind of fact, so they share a
+     row; the marks take the space the meta line leaves on the right. */
+  .card .metarow {
+    display: flex; align-items: center;
+    flex-wrap: wrap; gap: 3px 7px; margin-bottom: 6px;
+  }
+  .card .metarow .meta { margin-bottom: 0; }
+  .card .metarow .sep { opacity: 0.7; }
+  /* Once the row wraps, a separator can be left stranded at the end of a line;
+     below that width the items are grouped by spacing instead. */
+  @media (max-width: 560px) {
+    .card .metarow { gap: 2px 11px; }
+    .card .metarow .sep { display: none; }
+  }
   .card p { margin: 6px 0; font-size: 15px; }
+  /* Prose is set ragged-right. Justification was measured and rejected: even at
+     the full 780px measure with hyphenation on, one paragraph stretched its word
+     spaces to 1.85x the median. Browsers break lines greedily and can only grow
+     spaces, never shrink them, so a bad line stays bad. */
+  /* Event marks, linking to the competition site. The official files are white
+     on transparent, so they are used as masks and painted in the theme's own
+     ink — no recoloured copies, and no light/dark pair to keep in sync. */
+  .card a.event {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 6px 18px;
+    margin: 0; text-decoration: none;
+    color: var(--muted);
+    transition: color 0.18s ease;
+  }
+  .card a.event:hover, .card a.event:focus-visible { color: var(--ink); }
+  .event .mark {
+    display: block; background-color: currentColor;
+    -webkit-mask: no-repeat center / contain; mask: no-repeat center / contain;
+  }
+  .event .susq {
+    width: 131px; height: 11px;
+    -webkit-mask-image: url(assets/susquehanna-logo-white.svg);
+    mask-image: url(assets/susquehanna-logo-white.svg);
+  }
   .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  /* Chips are inert labels, so they are not painted in the accent: the accent is
+     reserved for things that can be clicked. Grey also clears AA at this size,
+     which the accent does not against the chip fill. */
   .chip {
-    background: var(--chip); color: var(--accent);
+    background: var(--chip); color: var(--muted);
     font-size: 12.5px; padding: 2px 10px; border-radius: 20px;
   }
+  /* Education. The institution is set as a letter-spaced wordmark rather than a
+     crest — it echoes the SUSQUEHANNA mark's treatment, and a university arms
+     on a personal site would read as an endorsement it does not have. */
+  .edu .inst {
+    font-size: 13px; font-weight: 600; color: var(--ink);
+    text-transform: uppercase; letter-spacing: 0.15em;
+    margin-bottom: 6px;
+  }
+  .edu .degree { margin: 0 0 7px; font-size: 15px; }
+  .edu .note { margin: 0; color: var(--muted); font-size: 14.5px; }
   .skills p { margin: 4px 0; font-size: 15px; }
   .skills b { font-weight: 600; }
   footer { margin-top: 60px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); padding-top: 14px; }
@@ -161,8 +215,7 @@
 
 <h2 id="about">About</h2>
 <p>
-  Hi! I am a Bachelor of Commerce (Finance) student at <strong>UNSW Sydney</strong>
-  (2023 – 2026), working across systematic trading, AI-driven quantitative
+  Hi! I work across systematic trading, AI-driven quantitative
   research, and multi-agent simulation. I care about one unglamorous thing above
   all: <em>the effective sample is smaller than it looks</em> — so I price
   selection luck before believing a backtest, and ship the simplest thing that
@@ -183,22 +236,32 @@
   <li><span class="date">Aug 2026</span><span>📄 Published <em><a href="https://github.com/Yiping-Yin/algothon-2026/blob/main/Algothon-Research-Report.pdf">Forecasting Under a Limited Effective Sample</a></em> — every constant derived before touching data, every claim graded by evidence class, with a postscript reading the verified outcome against thresholds fixed in advance.</span></li>
   <li><span class="date">Aug 2026</span><span>🥇 <strong>1st, Algothon 2026 General-round leaderboard</strong> (984.62, public data, as of 3 Aug).</span></li>
   <li><span class="date">Jul 2026</span><span>🤖 Completed the UNSW FAIC AI-engineering training — RAG, LangGraph, MCP, multi-agent workflows, and 4-bit QLoRA adaptation of Llama-3.1-Nemotron-Nano-8B.</span></li>
-  <li><span class="date">2026</span><span>🏆 <strong>Peter Farrell Cup 2026 finalist</strong> and <strong>Antler Australia AUS16</strong> with PittsAI, a multi-agent customer-simulation prototype.</span></li>
+  <li><span class="date">2026</span><span>🏆 <strong>Peter Farrell Cup 2026 finalist</strong> with PittsAI, a multi-agent customer-simulation prototype.</span></li>
 </ul>
 
 <h2 id="work">Systematic quantitative trading</h2>
 
 <div class="card">
-  <h3><a href="https://github.com/Yiping-Yin/algothon-2026">SIG Algothon 2026 — systematic multi-asset strategy</a></h3>
-  <div class="meta">Team captain &amp; quant strategy developer · Jun 2026 – Aug 2026</div>
+  <h3><a href="https://github.com/Yiping-Yin/algothon-2026">Cross-sectional forecasting under a limited effective sample</a></h3>
+  <div class="metarow">
+    <span class="meta">Quant strategy developer</span>
+    <span class="meta sep">·</span>
+    <a class="event" href="https://www.algothon.au/" aria-label="Algothon 2026, hosted by Susquehanna — official competition site">
+      <span class="mark susq"></span>
+    </a>
+    <span class="meta sep">·</span>
+    <span class="meta">Jun 2026 – Aug 2026</span>
+  </div>
   <p>
-    Lead–lag / reversal core in a four-horizon pair portfolio, calibrated on
-    full-history, 500-, 420- and 360-day windows with ADF, AR(1), correlation and
-    mean-crossing filters. Locked code and configuration hashes, reconciled local
-    traces against the official evaluator, and ran rolling stability checks.
-    <strong>General round 1st (984.62) · Final round 3rd (1,085.17)</strong> —
-    the out-of-sample result landed inside half a block's noise of the public
-    replay mean, exactly where our own noise analysis priced it.
+    <strong>1st of 253 on the General-round leaderboard (984.62) · 3rd in the
+    Final round (1,085.17).</strong> A cross-sectional pair book: within a pair one
+    leg leads the other, and the position rides the reversal of their spread rather
+    than either leg's own direction — so the panel's single common factor, 21.6% of
+    its correlation, cancels inside the pair instead of being traded. The edge is
+    thin and wide by construction: 54.07% directional accuracy, carried by about
+    thirty of the fifty-one names rather than concentrated in a few. Out of sample
+    it landed 0.4 of one block's standard error from the public replay mean,
+    3.7 points behind second place.
   </p>
   <div class="chips"><span class="chip">selection-bias pricing</span><span class="chip">time-series validation</span><span class="chip">reproducible research</span></div>
 </div>
@@ -285,31 +348,30 @@
     into comparable scenarios for product, pricing, channel and service
     decisions — with behavioural rules varied in controlled scenarios and
     synthetic results never treated as market evidence.
-    <strong>Peter Farrell Cup 2026 finalist</strong> · <strong>Antler
-    Australia AUS16</strong>.
+    <strong>Peter Farrell Cup 2026 finalist</strong>.
   </p>
   <div class="chips"><span class="chip">agent simulation</span><span class="chip">founder</span></div>
 </div>
 
 <h2>Education</h2>
-<ul>
-  <li>
-    <strong>UNSW Sydney</strong> — Bachelor of Commerce (Finance), Aug 2023 – Aug 2026 (expected).
-    UNSW International Student Award (20% tuition).
-    <br><span style="color:var(--muted); font-size:14.5px">
+<div class="edu">
+  <div class="inst">UNSW Sydney</div>
+  <p class="degree">
+    Bachelor of Commerce (Finance) · Aug 2023 – Aug 2026 (expected)<br>
+    UNSW International Student Award — 20% tuition.
+  </p>
+  <p class="note">
     Coursework: Trading &amp; Market Making · Data &amp; Algorithms in Trading ·
     Derivatives &amp; Risk · Financial Market Data Design and Analysis ·
     Numerical Methods · Mathematical Economics · Data &amp; ML.
-    Python Financial Data &amp; Portfolio Analysis: 96.25/100 (individual).</span>
-  </li>
-</ul>
+    Python Financial Data &amp; Portfolio Analysis: 96.25/100 (individual).
+  </p>
+</div>
 
 <h2>Competitions &amp; awards</h2>
 <ul>
   <li><strong>Algothon 2026</strong> (Susquehanna × UNSW FinTech Society) — Final round <strong>3rd</strong> · General round <strong>1st</strong> · team captain of abc123.</li>
   <li><strong>Peter Farrell Cup 2026</strong> — finalist (PittsAI).</li>
-  <li><strong>Antler Australia</strong> — AUS16 cohort (PittsAI).</li>
-  <li><strong>UNSW International Student Award</strong> — 20% tuition scholarship.</li>
 </ul>
 
 <h2>Technical skills</h2>
@@ -318,11 +380,6 @@
   <p><b>Quantitative trading:</b> L2 order books, microprice, IOC/passive quoting, market making, execution, backtesting, inventory &amp; risk controls.</p>
   <p><b>AI &amp; agents:</b> RAG, LangGraph, PEFT/QLoRA, MCP, LLM evaluation, multi-agent simulation, AI safety.</p>
 </div>
-
-<h2>Miscellaneous</h2>
-<p style="color:var(--muted)">
-  <em>We went where fancy led us, and returned when the mood had passed.</em>
-</p>
 
 <footer>
   © 2026 Yiping Yin · plain HTML on GitHub Pages
