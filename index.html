@@ -4,7 +4,27 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Yiping Yin</title>
-<meta name="description" content="Yiping Yin — systematic quantitative trading, AI quantitative research, multi-agent simulation & AI safety. UNSW Sydney. 3rd, Algothon 2026 Final (SIG × UNSW).">
+<meta name="description" content="Yiping Yin — systematic quantitative trading, AI quantitative research, multi-agent simulation &amp; AI safety. UNSW Sydney. 1st of 253 in the General round and 3rd in the Final round of Algothon 2026 (Susquehanna × UNSW FinTech Society).">
+<link rel="canonical" href="https://yiping-yin.github.io/">
+
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+
+<meta property="og:type" content="profile">
+<meta property="og:url" content="https://yiping-yin.github.io/">
+<meta property="og:title" content="Yiping Yin — quantitative research and trading">
+<meta property="og:description" content="Systematic trading, AI quantitative research and multi-agent simulation at UNSW Sydney. 1st of 253 in the General round and 3rd in the Final round of Algothon 2026.">
+<meta property="og:image" content="https://yiping-yin.github.io/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Yiping Yin — quantitative research and trading, UNSW Sydney. Algothon 2026: 1st of 253 teams in the General round, 3rd in the Final round.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Yiping Yin — quantitative research and trading">
+<meta name="twitter:description" content="Systematic trading, AI quantitative research and multi-agent simulation at UNSW Sydney. 1st of 253 in the General round and 3rd in the Final round of Algothon 2026.">
+<meta name="twitter:image" content="https://yiping-yin.github.io/assets/og-image.png">
 <style>
   :root {
     /* Neutrals are lifted from the CV (assets/Yiping-Yin-CV.pdf) so the two read
@@ -138,13 +158,24 @@
   .sectionnav a:hover, .sectionnav a:focus-visible { color: var(--ink); }
   .sectionnav a.on { color: var(--accent); border-left-color: var(--accent); }
   @media (min-width: 901px) { .topnav a:not(.cv) { display: none; } }
-  @media (max-width: 900px) { .sectionnav { display: none; } }
+  /* Below the two-column breakpoint the nav is no longer a rail beside the text,
+     so it lays out as a wrapped row of links under the header. Everything stays
+     visible and tappable rather than hiding behind a scroller. */
+  @media (max-width: 900px) {
+    .sectionnav { flex-direction: row; flex-wrap: wrap; gap: 2px 18px; margin-top: 18px; }
+    .sectionnav a {
+      border-left: 0; border-bottom: 2px solid transparent;
+      padding: 3px 0 4px; font-size: 13.5px;
+    }
+    .sectionnav a.on { border-bottom-color: var(--accent); }
+  }
   h2 {
     font-size: 19px; margin: 44px 0 12px; padding-bottom: 6px;
     border-bottom: 1px solid var(--line); letter-spacing: 0.01em;
   }
   h2 .sub { color: var(--muted); font-weight: 400; font-size: 14px; }
   a { color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
   ul { padding-left: 1.25em; margin: 8px 0; }
   li { margin: 6px 0; }
   .news { list-style: none; padding: 0; }
@@ -242,7 +273,7 @@
 <div class="wrap" id="top">
 
 <header>
-  <img class="avatar" src="assets/avatar.jpg" alt="Yiping Yin">
+  <img class="avatar" src="assets/avatar.jpg" alt="Yiping Yin" width="512" height="512">
   <div>
     <h1>Yiping Yin</h1>
     <p class="tagline">Systematic quantitative trading · AI quantitative research · multi-agent simulation &amp; AI safety</p>
