@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yiping Yin</title>
+<meta name="description" content="Yiping Yin — systematic quantitative trading, AI quantitative research, multi-agent simulation & AI safety. UNSW Sydney. 3rd, Algothon 2026 Final (SIG × UNSW).">
+<style>
+  :root {
+    --bg: #ffffff;
+    --ink: #24292f;
+    --muted: #6a737d;
+    --accent: #0b6663;
+    --line: #e8eaed;
+    --chip: #f2f6f5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16191c;
+      --ink: #e6e8ea;
+      --muted: #9aa4ad;
+      --accent: #5cc0ba;
+      --line: #2b3137;
+      --chip: #1f2529;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    padding: 0 20px;
+  }
+  .wrap { max-width: 780px; margin: 0 auto; padding: 56px 0 80px; }
+  header { display: flex; gap: 28px; align-items: center; flex-wrap: wrap; }
+  .avatar {
+    width: 128px; height: 128px; border-radius: 50%;
+    border: 1px solid var(--line); flex: none; object-fit: cover;
+  }
+  h1 { font-size: 30px; margin: 0 0 2px; letter-spacing: -0.01em; }
+  .tagline { color: var(--muted); margin: 0 0 10px; max-width: 46ch; }
+  .links { display: flex; gap: 14px; flex-wrap: wrap; font-size: 14.5px; }
+  .links a { color: var(--accent); text-decoration: none; }
+  .links a:hover { text-decoration: underline; }
+  h2 {
+    font-size: 19px; margin: 44px 0 12px; padding-bottom: 6px;
+    border-bottom: 1px solid var(--line); letter-spacing: 0.01em;
+  }
+  h2 .sub { color: var(--muted); font-weight: 400; font-size: 14px; }
+  a { color: var(--accent); }
+  ul { padding-left: 1.25em; margin: 8px 0; }
+  li { margin: 6px 0; }
+  .news { list-style: none; padding: 0; }
+  .news li { display: flex; gap: 14px; margin: 9px 0; }
+  .news .date { color: var(--muted); flex: none; width: 88px; font-variant-numeric: tabular-nums; font-size: 14.5px; padding-top: 1px; }
+  .card {
+    border: 1px solid var(--line); border-radius: 8px;
+    padding: 15px 20px; margin: 12px 0;
+  }
+  .card h3 { margin: 0 0 2px; font-size: 16px; }
+  .card .meta { color: var(--muted); font-size: 13.5px; margin-bottom: 6px; }
+  .card p { margin: 6px 0; font-size: 15px; }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  .chip {
+    background: var(--chip); color: var(--accent);
+    font-size: 12.5px; padding: 2px 10px; border-radius: 20px;
+  }
+  .skills p { margin: 4px 0; font-size: 15px; }
+  .skills b { font-weight: 600; }
+  footer { margin-top: 60px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); padding-top: 14px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <img class="avatar" src="assets/avatar.jpg" alt="Yiping Yin">
+  <div>
+    <h1>Yiping Yin</h1>
+    <p class="tagline">Systematic quantitative trading · AI quantitative research · multi-agent simulation &amp; AI safety</p>
+    <nav class="links">
+      <a href="https://github.com/Yiping-Yin">GitHub</a>
+      <a href="https://www.linkedin.com/in/yiping-yin/">LinkedIn</a>
+      <a href="mailto:yiping_yin0521@outlook.com">Email</a>
+      <a href="https://github.com/Yiping-Yin/algothon-2026/blob/main/Algothon-Research-Report.pdf">Research report</a>
+    </nav>
+  </div>
+</header>
+
+<h2>About</h2>
+<p>
+  Hi! I am a Bachelor of Commerce (Finance) student at <strong>UNSW Sydney</strong>
+  (2023 – 2026), working across systematic trading, AI-driven quantitative
+  research, and multi-agent simulation. I care about one unglamorous thing above
+  all: <em>the effective sample is smaller than it looks</em> — so I price
+  selection luck before believing a backtest, and ship the simplest thing that
+  survives falsification.
+</p>
+<p>
+  Most recently my team <strong>abc123</strong> placed
+  <strong>3rd in the Final round of Algothon 2026</strong> (Susquehanna
+  International Group × UNSW FinTech Society), scored on 500 hidden days, after
+  holding <strong>1st on the General-round leaderboard</strong>. The full
+  69-page research record is
+  <a href="https://github.com/Yiping-Yin/algothon-2026">public</a>.
+</p>
+
+<h2>News</h2>
+<ul class="news">
+  <li><span class="date">Aug 2026</span><span>🥉 <strong>3rd, Algothon 2026 Final round</strong> — technical score 1,085.17 on 500 hidden days, 0.4 of one block's standard error from our public-data replay mean.</span></li>
+  <li><span class="date">Aug 2026</span><span>📄 Published <em><a href="https://github.com/Yiping-Yin/algothon-2026/blob/main/Algothon-Research-Report.pdf">Forecasting Under a Limited Effective Sample</a></em> — every constant derived before touching data, every claim graded by evidence class, with a postscript reading the verified outcome against thresholds fixed in advance.</span></li>
+  <li><span class="date">Aug 2026</span><span>🥇 <strong>1st, Algothon 2026 General-round leaderboard</strong> (984.62, public data, as of 3 Aug).</span></li>
+  <li><span class="date">Jul 2026</span><span>🤖 Completed the UNSW FAIC AI-engineering training — RAG, LangGraph, MCP, multi-agent workflows, and 4-bit QLoRA adaptation of Llama-3.1-Nemotron-Nano-8B.</span></li>
+  <li><span class="date">2026</span><span>🏆 <strong>Peter Farrell Cup 2026 finalist</strong> and <strong>Antler Australia AUS16</strong> with PittsAI, a multi-agent customer-simulation prototype.</span></li>
+</ul>
+
+<h2>Systematic quantitative trading</h2>
+
+<div class="card">
+  <h3><a href="https://github.com/Yiping-Yin/algothon-2026">SIG Algothon 2026 — systematic multi-asset strategy</a></h3>
+  <div class="meta">Team captain &amp; quant strategy developer · Jun 2026 – Aug 2026</div>
+  <p>
+    Lead–lag / reversal core in a four-horizon pair portfolio, calibrated on
+    full-history, 500-, 420- and 360-day windows with ADF, AR(1), correlation and
+    mean-crossing filters. Locked code and configuration hashes, reconciled local
+    traces against the official evaluator, and ran rolling stability checks.
+    <strong>General round 1st (984.62) · Final round 3rd (1,085.17)</strong> —
+    the out-of-sample result landed inside half a block's noise of the public
+    replay mean, exactly where our own noise analysis priced it.
+  </p>
+  <div class="chips"><span class="chip">selection-bias pricing</span><span class="chip">time-series validation</span><span class="chip">reproducible research</span></div>
+</div>
+
+<div class="card">
+  <h3>Market microstructure &amp; intraday cross-asset trading</h3>
+  <div class="meta">Team lead &amp; quantitative researcher · Feb 2025 – Jul 2026</div>
+  <p>
+    Reconstructed trade-aligned L2 snapshots from nanosecond ASX/Cboe prints with
+    strictly prior timestamps (5,953 validated matches); built 5-second ETF
+    cross-asset fair-value signals and 1-minute/1-second equity microstructure
+    features from Nasdaq-100 futures, AUD/USD, spread, depth and order-imbalance;
+    ran chronologically split, cost-aware simulations with ablation and stress
+    testing to separate signal value from execution assumptions.
+  </p>
+  <div class="chips"><span class="chip">L2 order books</span><span class="chip">microprice</span><span class="chip">adverse selection</span></div>
+</div>
+
+<div class="card">
+  <h3>Algorithmic trading, market making &amp; execution</h3>
+  <div class="meta">Algorithmic trading developer · May 2026 – Aug 2026</div>
+  <p>
+    Automated market-making loop on the Optibook exchange API over five-level
+    books: equal-volume IOC legs for cross-book spreads, inventory-aware passive
+    quotes, EWMA-volatility adaptive thresholds, self-trade protection and
+    covariance risk gating. A saved one-hour simulation generated +34.80 P&amp;L
+    across 1,142 lots and 378 fills, ending flat; a next-trade model trained on
+    3,299 observations cut RMSE 4.37% versus the mid-price benchmark.
+  </p>
+  <div class="chips"><span class="chip">IOC / passive quoting</span><span class="chip">inventory control</span><span class="chip">execution</span></div>
+</div>
+
+<h2>AI quantitative research</h2>
+
+<div class="card">
+  <h3>Point-in-time multi-asset, news &amp; event pricing</h3>
+  <div class="meta">AI quantitative researcher · Jul 2026 – present</div>
+  <p>
+    Point-in-time panels for 50 US equities, 10 cryptocurrencies and 149,683
+    news headlines — ETL, deduplication, source provenance, timezone and
+    publication-time alignment — so out-of-sample multi-asset and sentiment
+    research cannot leak the future. Serving via Modal/FastAPI with signed
+    webhooks and idempotent event handling; building an earnings-event agent
+    that freezes point-in-time inputs and submits abnormal-return percentiles
+    for live evaluation.
+  </p>
+  <div class="chips"><span class="chip">point-in-time data</span><span class="chip">leakage control</span><span class="chip">event pricing</span></div>
+</div>
+
+<div class="card">
+  <h3>Evidence-grounded financial agents</h3>
+  <div class="meta">AI Mockathon · UNSW FAIC AI-engineering training · Jul 2026</div>
+  <p>
+    A bounded financial agent restricted to RBA, ASX and AFR sources, with
+    deterministic queries, structured tool traces and evidence-constrained
+    synthesis linking sources, parameters and intermediate outputs to
+    conclusions — treating agent outputs as hypotheses to audit, not answers to
+    trust.
+  </p>
+  <div class="chips"><span class="chip">RAG</span><span class="chip">tool traces</span><span class="chip">LLM evaluation</span></div>
+</div>
+
+<h2>Multi-agent simulation &amp; AI safety</h2>
+
+<div class="card">
+  <h3>Multi-agent behaviour, game theory &amp; AI safety</h3>
+  <div class="meta">Research assistant, UNSW Sydney · Nov 2025 – present</div>
+  <p>
+    Built a research-grade public agent-network dataset spanning 1,548,232
+    posts, 13.4M comments, 762,644 profiles and 32,081 communities (86,194
+    human-claimed agents); running game-theoretic multi-agent experiments that
+    vary interaction structure, memory and auction/market rules, with
+    counterfactual interventions for reward misspecification, collusion and
+    correlated failure.
+  </p>
+  <div class="chips"><span class="chip">multi-agent systems</span><span class="chip">game theory</span><span class="chip">AI safety</span></div>
+</div>
+
+<div class="card">
+  <h3>PittsAI — multi-agent customer simulation</h3>
+  <div class="meta">Founder &amp; research lead · Nov 2025 – Jul 2026</div>
+  <p>
+    A pre-seed prototype converting company materials and operating assumptions
+    into comparable scenarios for product, pricing, channel and service
+    decisions — with behavioural rules varied in controlled scenarios and
+    synthetic results never treated as market evidence.
+    <strong>Peter Farrell Cup 2026 finalist</strong> · <strong>Antler
+    Australia AUS16</strong>.
+  </p>
+  <div class="chips"><span class="chip">agent simulation</span><span class="chip">founder</span></div>
+</div>
+
+<h2>Education</h2>
+<ul>
+  <li>
+    <strong>UNSW Sydney</strong> — Bachelor of Commerce (Finance), Aug 2023 – Aug 2026 (expected).
+    UNSW International Student Award (20% tuition).
+    <br><span style="color:var(--muted); font-size:14.5px">
+    Coursework: Trading &amp; Market Making · Data &amp; Algorithms in Trading ·
+    Derivatives &amp; Risk · Financial Market Data Design and Analysis ·
+    Numerical Methods · Mathematical Economics · Data &amp; ML.
+    Python Financial Data &amp; Portfolio Analysis: 96.25/100 (individual).</span>
+  </li>
+</ul>
+
+<h2>Competitions &amp; awards</h2>
+<ul>
+  <li><strong>Algothon 2026</strong> (Susquehanna × UNSW FinTech Society) — Final round <strong>3rd</strong> · General round <strong>1st</strong> · team captain of abc123.</li>
+  <li><strong>Peter Farrell Cup 2026</strong> — finalist (PittsAI).</li>
+  <li><strong>Antler Australia</strong> — AUS16 cohort (PittsAI).</li>
+  <li><strong>UNSW International Student Award</strong> — 20% tuition scholarship.</li>
+</ul>
+
+<h2>Technical skills</h2>
+<div class="skills">
+  <p><b>Programming &amp; data:</b> Python, SQL/SQLite, FastAPI, pandas, NumPy, scikit-learn, Jupyter, basic C++.</p>
+  <p><b>Quantitative trading:</b> L2 order books, microprice, IOC/passive quoting, market making, execution, backtesting, inventory &amp; risk controls.</p>
+  <p><b>AI &amp; agents:</b> RAG, LangGraph, PEFT/QLoRA, MCP, LLM evaluation, multi-agent simulation, AI safety.</p>
+</div>
+
+<h2>Miscellaneous</h2>
+<p style="color:var(--muted)">
+  <em>We went where fancy led us, and returned when the mood had passed.</em>
+</p>
+
+<footer>
+  © 2026 Yiping Yin · plain HTML on GitHub Pages
+</footer>
+
+</div>
+</body>
+</html>
