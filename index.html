@@ -60,7 +60,7 @@
   }
   .topbar.scrolled { border-bottom-color: var(--line); }
   .topbar-in {
-    max-width: 780px; margin: 0 auto; height: 56px;
+    max-width: 1040px; margin: 0 auto; height: 56px;
     display: flex; align-items: center; justify-content: space-between; gap: 16px;
   }
   .brand { font-weight: 650; font-size: 16.5px; color: var(--ink); text-decoration: none; letter-spacing: -0.01em; }
@@ -85,15 +85,36 @@
     .topbar-in { height: 52px; }
   }
 
-  .wrap { max-width: 780px; margin: 0 auto; padding: 40px 0 80px; }
-  h2[id] { scroll-margin-top: 74px; }
-  header { display: flex; gap: 28px; align-items: center; flex-wrap: wrap; }
-  .avatar {
-    width: 128px; height: 128px; border-radius: 50%;
-    border: 1px solid var(--line); flex: none; object-fit: cover;
+  /* Two columns: identity parks on the left and stays put, the record scrolls
+     past it on the right. Collapses to the stacked single column below 900px. */
+  .wrap {
+    max-width: 1040px; margin: 0 auto; padding: 40px 0 80px;
+    display: grid; grid-template-columns: 232px minmax(0, 1fr);
+    gap: 0 60px; align-items: start;
   }
-  h1 { font-size: 30px; margin: 0 0 2px; letter-spacing: -0.01em; }
-  .tagline { color: var(--muted); margin: 0 0 10px; max-width: 46ch; }
+  h2[id] { scroll-margin-top: 74px; }
+  header { position: sticky; top: 84px; }
+  main > h2:first-child { margin-top: 0; }
+  .avatar {
+    width: 148px; height: 148px; border-radius: 50%;
+    border: 1px solid var(--line); flex: none; object-fit: cover;
+    margin-bottom: 18px; display: block;
+  }
+  h1 { font-size: 26px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .tagline { color: var(--muted); margin: 0 0 12px; font-size: 15px; }
+  @media (max-width: 900px) {
+    .wrap { display: block; max-width: 780px; }
+    .topbar-in { max-width: 780px; }
+    header {
+      position: static; display: flex; gap: 28px;
+      align-items: center; flex-wrap: wrap; margin-bottom: 8px;
+    }
+    header > div { flex: 1 1 320px; }
+    .avatar { width: 128px; height: 128px; margin-bottom: 0; }
+    h1 { font-size: 30px; }
+    .tagline { max-width: 46ch; }
+    main > h2:first-child { margin-top: 44px; }
+  }
   /* Icon links. They carry no text, so each one names itself with aria-label;
      resting grey keeps the header calm and the accent is spent on hover. */
   /* The negative margin pulls the first icon's padding back so the row still
@@ -105,6 +126,19 @@
   }
   .links a:hover, .links a:focus-visible { color: var(--accent); }
   .links svg { width: 20px; height: 20px; display: block; fill: currentColor; }
+  /* Section nav. The page runs to roughly four screens, so the sidebar earns its
+     space by tracking where the reader is rather than holding a static list.
+     It owns wayfinding above 900px; below that the top bar takes it back. */
+  .sectionnav { display: flex; flex-direction: column; margin-top: 26px; }
+  .sectionnav a {
+    color: var(--muted); text-decoration: none; font-size: 14px; line-height: 1.45;
+    padding: 6px 0 6px 13px; border-left: 2px solid var(--line);
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+  .sectionnav a:hover, .sectionnav a:focus-visible { color: var(--ink); }
+  .sectionnav a.on { color: var(--accent); border-left-color: var(--accent); }
+  @media (min-width: 901px) { .topnav a:not(.cv) { display: none; } }
+  @media (max-width: 900px) { .sectionnav { display: none; } }
   h2 {
     font-size: 19px; margin: 44px 0 12px; padding-bottom: 6px;
     border-bottom: 1px solid var(--line); letter-spacing: 0.01em;
@@ -223,8 +257,20 @@
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 5.5A2.5 2.5 0 0 1 4.5 3h15A2.5 2.5 0 0 1 22 5.5v.28l-10 5.72L2 5.78V5.5Zm0 2.58V18.5A2.5 2.5 0 0 0 4.5 21h15a2.5 2.5 0 0 0 2.5-2.5V8.08l-9.5 5.43a1 1 0 0 1-1 0L2 8.08Z"/></svg>
       </a>
     </nav>
+    <nav class="sectionnav" aria-label="Sections">
+      <a href="#about">About</a>
+      <a href="#news">News</a>
+      <a href="#work">Systematic trading</a>
+      <a href="#ai">AI quantitative research</a>
+      <a href="#agents">Multi-agent &amp; AI safety</a>
+      <a href="#education">Education</a>
+      <a href="#awards">Awards</a>
+      <a href="#skills">Skills</a>
+    </nav>
   </div>
 </header>
+
+<main>
 
 <h2 id="about">About</h2>
 <p>
@@ -307,7 +353,7 @@
   <div class="chips"><span class="chip">IOC / passive quoting</span><span class="chip">inventory control</span><span class="chip">execution</span></div>
 </div>
 
-<h2>AI quantitative research</h2>
+<h2 id="ai">AI quantitative research</h2>
 
 <div class="card">
   <h3>Point-in-time multi-asset, news &amp; event pricing</h3>
@@ -337,7 +383,7 @@
   <div class="chips"><span class="chip">RAG</span><span class="chip">tool traces</span><span class="chip">LLM evaluation</span></div>
 </div>
 
-<h2>Multi-agent simulation &amp; AI safety</h2>
+<h2 id="agents">Multi-agent simulation &amp; AI safety</h2>
 
 <div class="card">
   <h3>Multi-agent behaviour, game theory &amp; AI safety</h3>
@@ -366,7 +412,7 @@
   <div class="chips"><span class="chip">agent simulation</span><span class="chip">founder</span></div>
 </div>
 
-<h2>Education</h2>
+<h2 id="education">Education</h2>
 <div class="edu">
   <div class="inst">UNSW Sydney</div>
   <p class="degree">
@@ -381,18 +427,20 @@
   </p>
 </div>
 
-<h2>Competitions &amp; awards</h2>
+<h2 id="awards">Competitions &amp; awards</h2>
 <ul>
   <li><strong>Algothon 2026</strong> (Susquehanna × UNSW FinTech Society) — Final round <strong>3rd</strong> · General round <strong>1st</strong>.</li>
   <li><strong>Peter Farrell Cup 2026</strong> — finalist (PittsAI).</li>
 </ul>
 
-<h2>Technical skills</h2>
+<h2 id="skills">Technical skills</h2>
 <div class="skills">
   <p><b>Programming &amp; data:</b> Python, SQL/SQLite, FastAPI, pandas, NumPy, scikit-learn, Jupyter, basic C++.</p>
   <p><b>Quantitative trading:</b> L2 order books, microprice, IOC/passive quoting, market making, execution, backtesting, inventory &amp; risk controls.</p>
   <p><b>AI &amp; agents:</b> RAG, LangGraph, PEFT/QLoRA, MCP, LLM evaluation, multi-agent simulation, AI safety.</p>
 </div>
+
+</main>
 
 <footer>
   © 2026 Yiping Yin · plain HTML on GitHub Pages
@@ -430,6 +478,36 @@
   onScroll();
   addEventListener('scroll', onScroll, { passive: true });
 })();
+</script>
+<script>
+  // Scrollspy for the sidebar nav: the active item is the last heading that has
+  // passed under the top bar. An IntersectionObserver drives the updates — it is
+  // what the API is for, and unlike a scroll handler it is not tied to scroll
+  // events being delivered. scroll and resize stay wired as a fallback.
+  (function () {
+    var links = Array.prototype.slice.call(document.querySelectorAll('.sectionnav a'));
+    if (!links.length) return;
+    var targets = links.map(function (a) { return document.querySelector(a.getAttribute('href')); });
+
+    function update() {
+      var current = 0;
+      for (var i = 0; i < targets.length; i++) {
+        if (targets[i] && targets[i].getBoundingClientRect().top <= 100) current = i;
+      }
+      if (window.innerHeight + window.scrollY >= document.body.scrollHeight - 4) {
+        current = targets.length - 1;
+      }
+      for (var j = 0; j < links.length; j++) links[j].classList.toggle('on', j === current);
+    }
+
+    if (window.IntersectionObserver) {
+      var io = new IntersectionObserver(update, { rootMargin: '-100px 0px 0px 0px', threshold: [0, 1] });
+      targets.forEach(function (t) { if (t) io.observe(t); });
+    }
+    addEventListener('scroll', update, { passive: true });
+    addEventListener('resize', update);
+    update();
+  })();
 </script>
 </body>
 </html>
