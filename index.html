@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Yiping Yin</title>
+<title>Yiping Yin — quantitative research and trading</title>
 <meta name="description" content="Yiping Yin — systematic quantitative trading, AI quantitative research, multi-agent simulation &amp; AI safety. UNSW Sydney. 1st of 253 in the General round and 3rd in the Final round of Algothon 2026 (Susquehanna × UNSW FinTech Society).">
 <link rel="canonical" href="https://yiping-yin.github.io/">
 
@@ -25,6 +25,22 @@
 <meta name="twitter:title" content="Yiping Yin — quantitative research and trading">
 <meta name="twitter:description" content="Systematic trading, AI quantitative research and multi-agent simulation at UNSW Sydney. 1st of 253 in the General round and 3rd in the Final round of Algothon 2026.">
 <meta name="twitter:image" content="https://yiping-yin.github.io/assets/og-image.png">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Yiping Yin",
+  "url": "https://yiping-yin.github.io/",
+  "image": "https://yiping-yin.github.io/assets/avatar.jpg",
+  "affiliation": { "@type": "CollegeOrUniversity", "name": "UNSW Sydney" },
+  "knowsAbout": ["systematic trading", "quantitative research", "market microstructure", "multi-agent simulation", "AI safety"],
+  "sameAs": [
+    "https://github.com/Yiping-Yin",
+    "https://www.linkedin.com/in/yiping-yin/"
+  ]
+}
+</script>
 <style>
   :root {
     /* Neutrals are lifted from the CV (assets/Yiping-Yin-CV.pdf) so the two read
@@ -273,7 +289,7 @@
 <div class="wrap" id="top">
 
 <header>
-  <img class="avatar" src="assets/avatar.jpg" alt="Yiping Yin" width="512" height="512">
+  <img class="avatar" src="assets/avatar.jpg" alt="Yiping Yin" width="320" height="320">
   <div>
     <h1>Yiping Yin</h1>
     <p class="tagline">Systematic quantitative trading · AI quantitative research · multi-agent simulation &amp; AI safety</p>
@@ -528,7 +544,11 @@
       if (window.innerHeight + window.scrollY >= document.body.scrollHeight - 4) {
         current = targets.length - 1;
       }
-      for (var j = 0; j < links.length; j++) links[j].classList.toggle('on', j === current);
+      for (var j = 0; j < links.length; j++) {
+        links[j].classList.toggle('on', j === current);
+        if (j === current) links[j].setAttribute('aria-current', 'true');
+        else links[j].removeAttribute('aria-current');
+      }
     }
 
     if (window.IntersectionObserver) {
