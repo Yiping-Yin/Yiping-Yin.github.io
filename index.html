@@ -51,7 +51,9 @@
   } catch (error) { /* The system preference remains the default. */ }
 </script>
 <script src="assets/site.js?v=editorial-layout-3" defer></script>
-<script src="assets/market-visual.js?v=time-sections-5" defer></script>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"}}</script>
+<script type="module" src="assets/market-visual.mjs?v=imc-ring-1"></script>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -85,11 +87,9 @@
           <p class="hero-focus">Quantitative research<br>&amp; intelligent systems.</p>
           <div class="hero-actions"><a href="#research" class="hero-cta">Explore my research <span aria-hidden="true">↗</span></a></div>
         </div>
-        <figure class="hero-visual" aria-label="An animated study of time, measurement and illustrative market signals. Local times for Beijing and Sydney.">
-          <img class="market-fallback" src="assets/market-clock.png" alt="Static view of transparent measurement planes and illustrative market signals" width="1360" height="920">
+        <figure class="hero-visual" aria-label="An animated ring of daily S&amp;P 500 candlesticks with volume bars and date labels. Illustrative, not live data.">
+          <img class="market-fallback" src="assets/market-ring.png" alt="Static view of a ring of daily candlesticks with volume bars and date labels" width="1360" height="920">
           <canvas id="market-canvas" aria-hidden="true"></canvas>
-          <span id="market-status" class="sr-only" role="status" aria-live="polite"></span>
-          <figcaption class="market-caption"><span><span class="clock-fallback-label">Beijing · Sydney</span><span class="clock-cities" hidden><button type="button" data-clock-city="beijing" aria-pressed="true">Beijing <time id="clock-beijing"></time></button><button type="button" data-clock-city="sydney" aria-pressed="false">Sydney <time id="clock-sydney"></time></button></span></span><button id="market-motion" type="button" hidden aria-label="Pause visualization motion">Pause</button></figcaption>
         </figure>
       </div>
     </section>

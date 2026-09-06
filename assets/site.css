@@ -73,20 +73,8 @@ h1 > span { color: #8facd0; }
 .hero-cta:hover { border-bottom-color: #fff; }
 .hero-visual { position: absolute; margin: 0; width: 680px; height: 460px; top: 22px; right: 0; }
 .market-fallback, #market-canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: contain; }
-#market-canvas { touch-action: pan-y; }
+#market-canvas { touch-action: pan-y; cursor: grab; }
 .market-ready .market-fallback { display: none; }
-.market-caption { position: absolute; left: 72px; right: 50px; bottom: 0; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-.hero-visual figcaption { color: #c0d0e2; font-size: 10px; letter-spacing: .4px; }
-.hero-visual figcaption span { color: #819ab7; }
-.market-ready .clock-fallback-label { display: none; }
-.clock-cities { display: flex; gap: 18px; }
-.clock-cities button { display: inline-flex; align-items: center; gap: 7px; padding: 6px 0; border: 0; color: #9ab0c9; background: transparent; font-size: 11px; }
-.clock-cities button::before { content: ""; width: 4px; height: 4px; background: #a1cbbb; border-radius: 50%; }
-.clock-cities button[data-clock-city="sydney"]::before { background: #c8a3a7; }
-.clock-cities button[aria-pressed="true"] { color: #e0eaf5; }
-.clock-cities time { font-variant-numeric: tabular-nums; }
-#market-motion { color: #a8bdd5; background: transparent; border: 1px solid #4b6382; padding: 5px 9px; border-radius: 3px; font-size: 10px; line-height: 1.4; }
-#market-motion:hover { color: #fff; border-color: #a8bdd5; }
 .content-shell { max-width: 1240px; margin: auto; padding: 0 50px; }
 .highlights-section { padding-top: 32px; }
 .recognition-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 64px; }
@@ -201,7 +189,6 @@ footer a { color: var(--muted); text-decoration: none; padding: 8px 0; }
   .hero-inner::before { left: 35px; right: 35px; }
   .hero-copy { max-width: 400px; }
   .hero-visual { right: 0; width: min(560px, calc(100% - 430px)); }
-  .market-caption { right: 35px; }
   .recognition-grid,.background-section { column-gap: 40px; }
   .recognition { gap: 13px; }
 }
@@ -209,8 +196,6 @@ footer a { color: var(--muted); text-decoration: none; padding: 8px 0; }
   .hero { background-image: radial-gradient(ellipse 92% 76% at 64% 82%, #103969a8 0%, #082a523d 50%, #04162400 84%), linear-gradient(120deg, #041624 0%, #051a2d 65%, #061c32 100%); }
   .hero-inner { display: block; min-height: 0; padding: 48px 35px 282px; }
   .hero-visual { top: auto; right: 35px; bottom: 18px; width: calc(100% - 70px); height: 260px; }
-  .market-caption { left: 25px; right: 25px; }
-  .clock-cities { gap: 12px; }
   .hero-copy { max-width: none; }
   h1 { font-size: 61px; }
   .hero-focus { font-size: 24px; }
@@ -244,8 +229,6 @@ footer a { color: var(--muted); text-decoration: none; padding: 8px 0; }
   .hero-actions { margin-top: 17px; gap: 20px; }
   .hero-cta { font-size: 12px; }
   .hero-visual { top: auto; bottom: 20px; right: 10px; width: calc(100% - 20px); height: 228px; }
-  .market-caption { left: 15px; right: 15px; bottom: 0; }
-  .hero-visual figcaption { font-size: 9px; }
   .content-shell { padding: 0 23px; }
   .highlights-section { padding-top: 24px; }
   .recognition-grid { grid-template-columns: 1fr; gap: 18px; }
@@ -301,7 +284,6 @@ footer a { color: var(--muted); text-decoration: none; padding: 8px 0; }
   .content-shell { padding: 0 18px; }
   .hero-inner { padding-left: 21px; padding-right: 21px; }
   .hero-inner::before { left: 21px; right: 21px; }
-  .market-caption { left: 16px; right: 16px; }
   .hero-actions { gap: 12px; }
   .hero-visual { width: calc(100% - 10px); right: 5px; }
   h1 { font-size: 52px; }
