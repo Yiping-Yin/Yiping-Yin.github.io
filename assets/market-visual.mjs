@@ -63,7 +63,8 @@ const DEPTH_FADE = 0.30;
 const DEPTH_COLOUR = 0x0b2a4c;
 const DEPTH_SAMPLES = 32;
 
-const MOBILE_QUERY = '(max-width: 700px)';
+const MOBILE_QUERY = '(max-width: 850px)';          // the stylesheet's 260 px box: no labels, no ticks, aperture 2
+const CAPTION_COMPACT_QUERY = '(max-width: 1100px)'; // the hero box narrows below the full source line
 const MOBILE_APERTURE = 2;
 const LABEL_FACING = 0.30;    // a date is drawn only when its plane faces the camera
 const LABEL_FONT = '500 40px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif';
@@ -121,6 +122,7 @@ function boot(canvas) {
   const figure = canvas.closest('.hero-visual') || canvas.parentElement;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const compact = window.matchMedia(MOBILE_QUERY);
+  const narrow = window.matchMedia(CAPTION_COMPACT_QUERY);
 
   // Series shape ---------------------------------------------------------
   const bounds = seriesBounds(series);
@@ -147,6 +149,7 @@ function boot(canvas) {
   try {
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
   } catch (error) {
+    if (captionEl) captionEl.classList.remove('is-pending');
     return; // The static fallback image stays visible and the caption is already correct.
   }
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -306,7 +309,7 @@ function boot(canvas) {
   const arrival = { active: false, begun: false, start: 0, plan: ARRIVAL.first, captioned: false };
   const glide = { active: false, from: 0, to: 0, start: 0, duration: DETENT_SECONDS };
   const nib = { level: items[startOffset + count - 1].close, scale: 0, tween: null };
-  const drag = { id: -1, down: false, captured: false, touch: false, x0: 0, y0: 0, R0: 0, targetR: 0, crossed: 0 };
+  const drag = { id: -1, down: false, captured: false, touch: false, x0: 0, y0: 0, R0: 0, targetR: 0, crossed: 0, moved: false };
   const hover = { item: null, x: 0, y: 0, releaseId: 0, inside: false };
   const cursor = { value: 0, tween: null };
   const clock = { frameId: 0, wakeId: 0 };
@@ -318,6 +321,11 @@ function boot(canvas) {
   const raycaster = new THREE.Raycaster();
   const pickPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -pickY);
   const pickPoint = new THREE.Vector3();
+  const pickRay = new THREE.Ray();
+  const outerInverse = new THREE.Matrix4();
+  const UP = new THREE.Vector3(0, 1, 0);
+  const PICK_INNER = 0.6 * CANDLE_RING;
+  const PICK_OUTER = CURSOR_OUTER;
   const ndc = new THREE.Vector2();
   let chrome = 0;   // blades and labels fade up together at the end of the arrival
   let inView = true;
@@ -588,8 +596,13 @@ function boot(canvas) {
 
   function toggleBeats() {
     if (reducedMotion.matches) return;
-    if (state.mode === 'frozen') { state.mode = 'idle'; resumeBeats(); }
-    else { state.mode = 'frozen'; stopBeats(); }
+    if (state.mode === 'frozen') { state.mode = hover.inside ? 'held' : 'idle'; resumeBeats(); }
+    else {
+      // An active beat finishes its step (updateBeat will not chain while frozen);
+      // only an idle wake-up is cancelled.
+      state.mode = 'frozen';
+      if (!beat.active) clearWake();
+    }
   }
 
   // Arrival --------------------------------------------------------------
@@ -625,7 +638,7 @@ function boot(canvas) {
     placeCamera(1, 1);
     afterStep();
     placeCamera(0);
-    if (captionEl && plan.captionAt > 0) captionEl.classList.add('is-pending');
+    if (captionEl) captionEl.classList.toggle('is-pending', plan.captionAt > 0);
     requestFrame();
   }
 
@@ -813,9 +826,15 @@ function boot(canvas) {
     if (!box.width || !box.height) return null;
     ndc.set(((event.clientX - box.left) / box.width) * 2 - 1, -((event.clientY - box.top) / box.height) * 2 + 1);
     raycaster.setFromCamera(ndc, camera);
-    if (!raycaster.ray.intersectPlane(pickPlane, pickPoint)) return null;
-    inner.updateWorldMatrix(true, false);
-    inner.worldToLocal(pickPoint);
+    // The candle band lives in the tilted outer group, so intersect in that
+    // frame rather than against a world-horizontal plane.
+    outer.updateWorldMatrix(true, false);
+    outerInverse.copy(outer.matrixWorld).invert();
+    pickRay.copy(raycaster.ray).applyMatrix4(outerInverse);
+    if (!pickRay.intersectPlane(pickPlane, pickPoint)) return null;
+    const radius = Math.hypot(pickPoint.x, pickPoint.z);
+    if (radius < PICK_INNER || radius > PICK_OUTER) return null;
+    pickPoint.applyAxisAngle(UP, -state.R);  // outer-local → drum-local
     return itemAtSlot(slotFromLocal(pickPoint.x, pickPoint.z, slots));
   }
 
@@ -854,9 +873,12 @@ function boot(canvas) {
   // Drag -----------------------------------------------------------------
   function updateDrag(time) {
     if (!drag.captured) return false;
+    const wanted = clampOffset(offsetFromAngle(drag.targetR, slots, pen, aperture), total, slots, aperture);
+    // A held-still drag costs nothing until the pointer moves or a crossing is due.
+    if (!drag.moved && wanted === state.offset) return false;
+    drag.moved = false;
     setDrumAngle(drag.targetR);
     updateLabels();
-    const wanted = clampOffset(offsetFromAngle(drag.targetR, slots, pen, aperture), total, slots, aperture);
     if (wanted !== state.offset && time - drag.crossed >= CROSS_SECONDS) {
       const next = state.offset + (wanted > state.offset ? 1 : -1);
       applyWindow(state.offset, next, time, DRAG_PRINT);
@@ -880,6 +902,7 @@ function boot(canvas) {
       glide.active = false;
       setDrumAngle(glide.to);
       afterStep();
+      if (state.mode === 'idle') resumeBeats();
       return false;
     }
     return true;
@@ -925,7 +948,10 @@ function boot(canvas) {
   }
 
   canvas.addEventListener('pointerdown', (event) => {
+    if (event.button !== 0 || !event.isPrimary) return;
+    if (arrival.active) finishArrival(now());  // a gesture ends the performance early
     drag.id = event.pointerId;
+    drag.moved = false;
     drag.down = true;
     drag.captured = false;
     drag.touch = event.pointerType === 'touch';
@@ -960,11 +986,14 @@ function boot(canvas) {
     if (R > high) R = high + (R - high) * RUBBER;
     else if (R < low) R = low + (R - low) * RUBBER;
     drag.targetR = R;
+    drag.moved = true;
     requestFrame();
   });
 
   canvas.addEventListener('pointerup', () => endDrag(false));
   canvas.addEventListener('pointercancel', () => endDrag(true));
+  canvas.addEventListener('lostpointercapture', () => { if (drag.down && drag.captured) endDrag(true); });
+  window.addEventListener('blur', () => { if (drag.down) endDrag(true); });
   canvas.addEventListener('pointerleave', (event) => {
     // A captured drag keeps running outside the box; only a gesture that never
     // became one is cancelled here.
@@ -987,6 +1016,7 @@ function boot(canvas) {
 
   // Keyboard: the canvas is a slider whose value is the session under the pen.
   canvas.addEventListener('keydown', (event) => {
+    if (arrival.active && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', ' ', 'Spacebar'].includes(event.key)) finishArrival(now());
     const jump = event.shiftKey ? 5 : 1;
     let next = null;
     if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') next = state.offset - jump;
@@ -1004,7 +1034,7 @@ function boot(canvas) {
   function writeSource() {
     if (!sourceEl) return;
     // The phone keeps one line, so the window's opening date goes.
-    sourceEl.textContent = compact.matches
+    sourceEl.textContent = (compact.matches || narrow.matches)
       ? `${meta.name} · ${meta.interval} · to ${series[total - 1].label} · captured ${meta.capturedAt} · not live`
       : captionLines(meta, series, slots, aperture, GLYPH_RATIO, total - 1)[0];
   }
@@ -1055,6 +1085,7 @@ function boot(canvas) {
   if (reducedMotion.addEventListener) reducedMotion.addEventListener('change', onMotionPreference);
   else reducedMotion.addListener(onMotionPreference);
   if (compact.addEventListener) compact.addEventListener('change', writeSource);
+  if (narrow.addEventListener) narrow.addEventListener('change', writeSource);
 
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) stopFrame();

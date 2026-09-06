@@ -295,3 +295,27 @@ test('captionLines follows the pen to any session, and drops the return on the f
   assert.ok(mobile[0].includes('53 of 110 sessions'));   // a smaller aperture shows one more session
   assert.ok(mobile[1].startsWith(series[51].label + ' · O '));
 });
+
+test('index.html ships the terminal caption and slider text that captionLines and the data produce', async () => {
+  const fs = await import('node:fs');
+  const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8').replace(/&amp;/g, '&');
+  const { default: series, meta } = await import('../assets/market-data.mjs');
+  const [line1, line2] = captionLines(meta, series, 55, 3, GLYPH_RATIO, series.length - 1);
+  const source = html.match(/<span class="market-caption-source">([^<]*)<\/span>/);
+  const session = html.match(/<span class="market-caption-session">(.*?)<\/span><\/figcaption>/s);
+  assert.ok(source && session, 'both caption spans present');
+  assert.equal(source[1], line1);
+  assert.equal(session[1].replace(/<[^>]+>/g, ''), line2);
+  const last = series[series.length - 1];
+  const valuetext = `${last.label}, O ${formatPrice(last.open)}, H ${formatPrice(last.high)}, L ${formatPrice(last.low)}, C ${formatPrice(last.close)}`;
+  assert.ok(html.includes(`aria-valuenow="${series.length - 1}"`), 'aria-valuenow is the last index');
+  assert.ok(html.includes(`aria-valuetext="${valuetext}"`), 'aria-valuetext matches the last row');
+});
+
+test('depthFade works with the renderer\'s view-space band where near is larger than far', () => {
+  near(depthFade(-6.9, -6.9, -19.8, 0.3), 0);
+  near(depthFade(-19.8, -6.9, -19.8, 0.3), 0.3);
+  near(depthFade(-13.35, -6.9, -19.8, 0.3), 0.15);
+  near(depthFade(-3, -6.9, -19.8, 0.3), 0);
+  near(depthFade(-25, -6.9, -19.8, 0.3), 0.3);
+});
