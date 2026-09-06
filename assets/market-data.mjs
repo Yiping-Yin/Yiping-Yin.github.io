@@ -1,5 +1,10 @@
 // S&P 500 index (^GSPC), daily OHLCV for the 110 NYSE sessions from 2026-03-31 to 2026-09-04.
 // Source: Yahoo Finance daily history, captured 2026-09-06. Illustrative only.
+
+// Provenance for the hero caption: every figure the caption prints is either
+// from here or derived from the rows below, so the two can never drift.
+export const meta = { symbol: '^GSPC', name: 'S&P 500', interval: 'daily', source: 'Yahoo Finance daily history', capturedAt: '2026-09-06' };
+
 export default [
   { label: "2026-03-31", open: 6395.88, high: 6539.05, low: 6395.88, close: 6528.52, volume: 6396100000 },
   { label: "2026-04-01", open: 6556.56, high: 6609.67, low: 6554.29, close: 6575.32, volume: 5637260000 },
