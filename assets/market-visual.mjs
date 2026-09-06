@@ -133,17 +133,23 @@ function boot(canvas) {
   const maxOffset = clampOffset(total, total, slots, aperture);    // 58 for 110/55/3
   const pen = penAzimuth(EYE[0], EYE[2], slots);                   // −3 slots
   const stepAngle = TAU / slots;
-  const timing = compact.matches ? TIMING.mobile : TIMING.desktop;
+  let timing = compact.matches ? TIMING.mobile : TIMING.desktop;
+  let chromeOn = !compact.matches;   // ticks and date labels are for the wide box only
   const nibIndex = total * 2;                                      // the one extra box instance
 
   // Caption first, so it is right even when WebGL is not there ------------
   const captionEl = figure ? figure.querySelector('.market-caption') : null;
   const sourceEl = captionEl ? captionEl.querySelector('.market-caption-source') : null;
   const sessionEl = captionEl ? captionEl.querySelector('.market-caption-session') : null;
+  if (count < 1) {
+    if (captionEl) captionEl.classList.remove('is-pending');
+    console.warn('market-visual: the series needs at least ' + (slots - aperture + 1) + ' rows; the still stays.');
+    return;
+  }
   const stored = recall();
   const startOffset = reducedMotion.matches ? maxOffset : (stored.seen ? stored.offset : 0);
   writeSource();
-  writeSession(startOffset + count - 1);
+  writeSession(total - 1);  // the still shows the end of the record; the live caption is written once the renderer exists
 
   let renderer;
   try {
@@ -156,6 +162,7 @@ function boot(canvas) {
   renderer.setClearColor(0x000000, 0);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
+  writeSession(startOffset + count - 1);
 
   // Scene graph ----------------------------------------------------------
   const scene = new THREE.Scene();
@@ -223,15 +230,13 @@ function boot(canvas) {
       inner.add(blade);
       item.blade = blade;
 
-      if (!compact.matches) {
-        const label = makeLabel(row.label, renderer);
-        const labelPos = ringPosition(LABEL_RING, slots, slot);
-        label.position.set(labelPos.x, 0, labelPos.z);
-        label.rotation.y = stepAngle * slot;
-        label.visible = false;
-        inner.add(label);
-        item.label = label;
-      }
+      const label = makeLabel(row.label, renderer);
+      const labelPos = ringPosition(LABEL_RING, slots, slot);
+      label.position.set(labelPos.x, 0, labelPos.z);
+      label.rotation.y = stepAngle * slot;
+      label.visible = false;
+      inner.add(label);
+      item.label = label;
     }
     return item;
   });
@@ -241,7 +246,7 @@ function boot(canvas) {
   wicks.instanceColor.needsUpdate = true;
 
   // The dial ------------------------------------------------------------
-  const gapFar = pen + 3.5 * stepAngle;   // the far edge of the three erased slots
+  const gapFar = pen + (aperture + 0.5) * stepAngle;   // the far edge of the erased slots
   const gapNear = pen + 0.5 * stepAngle;
 
   const rimGeometry = new THREE.BufferGeometry();
@@ -259,7 +264,7 @@ function boot(canvas) {
   dial.add(rim);
 
   let ticks = null;
-  if (!compact.matches) {
+  {
     const points = [];
     for (let k = 0; k < slots; k += 1) {
       const t = stepAngle * k;
@@ -270,6 +275,7 @@ function boot(canvas) {
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(points, 3));
     ticks = new THREE.LineSegments(geometry, basicLineMaterial(TICK_ALPHA));
     ticks.renderOrder = 1;
+    ticks.visible = chromeOn;
     dial.add(ticks);
   }
 
@@ -346,10 +352,10 @@ function boot(canvas) {
     const { candle, bar, candlePos, barPos, index } = item;
     quaternion.identity();
     position.set(candlePos.x, candle.body.y, candlePos.z);
-    scale.set(candle.body.width * q * wide, candle.body.height * q, candle.body.width * q * wide);
+    scale.set(candle.body.width * q * wide, Math.max(candle.body.height * q, 1e-4), candle.body.width * q * wide);
     boxes.setMatrixAt(index, matrix.compose(position, quaternion, scale));
     position.set(candlePos.x, candle.wick.y, candlePos.z);
-    scale.set(candle.wick.diameter * q * wide, candle.wick.height * q, candle.wick.diameter * q * wide);
+    scale.set(candle.wick.diameter * q * wide, Math.max(candle.wick.height * q, 1e-4), candle.wick.diameter * q * wide);
     wicks.setMatrixAt(index, matrix.compose(position, quaternion, scale));
     const barHeight = bar.height * p;
     position.set(barPos.x, barHeight / 2, barPos.z);
@@ -368,7 +374,7 @@ function boot(canvas) {
     if (item.label) {
       const alpha = LABEL_ALPHA * item.p * chrome;
       item.label.material.opacity = alpha;
-      item.label.visible = item.facing && alpha > 0.001;
+      item.label.visible = chromeOn && item.facing && alpha > 0.001;
     }
   }
 
@@ -671,10 +677,21 @@ function boot(canvas) {
     return true;
   }
 
-  function finishArrival(time) {
+  function finishArrival(time, autoBeat = true) {
     const plan = arrival.plan;
     arrival.active = false;
     placeCamera(1, 1);
+    // Whatever the arrival had not printed yet is printed now.
+    for (const item of items) {
+      item.tween = null;
+      item.candleTween = null;
+      const v = isVisible(state.offset, item.index, slots, aperture) ? 1 : 0;
+      item.p = v;
+      item.candleP = v;
+      applyItem(item);
+    }
+    boxes.instanceMatrix.needsUpdate = true;
+    wicks.instanceMatrix.needsUpdate = true;
     rimGeometry.setDrawRange(0, RIM_POINTS);
     rimMaterial.opacity = RIM_ALPHA;
     rim.visible = true;
@@ -691,7 +708,7 @@ function boot(canvas) {
     // A tab that was hidden through the arrival lands here with a stale clock,
     // so anchor the first beat to now rather than to a time long past.
     const anchor = arrival.start + plan.beatAt;
-    if (state.mode === 'idle') startBeat(time - anchor > timing.period ? time : anchor);
+    if (autoBeat && state.mode === 'idle') startBeat(time - anchor > timing.period ? time : anchor);
   }
 
   // Terminal state: reduced motion, and the end of the record ------------
@@ -917,6 +934,7 @@ function boot(canvas) {
       state.offset = next;
       remember(next);
     }
+    if (hover.item && !isVisible(next, hover.item.index, slots, aperture)) setHover(null);
     glide.from = state.R;
     glide.to = drumAngle(next, slots, pen, aperture);
     glide.start = time;
@@ -949,7 +967,7 @@ function boot(canvas) {
 
   canvas.addEventListener('pointerdown', (event) => {
     if (event.button !== 0 || !event.isPrimary) return;
-    if (arrival.active) finishArrival(now());  // a gesture ends the performance early
+    if (arrival.active) finishArrival(now(), false);  // a gesture ends the performance early, frozen
     drag.id = event.pointerId;
     drag.moved = false;
     drag.down = true;
@@ -957,8 +975,6 @@ function boot(canvas) {
     drag.touch = event.pointerType === 'touch';
     drag.x0 = event.clientX;
     drag.y0 = event.clientY;
-    drag.R0 = state.R;
-    drag.targetR = state.R;
     drag.crossed = 0;
   });
 
@@ -974,6 +990,11 @@ function boot(canvas) {
       state.mode = 'frozen';
       stopBeats();
       glide.active = false;
+      // Grip the drum where it is now, not where it was at pointerdown.
+      drag.R0 = state.R;
+      drag.targetR = state.R;
+      drag.x0 = event.clientX;
+      drag.y0 = event.clientY;
       setHover(null);
       canvas.style.cursor = 'grabbing';
       if (canvas.setPointerCapture) canvas.setPointerCapture(drag.id);
@@ -990,14 +1011,14 @@ function boot(canvas) {
     requestFrame();
   });
 
-  canvas.addEventListener('pointerup', () => endDrag(false));
-  canvas.addEventListener('pointercancel', () => endDrag(true));
-  canvas.addEventListener('lostpointercapture', () => { if (drag.down && drag.captured) endDrag(true); });
+  canvas.addEventListener('pointerup', (event) => { if (event.pointerId === drag.id) endDrag(false); });
+  canvas.addEventListener('pointercancel', (event) => { if (event.pointerId === drag.id) endDrag(true); });
+  canvas.addEventListener('lostpointercapture', (event) => { if (event.pointerId === drag.id && drag.down && drag.captured) endDrag(true); });
   window.addEventListener('blur', () => { if (drag.down) endDrag(true); });
   canvas.addEventListener('pointerleave', (event) => {
     // A captured drag keeps running outside the box; only a gesture that never
     // became one is cancelled here.
-    if (drag.down && !drag.captured) endDrag(true);
+    if (drag.down && !drag.captured && event.pointerId === drag.id) endDrag(true);
     if (event.pointerType === 'touch' || !hover.inside) return;
     if (hover.releaseId) window.clearTimeout(hover.releaseId);
     hover.releaseId = window.setTimeout(clearHover, HOVER_RELEASE * 1000);
@@ -1016,7 +1037,7 @@ function boot(canvas) {
 
   // Keyboard: the canvas is a slider whose value is the session under the pen.
   canvas.addEventListener('keydown', (event) => {
-    if (arrival.active && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', ' ', 'Spacebar'].includes(event.key)) finishArrival(now());
+    if (arrival.active && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', ' ', 'Spacebar'].includes(event.key)) finishArrival(now(), false);
     const jump = event.shiftKey ? 5 : 1;
     let next = null;
     if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') next = state.offset - jump;
@@ -1084,7 +1105,15 @@ function boot(canvas) {
   }
   if (reducedMotion.addEventListener) reducedMotion.addEventListener('change', onMotionPreference);
   else reducedMotion.addListener(onMotionPreference);
-  if (compact.addEventListener) compact.addEventListener('change', writeSource);
+  function onCompactChange() {
+    chromeOn = !compact.matches;
+    timing = compact.matches ? TIMING.mobile : TIMING.desktop;
+    if (ticks) ticks.visible = chromeOn;
+    applyChrome();
+    writeSource();
+    requestFrame();
+  }
+  if (compact.addEventListener) compact.addEventListener('change', onCompactChange);
   if (narrow.addEventListener) narrow.addEventListener('change', writeSource);
 
   document.addEventListener('visibilitychange', () => {
@@ -1096,9 +1125,21 @@ function boot(canvas) {
   if ('IntersectionObserver' in window) {
     new IntersectionObserver((entries) => {
       inView = entries[0].isIntersecting;
-      if (inView) requestFrame(); else stopFrame();
+      if (inView) { dirty = true; requestFrame(); } else stopFrame();
     }).observe(canvas);
   }
+  canvas.addEventListener('webglcontextlost', () => {
+    // three.js allows the restore itself; show the still until it happens.
+    stopFrame();
+    clearWake();
+    if (figure) figure.classList.remove('market-ready');
+  });
+  canvas.addEventListener('webglcontextrestored', () => {
+    if (figure) figure.classList.add('market-ready');
+    dirty = true;
+    resize();
+    requestFrame();
+  });
   if (figure && 'ResizeObserver' in window) new ResizeObserver(resize).observe(figure);
   window.addEventListener('resize', resize, { passive: true });
 
@@ -1107,6 +1148,10 @@ function boot(canvas) {
   resize();
   if (reducedMotion.matches) showTerminal();
   else startArrival(stored.seen ? ARRIVAL.revisit : ARRIVAL.first, now());
+  canvas.removeAttribute('aria-hidden');
+  canvas.tabIndex = 0;
+  canvas.setAttribute('role', 'slider');
+  canvas.setAttribute('aria-label', 'Session under the pen');
   writeAria();
   if (figure) figure.classList.add('market-ready');
   requestFrame();

@@ -232,9 +232,11 @@ export function formatPrice(n) {
 // Session return against the previous close. '' when there is no previous
 // close (the first row of the record), so the caller can just concatenate.
 export function formatReturn(close, prevClose) {
-  if (prevClose === undefined) return '';
+  if (!(prevClose > 0) || !Number.isFinite(prevClose) || !Number.isFinite(close)) return '';
   const percent = (close / prevClose - 1) * 100;
-  return `${percent < 0 ? '\u2212' : '+'}${Math.abs(percent).toFixed(2)} %`;
+  const magnitude = Math.abs(percent).toFixed(2);
+  const sign = percent < 0 && magnitude !== '0.00' ? '\u2212' : '+';
+  return `${sign}${magnitude} %`;
 }
 
 // The two caption lines, derived entirely from the data file: what the series

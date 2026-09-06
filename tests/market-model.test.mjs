@@ -308,8 +308,37 @@ test('index.html ships the terminal caption and slider text that captionLines an
   assert.equal(session[1].replace(/<[^>]+>/g, ''), line2);
   const last = series[series.length - 1];
   const valuetext = `${last.label}, O ${formatPrice(last.open)}, H ${formatPrice(last.high)}, L ${formatPrice(last.low)}, C ${formatPrice(last.close)}`;
-  assert.ok(html.includes(`aria-valuenow="${series.length - 1}"`), 'aria-valuenow is the last index');
-  assert.ok(html.includes(`aria-valuetext="${valuetext}"`), 'aria-valuetext matches the last row');
+  assert.ok(/<canvas id="market-canvas" aria-hidden="true"><\/canvas>/.test(html), 'the canvas is inert until the module applies the slider role');
+  assert.ok(!html.includes('aria-valuetext='), 'no slider text is shipped for a slider that may never run');
+  assert.equal(valuetext.slice(0, 10), last.label);
+});
+
+test('easing curves that drive the step and the dolly keep their shape', () => {
+  near(EASE.easeInOut(0.25), 0.1292, 1e-3);
+  near(EASE.easeInOut(0.5), 0.5, 1e-9);
+  near(EASE.easeInOut(0.75), 0.8708, 1e-3);
+  near(EASE.camera(0.5), 0.7979, 1e-3);
+});
+
+test('detentTarget snaps relative to the pen even when the pen is off the tick grid', () => {
+  const step = TAU / 55;
+  const p = DEFAULT_PEN + 0.31 * step;
+  near(detentTarget(p + 0.4 * step, 55, p), p, 1e-12);
+  near(detentTarget(p + 0.6 * step, 55, p), p + step, 1e-12);
+});
+
+test('formatReturn never prints a signed zero and stays silent for a degenerate previous close', () => {
+  assert.equal(formatReturn(7718.40, 7718.60), '+0.00 %');
+  assert.equal(formatReturn(7718.60, 0), '');
+  assert.equal(formatReturn(7718.60, Infinity), '');
+  assert.equal(formatReturn(7700, 7750), '\u22120.65 %');
+});
+
+test('a doji keeps the down colour and a zero body height that the renderer floors', () => {
+  const b = seriesBounds(rows);
+  const doji = candleMetrics({ label: '2026-04-07', open: 99, high: 101, low: 98, close: 99, volume: 1_500 }, b, 1.2);
+  assert.equal(doji.colour, '#DC7A88');
+  assert.equal(doji.body.height, 0);
 });
 
 test('depthFade works with the renderer\'s view-space band where near is larger than far', () => {
