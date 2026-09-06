@@ -10,21 +10,20 @@
 <link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
-<meta name="theme-color" content="#f7f8f4" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#141b18" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#041a30">
 
 <meta property="og:type" content="profile">
 <meta property="og:url" content="https://yiping-yin.github.io/">
 <meta property="og:title" content="Yiping Yin — quantitative research and trading">
 <meta property="og:description" content="Market microstructure, asset pricing and multi-agent market simulation at UNSW Sydney. 1st of 253 in the General round and 3rd in the Final technical ranking of Algothon 2026.">
-<meta property="og:image" content="https://yiping-yin.github.io/assets/og-image.png?v=20260906">
+<meta property="og:image" content="https://yiping-yin.github.io/assets/og-image.png?v=20260906-release">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Yiping Yin, UNSW Sydney. Quantitative research, built to be tested. Market microstructure, asset pricing and multi-agent market simulation.">
+<meta property="og:image:alt" content="Yiping Yin — quantitative research and intelligent systems, with an original three-dimensional study of time and measurement.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Yiping Yin — quantitative research and trading">
 <meta name="twitter:description" content="Market microstructure, asset pricing and multi-agent market simulation at UNSW Sydney. 1st of 253 in the General round and 3rd in the Final technical ranking of Algothon 2026.">
-<meta name="twitter:image" content="https://yiping-yin.github.io/assets/og-image.png?v=20260906">
+<meta name="twitter:image" content="https://yiping-yin.github.io/assets/og-image.png?v=20260906-release">
 
 <script type="application/ld+json">
 {
@@ -41,7 +40,7 @@
   ]
 }
 </script>
-<link rel="stylesheet" href="assets/site.css">
+<link rel="stylesheet" href="assets/site.css?v=editorial-layout-3">
 <script>
   // Honor a saved choice before paint, including when storage is unavailable.
   try {
@@ -51,16 +50,18 @@
     }
   } catch (error) { /* The system preference remains the default. */ }
 </script>
-<script src="assets/site.js" defer></script>
+<script src="assets/site.js?v=editorial-layout-3" defer></script>
+<script src="assets/market-visual.js?v=time-sections-5" defer></script>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 <div class="topbar" id="topbar">
   <div class="topbar-in">
-    <a class="brand" href="#top"><span class="monogram" aria-hidden="true">YY</span><span>Yiping Yin</span></a>
-    <nav class="topnav" aria-label="Primary navigation">
-      <a class="desktop-link" href="#work">Research</a>
-      <a class="desktop-link" href="#education">Background</a>
+    <a class="brand" href="#top"><img src="assets/avatar.jpg" alt="" width="28" height="28"><span>Yiping Yin</span></a>
+    <nav class="topnav sectionnav" aria-label="Primary navigation">
+      <a class="desktop-link" href="#about">About</a>
+      <a class="desktop-link" href="#research">Research</a>
+      <a class="desktop-link" href="#education">Experience</a>
       <a class="desktop-link" href="#contact">Contact</a>
       <a class="cv" href="assets/Yiping-Yin-CV.pdf">View CV <span aria-hidden="true">↗</span></a>
       <button id="theme" class="icon-button" type="button" aria-label="Change color theme" hidden></button>
@@ -70,101 +71,108 @@
     </nav>
   </div>
   <nav id="mobile-nav" aria-label="Mobile navigation" hidden>
-    <a href="#about">Overview</a><a href="#work">Systematic trading</a><a href="#ai">AI research</a><a href="#agents">Multi-agent systems</a><a href="#education">Background</a><a href="#news">Updates</a><a href="#contact">Contact</a>
+    <a href="#about">About</a><a href="#research">Research</a><a href="#education">Experience</a><a href="#contact">Contact</a>
   </nav>
 </div>
 <span class="sr-only" id="theme-status" role="status" aria-live="polite"></span>
 <div class="page-shell" id="top">
-  <aside class="profile" aria-label="Profile and page navigation">
-    <div class="profile-identity">
-      <img class="avatar" src="assets/avatar.jpg" alt="Portrait of Yiping Yin" width="320" height="320" fetchpriority="high">
-      <div class="profile-copy">
-        <p class="profile-name">Yiping Yin<span class="name-rule" aria-hidden="true"></span></p>
-        <p class="profile-role">AI Quant Engineer Intern<br> Beixi · Beijing</p>
-        <p class="location"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m2 9 10-5 10 5-10 5L2 9Zm4 2v6c4 3 8 3 12 0v-6M22 9v8"/></svg>UNSW Sydney</p>
-        <nav class="links" aria-label="Social and email links">
-      <a href="https://github.com/Yiping-Yin" aria-label="GitHub" title="GitHub">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
-      </a>
-      <a href="https://www.linkedin.com/in/yiping-yin/" aria-label="LinkedIn" title="LinkedIn">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 1 1 0-4.125 2.062 2.062 0 0 1 0 4.125zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-      </a>
-      <a href="mailto:yiping_yin0521@outlook.com" aria-label="Email" title="Email">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 5.5A2.5 2.5 0 0 1 4.5 3h15A2.5 2.5 0 0 1 22 5.5v.28l-10 5.72L2 5.78V5.5Zm0 2.58V18.5A2.5 2.5 0 0 0 4.5 21h15a2.5 2.5 0 0 0 2.5-2.5V8.08l-9.5 5.43a1 1 0 0 1-1 0L2 8.08Z"/></svg>
-      </a>
-    </nav>
-      </div>
-    </div>
-    <nav class="sectionnav" aria-label="On this page">
-      <a href="#about"><span aria-hidden="true">00</span>Overview</a>
-      <a href="#work"><span aria-hidden="true">01</span>Systematic trading</a>
-      <a href="#ai"><span aria-hidden="true">02</span>AI research</a>
-      <a href="#agents"><span aria-hidden="true">03</span>Multi-agent systems</a>
-      <a href="#education"><span aria-hidden="true">04</span>Background</a>
-      <a href="#news"><span aria-hidden="true">05</span>Updates</a>
-      <a href="#contact"><span aria-hidden="true">06</span>Get in touch</a>
-    </nav>
-    <a class="profile-cv" href="assets/Yiping-Yin-CV.pdf">Curriculum vitae <span>PDF ↗</span></a>
-  </aside>
-  <main id="main" tabindex="-1">
-    <section class="intro" aria-labelledby="about">
-      <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span>Market microstructure · Asset pricing · Simulation</p>
-      <h1 id="about">Quantitative research,<br><em>built to be tested.</em></h1>
-      <p class="intro-text">I’m Yiping. My work connects market microstructure, asset pricing and multi-agent market simulation — turning questions about markets and behaviour into systems we can test.</p>
-      <p class="intro-note">At Beixi, I work on RAG research and system development as an AI quantitative engineering intern. Across my projects, I value time-aware validation and reproducible experiments.</p>
-      <div class="intro-actions">
-        <a class="button primary" href="#work">Explore my work <span aria-hidden="true">↓</span></a>
-        <a class="text-link" href="mailto:yiping_yin0521@outlook.com">Get in touch <span aria-hidden="true">↗</span></a>
-      </div>
 
+  <main id="main" tabindex="-1">
+    <section class="hero" aria-labelledby="about">
+      <div class="hero-inner">
+        <div class="hero-copy">
+          <h1 id="about">Yiping Yin<span aria-hidden="true">.</span></h1>
+          <p class="hero-focus">Quantitative research<br>&amp; intelligent systems.</p>
+          <div class="hero-actions"><a href="#research" class="hero-cta">Explore my research <span aria-hidden="true">↗</span></a></div>
+        </div>
+        <figure class="hero-visual" aria-label="An animated study of time, measurement and illustrative market signals. Local times for Beijing and Sydney.">
+          <img class="market-fallback" src="assets/market-clock.png" alt="Static view of transparent measurement planes and illustrative market signals" width="1360" height="920">
+          <canvas id="market-canvas" aria-hidden="true"></canvas>
+          <span id="market-status" class="sr-only" role="status" aria-live="polite"></span>
+          <figcaption class="market-caption"><span><span class="clock-fallback-label">Beijing · Sydney</span><span class="clock-cities" hidden><button type="button" data-clock-city="beijing" aria-pressed="true">Beijing <time id="clock-beijing"></time></button><button type="button" data-clock-city="sydney" aria-pressed="false">Sydney <time id="clock-sydney"></time></button></span></span><button id="market-motion" type="button" hidden aria-label="Pause visualization motion">Pause</button></figcaption>
+        </figure>
+      </div>
+    </section>
+    <div class="content-shell">
+
+
+    <section class="highlights-section" aria-labelledby="news">
+      <h2 id="news" class="sr-only">Competition highlights</h2>
+      <div class="recognition-grid">
+        <a class="recognition" href="https://github.com/Yiping-Yin/algothon-2026/blob/main/Algothon-Research-Report.pdf"><span class="icon icon-trophy" aria-hidden="true"></span><div><p class="recognition-title">Algothon 2026 <span>Susquehanna × UNSW</span></p><p class="recognition-result"><strong>1st / 253</strong> General <span class="recognition-divider">·</span> <strong>3rd</strong> Final technical</p></div><span class="icon icon-arrow-up-right" aria-hidden="true"></span></a>
+        <a class="recognition" href="https://bigquant.com/wiki/doc/lEUypayaG4"><span class="icon icon-trophy" aria-hidden="true"></span><div><p class="recognition-title">BigAlpha 2026 <span>AI Open Innovation</span></p><p class="recognition-result"><strong>Top 3</strong> <span class="recognition-divider">·</span> Score 87</p></div><span class="icon icon-arrow-up-right" aria-hidden="true"></span></a>
+      </div>
     </section>
 
-    <section class="research-section" aria-labelledby="work">
-      <div class="section-heading"><div><p class="eyebrow">01 / Selected work</p><h2 id="work">Systematic trading</h2></div><span class="section-note">Signals, validation &amp; execution</span></div>
+    <section class="research-overview" aria-labelledby="research">
+      <div class="major-heading"><h2 id="research">Selected work</h2></div>
+      <div class="research-tabs" role="tablist" aria-label="Research areas" hidden>
+        <button id="tab-trading" role="tab" aria-controls="panel-trading" data-research-tab="trading">Trading</button>
+        <button id="tab-ai" role="tab" aria-controls="panel-ai" data-research-tab="ai">AI &amp; data</button>
+        <button id="tab-agents" role="tab" aria-controls="panel-agents" data-research-tab="agents">Multi-agent systems</button>
+      </div>
+    <section class="research-section research-panel" id="panel-trading" aria-labelledby="work">
+      <div class="section-heading"><h2 id="work">Systematic trading</h2></div>
       <article class="featured-project">
-        <div class="feature-topline"><span class="eyebrow">Featured research</span><a class="event" href="https://www.algothon.au/" aria-label="Algothon 2026, hosted by Susquehanna — official competition site"><span class="mark susq" aria-hidden="true"></span><span>Algothon 2026 ↗</span></a></div>
-        <h3><a href="https://github.com/Yiping-Yin/algothon-2026">Forecasting under a<br class="wide-only"> limited effective sample <span aria-hidden="true">↗</span></a></h3>
+        <div class="feature-topline"><span class="feature-label">Featured research</span><a class="event" href="https://www.algothon.au/" aria-label="Algothon 2026, hosted by Susquehanna — official competition site"><span class="mark susq" aria-hidden="true"></span><span>Algothon 2026 ↗</span></a></div>
+        <h3><a href="https://github.com/Yiping-Yin/algothon-2026">Forecasting under a limited effective sample <span aria-hidden="true">↗</span></a></h3>
         <p class="project-meta">Quant strategy developer · Team abc123 · Jun – Aug 2026</p>
         <p class="feature-description">A cross-sectional pairs strategy built around a small, distributed edge — with selection bias, time-series validation and reproducibility at the centre of the research.</p>
-        <dl class="results"><div><dt>General · 253 teams</dt><dd>1st<span>984.62 score</span></dd></div><div><dt>Final technical</dt><dd>3rd<span>1,085.17 score</span></dd></div><div><dt>Final evaluation</dt><dd>500<span>hidden days</span></dd></div></dl>
-        <div class="project-actions"><a class="button primary" href="https://github.com/Yiping-Yin/algothon-2026/blob/main/Algothon-Research-Report.pdf">Read the 69-page report <span aria-hidden="true">↗</span></a><a class="text-link" href="https://github.com/Yiping-Yin/algothon-2026">View repository <span aria-hidden="true">↗</span></a></div>
-        <details class="research-details"><summary>Method &amp; evaluation details</summary><div><p>Within a pair, one leg leads the other. The position trades the reversal of their spread rather than either leg’s direction, cancelling the panel’s common factor (21.6% of its correlation) inside the pair. Directional accuracy was 54.07%, distributed across about thirty of fifty-one names.</p><p>General-round leaderboard position was recorded as of 3 August 2026. The final technical result was 0.4 of one block’s standard error from the public-data replay mean, 3.7 points behind second place. The public research record documents the method and its evidence limits.</p></div></details>
+        <p class="evaluation-note">Final technical score <strong>1,085.17</strong> · Evaluated on <strong>500 hidden days</strong></p>
+        <div class="project-actions"><a class="button primary" href="https://github.com/Yiping-Yin/algothon-2026/blob/main/Algothon-Research-Report.pdf">Research report <span class="link-format">69 pages</span> <span aria-hidden="true">↗</span></a><a class="text-link" href="https://github.com/Yiping-Yin/algothon-2026">Code &amp; materials <span aria-hidden="true">↗</span></a></div>
+        <details class="research-details"><summary>Method &amp; evaluation details</summary><div><p>Within a pair, one leg leads the other. The position trades the reversal of their spread rather than either leg’s direction, cancelling the panel’s common factor (21.6% of its correlation) inside the pair. Directional accuracy was 54.07%, distributed across about thirty of fifty-one names.</p><p>The General-round score was 984.62; leaderboard position was recorded as of 3 August 2026. The final technical result was 0.4 of one block’s standard error from the public-data replay mean, 3.7 points behind second place. The public research record documents the method and its evidence limits.</p></div></details>
       </article>
-      <article class="project-row"><span class="project-index" aria-hidden="true">01.1</span><div class="project-content"><p class="project-meta">Quantitative research · Feb – May 2025</p><h3>Order-book analytics &amp; ETF pricing</h3><p>Reconstructing limit-order books and modelling ETF fair value, with strict timestamp alignment and explicit assumptions in historical market-making diagnostics.</p><div class="tags"><span>L1–L8 order books</span><span>ETF fair value</span><span>Historical diagnostics</span></div><details class="research-details"><summary>Data, models &amp; historical diagnostics</summary><div><p>Reconciled 4,406 PXA trades to 24,303 eligible L1–L8 order-book states using same-venue, strict-prior matching. Benchmarked four mid-price estimators and produced 34,044 rolling-100 diagnostics with zero look-ahead rows.</p><p>A five-second NDQ fair-value/iNAV model used 4,319 synchronized ETF, NQ futures and AUD/USD observations. The beta-1 specification recorded 4.30 bps MAE and 0.999 correlation on 4,259 post-calibration rows.</p><p>A 64-session chronological minute-bar-proxy market-making study included a 12-session historical diagnostic partition. Under identical proxy assumptions, inventory and imbalance controls reduced fills from 1,863 to 1,014 and maximum inventory from 500 to 336; diagnostic net P&amp;L rose from 56.53 to 147.21.</p></div></details></div></article>
-      <article class="project-row"><span class="project-index" aria-hidden="true">01.2</span><div class="project-content"><p class="project-meta">Optiver × UNSW · May – Aug 2026</p><h3>Cross-asset market making &amp; execution</h3><p>A market-making system connecting an equity basket, futures, ETF and options through common index units, depth-matched execution and inventory-aware hedging.</p><div class="tags"><span>Market microstructure</span><span>Black-76 options</span><span>Delta hedging</span></div><details class="research-details"><summary>Microstructure study &amp; simulation results</summary><div><p>Analyzed 1,003 timestamp-matched OB5X futures–ETF order-book observations from a 20-minute Optibook session. Lead-lag was negligible within three seconds; return correlation rose from 0.032 at one second to 0.522 at 120 seconds, consistent with an Epps-effect pattern.</p><p>Normalized the five-stock basket, three futures and ETF into common index units. The system executed depth-matched ETF–futures IOC pairs and quoted two Black-76 options with inventory-aware skew and threshold-based delta hedging.</p><p>A one-hour Optibook simulation produced +36.50 P&amp;L change on 1,222 lots and 187 fills. Of these, 39 arbitrage pairs matched 892 lots. All 6,972 quote cycles remained two-sided, maximum |delta| was 7.51, and cleanup ended flat with zero loop errors, reconnects or self-trades. These figures describe that simulation.</p></div></details></div></article>
+      <details class="project-study"><summary><span><strong>Order-book analytics &amp; ETF pricing</strong><span class="project-meta">Quantitative research · Feb – May 2025</span></span><span class="icon icon-chevron-down" aria-hidden="true"></span></summary><div class="study-body"><p>Reconstructing limit-order books and modelling ETF fair value, with strict timestamp alignment and explicit assumptions in historical market-making diagnostics.</p><div class="tags"><span>L1–L8 order books</span><span>ETF fair value</span><span>Historical diagnostics</span></div><div class="technical-note"><h4>Data, models &amp; historical diagnostics</h4><p>Reconciled 4,406 PXA trades to 24,303 eligible L1–L8 order-book states using same-venue, strict-prior matching. Benchmarked four mid-price estimators and produced 34,044 rolling-100 diagnostics with zero look-ahead rows.</p><p>A five-second NDQ fair-value/iNAV model used 4,319 synchronized ETF, NQ futures and AUD/USD observations. The beta-1 specification recorded 4.30 bps MAE and 0.999 correlation on 4,259 post-calibration rows.</p><p>A 64-session chronological minute-bar-proxy market-making study included a 12-session historical diagnostic partition. Under identical proxy assumptions, inventory and imbalance controls reduced fills from 1,863 to 1,014 and maximum inventory from 500 to 336; diagnostic net P&amp;L rose from 56.53 to 147.21.</p></div></div></details>
+      <details class="project-study"><summary><span><strong>Cross-asset market making &amp; execution</strong><span class="project-meta">Optiver × UNSW · May – Aug 2026</span></span><span class="icon icon-chevron-down" aria-hidden="true"></span></summary><div class="study-body"><p>A market-making system connecting an equity basket, futures, ETF and options through common index units, depth-matched execution and inventory-aware hedging.</p><div class="tags"><span>Market microstructure</span><span>Black-76 options</span><span>Delta hedging</span></div><div class="technical-note"><h4>Microstructure study &amp; simulation results</h4><p>Analyzed 1,003 timestamp-matched OB5X futures–ETF order-book observations from a 20-minute Optibook session. Lead-lag was negligible within three seconds; return correlation rose from 0.032 at one second to 0.522 at 120 seconds, consistent with an Epps-effect pattern.</p><p>Normalized the five-stock basket, three futures and ETF into common index units. The system executed depth-matched ETF–futures IOC pairs and quoted two Black-76 options with inventory-aware skew and threshold-based delta hedging.</p><p>A one-hour Optibook simulation produced +36.50 P&amp;L change on 1,222 lots and 187 fills. Of these, 39 arbitrage pairs matched 892 lots. All 6,972 quote cycles remained two-sided, maximum |delta| was 7.51, and cleanup ended flat with zero loop errors, reconnects or self-trades. These figures describe that simulation.</p></div></div></details>
     </section>
 
-    <section class="research-section" aria-labelledby="ai">
-      <div class="section-heading"><div><p class="eyebrow">02 / Applied AI</p><h2 id="ai">AI quantitative research</h2></div><span class="section-note">Time-aware data &amp; auditable agents</span></div>
-      <article class="project-row"><span class="project-index" aria-hidden="true">02.1</span><div class="project-content"><p class="project-meta">Chicago Booth × Optiver · Aug 2026 – present</p><h3>Explaining Markets — earnings-reaction forecasting</h3><p>A frozen text-based residual model and a signed submission path for earnings-event forecasts, with a separate three-agent challenger designed for shadow evaluation.</p><div class="tags"><span>TF-IDF / Ridge</span><span>Forward validation</span><span>Event forecasting</span></div><details class="research-details"><summary>Model, validation &amp; agent design</summary><div><p>Built and froze a 50,000-feature TF-IDF/Ridge residual model on 6,147 asset-event examples from Q4 2025 to Q2 2026. Used cutoff-bounded official disclosures, quarter-wise earnings-surprise residualization and a fixed forward scheme, with 2,000 source-event block bootstraps under the pinned official delta R-squared scorer.</p><p>Engineered a five-minute signed ACK-first submission path with atomic deduplication, asynchronous inference after acknowledgement and exact-neutral fallbacks.</p><p>Designed an E1-anchored three-agent challenger with direction counterfactuals and effective-sample, out-of-distribution and evidence gates for selection-adjusted E2–E5 shadow evaluation.</p></div></details></div></article>
-      <article class="project-row"><span class="project-index" aria-hidden="true">02.2</span><div class="project-content"><p class="project-meta">Multi-asset research · Jul 2026 – present</p><h3>Signal Mosaic — market &amp; news analytics</h3><p>A reproducible foundation for studying equities, cryptocurrencies and news on their native trading calendars, with explicit data-cleaning and publication-time controls.</p><div class="tags"><span>Calendar alignment</span><span>News analytics</span><span>Point-in-time controls</span></div><details class="research-details"><summary>Data foundation &amp; quality controls</summary><div><p>The 2020–2023 foundation spans 50 US equities, 10 cryptocurrencies and 149,683 raw headlines. Native-calendar returns and news alignment to the same or next equity trading day preserve market-specific timing.</p><p>Removed 2,847 exact duplicates and excluded 10 post-sample crypto rows. Built breadth and regime diagnostics with point-in-time availability and lagged-sentiment controls.</p></div></details></div></article>
-      <article class="project-row"><span class="project-index" aria-hidden="true">02.3</span><div class="project-content"><p class="project-meta">AI Mockathon · UNSW FAIC AI-engineering training · Jul 2026</p><h3>Evidence-grounded financial agents</h3><p>A bounded financial agent connecting conclusions to source material and tool traces, with outputs treated as hypotheses to audit.</p><div class="tags"><span>RAG</span><span>Tool traces</span><span>LLM evaluation</span></div><details class="research-details"><summary>Sources &amp; approach</summary><div><p>Restricted to RBA, ASX and AFR sources, with deterministic queries and evidence-constrained synthesis. Structured traces connect sources, parameters and intermediate outputs to conclusions.</p></div></details></div></article>
+    <section class="research-section research-panel" id="panel-ai" aria-labelledby="ai">
+      <div class="section-heading"><h2 id="ai">AI quantitative research</h2></div>
+      <details class="project-study" open><summary><span><strong>Explaining Markets — earnings-reaction forecasting</strong><span class="project-meta">Chicago Booth × Optiver · Aug 2026 – present</span></span><span class="icon icon-chevron-down" aria-hidden="true"></span></summary><div class="study-body"><p>A frozen text-based residual model and a signed submission path for earnings-event forecasts, with a separate three-agent challenger designed for shadow evaluation.</p><div class="tags"><span>TF-IDF / Ridge</span><span>Forward validation</span><span>Event forecasting</span></div><div class="technical-note"><h4>Model, validation &amp; agent design</h4><p>Built and froze a 50,000-feature TF-IDF/Ridge residual model on 6,147 asset-event examples from Q4 2025 to Q2 2026. Used cutoff-bounded official disclosures, quarter-wise earnings-surprise residualization and a fixed forward scheme, with 2,000 source-event block bootstraps under the pinned official delta R-squared scorer.</p><p>Engineered a five-minute signed ACK-first submission path with atomic deduplication, asynchronous inference after acknowledgement and exact-neutral fallbacks.</p><p>Designed an E1-anchored three-agent challenger with direction counterfactuals and effective-sample, out-of-distribution and evidence gates for selection-adjusted E2–E5 shadow evaluation.</p></div></div></details>
+      <details class="project-study"><summary><span><strong>Signal Mosaic — market &amp; news analytics</strong><span class="project-meta">Multi-asset research · Jul 2026 – present</span></span><span class="icon icon-chevron-down" aria-hidden="true"></span></summary><div class="study-body"><p>A reproducible foundation for studying equities, cryptocurrencies and news on their native trading calendars, with explicit data-cleaning and publication-time controls.</p><div class="tags"><span>Calendar alignment</span><span>News analytics</span><span>Point-in-time controls</span></div><div class="technical-note"><h4>Data foundation &amp; quality controls</h4><p>The 2020–2023 foundation spans 50 US equities, 10 cryptocurrencies and 149,683 raw headlines. Native-calendar returns and news alignment to the same or next equity trading day preserve market-specific timing.</p><p>Removed 2,847 exact duplicates and excluded 10 post-sample crypto rows. Built breadth and regime diagnostics with point-in-time availability and lagged-sentiment controls.</p></div></div></details>
+      <details class="project-study"><summary><span><strong>Evidence-grounded financial agents</strong><span class="project-meta">AI Mockathon · UNSW FAIC AI-engineering training · Jul 2026</span></span><span class="icon icon-chevron-down" aria-hidden="true"></span></summary><div class="study-body"><p>A bounded financial agent connecting conclusions to source material and tool traces, with outputs treated as hypotheses to audit.</p><div class="tags"><span>RAG</span><span>Tool traces</span><span>LLM evaluation</span></div><div class="technical-note"><h4>Sources &amp; approach</h4><p>Restricted to RBA, ASX and AFR sources, with deterministic queries and evidence-constrained synthesis. Structured traces connect sources, parameters and intermediate outputs to conclusions.</p></div></div></details>
     </section>
 
-    <section class="research-section" aria-labelledby="agents">
-      <div class="section-heading"><div><p class="eyebrow">03 / Interaction &amp; behaviour</p><h2 id="agents">Multi-agent systems</h2></div><span class="section-note">Simulation, game theory &amp; AI safety</span></div>
-      <article class="project-row"><span class="project-index" aria-hidden="true">03.1</span><div class="project-content"><p class="project-meta">Research assistant · UNSW Sydney · Jun 2026 – present</p><h3>Agent society &amp; strategic simulation</h3><p>Analyzing how shared-model bias, memory, information, incentives and network position shape collective outcomes in agent societies.</p><div class="tags"><span>Multi-agent systems</span><span>Counterfactual design</span><span>AI safety</span></div><details class="research-details"><summary>Research scope &amp; evaluation protocols</summary><div><p>Supervised by Dr Xianghua Wu. Analyzing a large-scale agent-society dataset for AI-Agent Society &amp; Strategic Simulation research.</p><p>Drafted probe-agent, controlled-intervention and external-model counterfactual protocols. Defined evaluation measures for diffusion speed, network concentration, knowledge correction and governance response.</p></div></details></div></article>
+    <section class="research-section research-panel" id="panel-agents" aria-labelledby="agents">
+      <div class="section-heading"><h2 id="agents">Multi-agent systems</h2></div>
+      <details class="project-study" open><summary><span><strong>Agent society &amp; strategic simulation</strong><span class="project-meta">Research assistant · UNSW Sydney · Jun 2026 – present</span></span><span class="icon icon-chevron-down" aria-hidden="true"></span></summary><div class="study-body"><p>Analyzing how shared-model bias, memory, information, incentives and network position shape collective outcomes in agent societies.</p><div class="tags"><span>Multi-agent systems</span><span>Counterfactual design</span><span>AI safety</span></div><div class="technical-note"><h4>Research scope &amp; evaluation protocols</h4><p>Supervised by Dr Xianghua Wu. Analyzing a large-scale agent-society dataset for AI-Agent Society &amp; Strategic Simulation research.</p><p>Drafted probe-agent, controlled-intervention and external-model counterfactual protocols. Defined evaluation measures for diffusion speed, network concentration, knowledge correction and governance response.</p></div></div></details>
       <article class="competition-project"><div><p class="project-meta">BigAlpha 2026 · BigQuant × Ingram Micro</p><h3><a href="https://bigquant.com/wiki/doc/lEUypayaG4">Latent-Agent Market Simulation <span aria-hidden="true">↗</span></a></h3><p>A multi-agent market simulation project in the AI Open Innovation category.</p><a class="text-link" href="https://bigquant.com/wiki/doc/lEUypayaG4">Explore the project <span aria-hidden="true">↗</span></a></div><div class="competition-result"><strong>Top 3</strong><span>AI Open Innovation</span><span>Score: 87</span></div></article>
-      <article class="project-row"><span class="project-index" aria-hidden="true">03.3</span><div class="project-content"><p class="project-meta">Founder &amp; research lead · Nov 2025 – Jul 2026</p><h3>PittsAI — customer simulation</h3><p>A multi-agent prototype for comparing product, pricing, channel and service scenarios. Synthetic results are treated as scenario outputs, with validation against real markets still required.</p><div class="tags"><span>Agent simulation</span><span>Founder</span><span>PFC 2026 finalist</span></div><details class="research-details"><summary>Prototype scope</summary><div><p>A pre-seed prototype that converts company materials and operating assumptions into comparable decision scenarios, varying behavioural rules under controlled conditions. Finalist in the Peter Farrell Cup 2026.</p></div></details></div></article>
+      <details class="project-study"><summary><span><strong>PittsAI — customer simulation</strong><span class="project-meta">Founder &amp; research lead · Nov 2025 – Jul 2026</span></span><span class="icon icon-chevron-down" aria-hidden="true"></span></summary><div class="study-body"><p>A multi-agent prototype for comparing product, pricing, channel and service scenarios. Synthetic results are treated as scenario outputs, with validation against real markets still required.</p><div class="tags"><span>Agent simulation</span><span>Founder</span><span>PFC 2026 finalist</span></div><div class="technical-note"><h4>Prototype scope</h4><p>A pre-seed prototype that converts company materials and operating assumptions into comparable decision scenarios, varying behavioural rules under controlled conditions. Finalist in the Peter Farrell Cup 2026.</p></div></div></details>
+    </section>
+
     </section>
 
     <section class="research-section background-section" aria-labelledby="education">
-      <div class="section-heading"><div><p class="eyebrow">04 / Background</p><h2 id="education">Experience &amp; education</h2></div></div>
-      <article class="experience-block"><div class="experience-heading"><h3>Beixi</h3><span class="project-meta">Aug 2026 – present · Wudaokou, Beijing</span></div><p class="experience-role">AI Quantitative Engineer · Intern</p><p>Researching retrieval-augmented generation (RAG) and building RAG systems for AI quantitative applications.</p><div class="tags"><span>RAG research</span><span>System development</span></div></article>
-      <div class="education-block"><div class="institution-mark" aria-hidden="true">UNSW</div><div><h3>UNSW Sydney</h3><p class="degree">Bachelor of Commerce · Finance Major</p><p class="project-meta">Sep 2023 – Sep 2026 · Financial Engineering Plan</p><p><a href="https://www.scholarships.unsw.edu.au/international-student-award">UNSW International Student Award</a> · 20% toward program tuition fees</p><p class="course-result">Optiver × UNSW · Data and Algorithms in Trading · <strong>High Distinction</strong></p><details class="research-details"><summary>Selected coursework</summary><div><p>Trading &amp; Market Making · Data &amp; Algorithms in Trading · Derivatives &amp; Risk · Financial Market Data Design and Analysis · Numerical Methods · Mathematical Economics · Data &amp; ML.</p><p>Python Financial Data &amp; Portfolio Analysis: 96.25/100 (individual).</p></div></details></div></div>
-      <div class="background-subsection"><h3 id="awards">Competitions &amp; awards</h3><ul class="award-list"><li><span><strong>Algothon 2026</strong><small>Susquehanna × UNSW FinTech Society</small></span><span class="award-result">3rd Final technical · 1st General</span></li><li><span><strong><a href="https://bigquant.com/bigalpha/2026">BigAlpha 2026</a></strong><small>BigQuant × Ingram Micro · AI Open Innovation</small></span><span class="award-result">Top 3 · Score 87</span></li><li><span><strong>Peter Farrell Cup 2026</strong><small>PittsAI</small></span><span class="award-result">Finalist</span></li></ul></div>
-      <div class="background-subsection"><h3 id="skills">Technical toolkit</h3><dl class="skills-grid"><div><dt>Programming &amp; data</dt><dd>Python, SQL/SQLite, FastAPI, pandas, NumPy, scikit-learn, Jupyter, C++</dd></div><div><dt>Quantitative trading</dt><dd>Order books, ETF pricing, options &amp; derivatives, market making, execution, backtesting, inventory &amp; risk controls</dd></div><div><dt>AI &amp; agents</dt><dd>RAG, LangGraph, PEFT/QLoRA, MCP, LLM evaluation, multi-agent simulation, AI safety</dd></div></dl><p class="training-note">Financial engineering study: Options &amp; Derivatives · Python &amp; Machine Learning · C++ Programming · Advanced C++ &amp; Modern Design.</p></div>
+      <div class="major-heading"><h2 id="education">Experience &amp; education</h2></div>
+      <article class="experience-block background-entry">
+        <h3>Beixi</h3>
+        <p class="entry-role">AI Quantitative Engineer · Intern</p>
+        <p class="project-meta">Aug 2026 – present · Wudaokou, Beijing</p>
+        <div class="entry-description"><p>Researching retrieval-augmented generation (RAG) and building RAG systems for AI quantitative applications.</p></div>
+      </article>
+      <article class="education-block background-entry">
+        <h3>UNSW Sydney</h3>
+        <p class="entry-role">Bachelor of Commerce · Finance Major</p>
+        <p class="project-meta">Sep 2023 – Sep 2026 · Financial Engineering Plan</p>
+        <div class="entry-description">
+          <p><a href="https://www.scholarships.unsw.edu.au/international-student-award">UNSW International Student Award</a> · 20% toward program tuition fees</p>
+          <p class="course-result">Optiver × UNSW · Data and Algorithms in Trading · <strong>High Distinction</strong></p>
+          <details class="research-details"><summary>Selected coursework</summary><div><p>Trading &amp; Market Making · Data &amp; Algorithms in Trading · Derivatives &amp; Risk · Financial Market Data Design and Analysis · Numerical Methods · Mathematical Economics · Data &amp; ML.</p><p>Python Financial Data &amp; Portfolio Analysis: 96.25/100 (individual).</p></div></details>
+        </div>
+      </article>
+      <div class="background-supplement" role="group" aria-label="Awards, skills and training">
+      <details class="background-subsection background-disclosure"><summary id="awards"><span class="icon icon-trophy" aria-hidden="true"></span>Full awards record</summary><ul class="award-list"><li><span><strong>Algothon 2026</strong><small>Susquehanna × UNSW FinTech Society</small></span><span class="award-result">3rd Final technical · 1st General</span></li><li><span><strong><a href="https://bigquant.com/bigalpha/2026">BigAlpha 2026</a></strong><small>BigQuant × Ingram Micro · AI Open Innovation</small></span><span class="award-result">Top 3 · Score 87</span></li><li><span><strong>Peter Farrell Cup 2026</strong><small>PittsAI</small></span><span class="award-result">Finalist</span></li></ul></details>
+      <details class="background-subsection background-disclosure"><summary id="skills"><span class="icon icon-circle-stack" aria-hidden="true"></span>Technical toolkit &amp; training</summary><dl class="skills-grid"><div><dt>Programming &amp; data</dt><dd>Python, SQL/SQLite, FastAPI, pandas, NumPy, scikit-learn, Jupyter, C++</dd></div><div><dt>Quantitative trading</dt><dd>Order books, ETF pricing, options &amp; derivatives, market making, execution, backtesting, inventory &amp; risk controls</dd></div><div><dt>AI &amp; agents</dt><dd>RAG, LangGraph, PEFT/QLoRA, MCP, LLM evaluation, multi-agent simulation, AI safety</dd></div></dl><p class="training-note">UNSW FAIC AI-engineering training (Jul 2026): RAG, LangGraph, MCP, multi-agent workflows and 4-bit QLoRA adaptation of Llama-3.1-Nemotron-Nano-8B.</p><p class="training-note">Financial engineering study: Options &amp; Derivatives · Python &amp; Machine Learning · C++ Programming · Advanced C++ &amp; Modern Design.</p></details>
+      </div>
     </section>
 
-    <section class="research-section" aria-labelledby="news">
-      <div class="section-heading"><div><p class="eyebrow">05 / Recent updates</p><h2 id="news">From the research desk</h2></div></div>
-      <ul class="news"><li><time datetime="2026">2026</time><p><a href="https://bigquant.com/wiki/doc/lEUypayaG4">Latent-Agent Market Simulation</a> received a Top 3 placement in BigAlpha’s AI Open Innovation category, with a score of 87.</p></li><li><time datetime="2026-08">Aug 2026</time><p>Published <a href="https://github.com/Yiping-Yin/algothon-2026/blob/main/Algothon-Research-Report.pdf">Forecasting Under a Limited Effective Sample <span aria-hidden="true">↗</span></a>, documenting the Algothon strategy, its validation and the final technical result.</p></li><li><time datetime="2026-07">Jul 2026</time><p>Completed UNSW FAIC AI-engineering training: RAG, LangGraph, MCP, multi-agent workflows and 4-bit QLoRA adaptation of Llama-3.1-Nemotron-Nano-8B.</p></li></ul>
-    </section>
+
 
     <section class="contact-section" aria-labelledby="contact">
-      <p class="eyebrow">06 / Get in touch</p><h2 id="contact">Let’s talk<br><em>markets &amp; models.</em></h2><p>For conversations about quantitative research, applied AI or multi-agent systems, reach out.</p><a class="contact-email" href="mailto:yiping_yin0521@outlook.com">yiping_yin0521@outlook.com <span aria-hidden="true">↗</span></a><div class="contact-links"><a href="https://github.com/Yiping-Yin">GitHub ↗</a><a href="https://www.linkedin.com/in/yiping-yin/">LinkedIn ↗</a><a href="assets/Yiping-Yin-CV.pdf">Curriculum vitae ↗</a></div>
+      <h2 id="contact">Get in touch</h2><p>I welcome conversations about quantitative research, applied AI and multi-agent systems.</p><a class="contact-email" href="mailto:yiping_yin0521@outlook.com">yiping_yin0521@outlook.com <span aria-hidden="true">↗</span></a><div class="contact-links"><a href="https://github.com/Yiping-Yin">GitHub ↗</a><a href="https://www.linkedin.com/in/yiping-yin/">LinkedIn ↗</a><a href="assets/Yiping-Yin-CV.pdf">Curriculum vitae ↗</a></div>
     </section>
     <footer><span>© 2026 Yiping Yin</span><a href="#top">Back to top <span aria-hidden="true">↑</span></a></footer>
+    </div>
   </main>
 </div>
 </body>

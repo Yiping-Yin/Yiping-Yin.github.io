@@ -48,14 +48,17 @@
     themeButton.hidden = false;
   }
 
-  function fragmentTarget(link) {
-    var fragment = link.getAttribute('href');
+  function targetForFragment(fragment) {
     if (!fragment || fragment.charAt(0) !== '#' || fragment.length < 2) return null;
     try {
       return document.getElementById(decodeURIComponent(fragment.slice(1)));
     } catch (error) {
       return null;
     }
+  }
+
+  function fragmentTarget(link) {
+    return targetForFragment(link.getAttribute('href'));
   }
 
   var navItems = Array.prototype.map.call(
@@ -74,10 +77,29 @@
   var framePending = false;
   var anchorOffset = 100;
   var activeSection = null;
+  var interactionSection = null;
+  var interactionScrollTop = 0;
+  var interactionScrolling = false;
 
   function readAnchorOffset() {
     var value = parseFloat(window.getComputedStyle(root).getPropertyValue('--anchor-offset'));
     anchorOffset = Number.isFinite(value) && value >= 0 ? value : 100;
+  }
+
+  function trackFragmentNavigation(target) {
+    interactionSection = sections.indexOf(target) !== -1 ? target : null;
+    interactionScrolling = !!interactionSection;
+    if (!interactionSection) return;
+    var margin = parseFloat(window.getComputedStyle(target).scrollMarginTop) || 0;
+    var maxScroll = Math.max(root.scrollHeight, document.body.scrollHeight) - window.innerHeight;
+    interactionScrollTop = Math.max(0, Math.min(maxScroll,
+      window.scrollY + target.getBoundingClientRect().top - anchorOffset - margin));
+  }
+
+  function releaseScrollInteraction() {
+    interactionSection = null;
+    interactionScrolling = false;
+    scheduleScrollUpdate();
   }
 
   function updateScrollState() {
@@ -88,6 +110,7 @@
 
     var current = sections[0];
     sections.forEach(function (section) {
+      if (!section.getClientRects().length) return;
       // Native anchors combine the root scroll padding with the target's margin.
       var margin = parseFloat(window.getComputedStyle(section).scrollMarginTop) || 0;
       if (section.getBoundingClientRect().top <= anchorOffset + margin + 1) current = section;
@@ -98,6 +121,15 @@
     // A short final section may never reach the bar; a page that fits is not scrolled.
     if (maxScroll > 4 && scrollTop > 0 && scrollTop >= maxScroll - 2) {
       current = sections[sections.length - 1];
+    }
+    var atInteractionTarget = Math.abs(scrollTop - interactionScrollTop) <= 2;
+    if (interactionScrolling && atInteractionTarget) interactionScrolling = false;
+    // Keep an explicit anchor selected through smooth scrolling and its clamped
+    // landing point. Subsequent scrolling returns control to the scrollspy.
+    if (interactionSection && (interactionScrolling || atInteractionTarget)) {
+      current = interactionSection;
+    } else {
+      interactionSection = null;
     }
     if (current === activeSection) return;
     activeSection = current;
@@ -114,6 +146,132 @@
     framePending = true;
     window.requestAnimationFrame(updateScrollState);
   }
+
+  var researchTabs = document.querySelector('.research-tabs');
+  var researchItems = [];
+  var researchHeading = document.getElementById('research');
+  var researchHeadings = { trading: 'work', ai: 'ai', agents: 'agents' };
+
+  if (researchTabs) {
+    var tabButtons = Array.prototype.slice.call(researchTabs.querySelectorAll('[data-research-tab]'));
+    var candidates = tabButtons.map(function (button) {
+      var panel = document.getElementById(button.getAttribute('aria-controls'));
+      var heading = document.getElementById(researchHeadings[button.dataset.researchTab]);
+      return panel && heading && panel.contains(heading)
+        ? { button: button, panel: panel, heading: heading } : null;
+    });
+    // Incomplete markup keeps the fully readable, unenhanced layout.
+    if (candidates.length === 3 && candidates.every(function (item) { return item; })) {
+      researchItems = candidates;
+    }
+  }
+
+  function activateResearch(item, updateUrl) {
+    var changed = item.panel.hidden;
+    var focusWouldBeHidden = researchItems.some(function (other) {
+      return other !== item && other.panel.contains(document.activeElement);
+    });
+    researchItems.forEach(function (other) {
+      var selected = other === item;
+      other.button.setAttribute('aria-selected', String(selected));
+      other.button.tabIndex = selected ? 0 : -1;
+      other.panel.hidden = !selected;
+    });
+    if (focusWouldBeHidden) item.button.focus({ preventScroll: true });
+    if (updateUrl) {
+      try {
+        window.history.replaceState(window.history.state, '', '#' + item.heading.id);
+      } catch (error) {
+        // Tab selection still works when history updates are unavailable.
+      }
+      interactionSection = researchHeading;
+      interactionScrollTop = window.scrollY;
+      interactionScrolling = false;
+    }
+    scheduleScrollUpdate();
+    return changed;
+  }
+
+  function revealTarget(target) {
+    if (!target) return false;
+    var item = researchItems.find(function (candidate) {
+      return candidate.panel === target || candidate.panel.contains(target);
+    });
+    var changed = item ? activateResearch(item, false) : false;
+    var ancestor = target;
+    while (ancestor) {
+      if (ancestor.tagName === 'DETAILS' && !ancestor.open) {
+        ancestor.open = true;
+        changed = true;
+      }
+      ancestor = ancestor.parentElement;
+    }
+    return changed;
+  }
+
+  function restoreFragment(forceScroll) {
+    var target = targetForFragment(window.location.hash);
+    var changed = revealTarget(target);
+    trackFragmentNavigation(target);
+    if (target && (forceScroll || changed)) {
+      window.requestAnimationFrame(function () {
+        target.scrollIntoView({ block: 'start', behavior: 'instant' });
+        scheduleScrollUpdate();
+      });
+    }
+    scheduleScrollUpdate();
+  }
+
+  if (researchItems.length) {
+    researchTabs.setAttribute('role', 'tablist');
+    researchItems.forEach(function (item, index) {
+      item.button.setAttribute('role', 'tab');
+      item.panel.setAttribute('role', 'tabpanel');
+      item.panel.setAttribute('aria-labelledby', item.button.id);
+      item.panel.tabIndex = 0;
+      item.button.addEventListener('click', function () { activateResearch(item, true); });
+      item.button.addEventListener('keydown', function (event) {
+        var next = index;
+        if (event.key === 'ArrowRight') next = (index + 1) % researchItems.length;
+        else if (event.key === 'ArrowLeft') next = (index + researchItems.length - 1) % researchItems.length;
+        else if (event.key === 'Home') next = 0;
+        else if (event.key === 'End') next = researchItems.length - 1;
+        else return;
+        event.preventDefault();
+        researchItems[next].button.focus({ preventScroll: true });
+        activateResearch(researchItems[next], true);
+      });
+    });
+    var initialTarget = targetForFragment(window.location.hash);
+    var initialItem = researchItems.find(function (item) {
+      return initialTarget && (item.panel === initialTarget || item.panel.contains(initialTarget));
+    }) || researchItems[0];
+    activateResearch(initialItem, false);
+    revealTarget(initialTarget);
+    researchTabs.hidden = false;
+  }
+
+  // Reveal same-page targets before the browser performs native anchor scrolling.
+  document.addEventListener('click', function (event) {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    var link = event.target.closest('a[href]');
+    if (!link || link.hasAttribute('download') || (link.target && link.target !== '_self')) return;
+    var url;
+    try {
+      url = new URL(link.href, window.location.href);
+    } catch (error) {
+      return;
+    }
+    if (url.origin !== window.location.origin || url.pathname !== window.location.pathname || url.search !== window.location.search) return;
+    var target = targetForFragment(url.hash);
+    revealTarget(target);
+    trackFragmentNavigation(target);
+    scheduleScrollUpdate();
+  }, true);
+
+  document.addEventListener('toggle', function (event) {
+    if (event.target.tagName === 'DETAILS') scheduleScrollUpdate();
+  }, true);
 
   var menuButton = document.getElementById('menu-toggle');
   var mobileNav = document.getElementById('mobile-nav');
@@ -161,6 +319,7 @@
       if (!link || !mobileNav.contains(link)) return;
       var target = fragmentTarget(link);
       if (!target) return;
+      revealTarget(target);
       var heading = target.matches('h1, h2, h3, h4, h5, h6')
         ? target : target.querySelector('h1, h2, h3, h4, h5, h6') || target;
       heading.setAttribute('tabindex', '-1');
@@ -173,7 +332,19 @@
   }
 
   window.addEventListener('scroll', scheduleScrollUpdate, { passive: true });
-  window.addEventListener('hashchange', scheduleScrollUpdate);
+  window.addEventListener('wheel', releaseScrollInteraction, { passive: true });
+  window.addEventListener('touchmove', releaseScrollInteraction, { passive: true });
+  window.addEventListener('pointerdown', function (event) {
+    if (event.target === root) releaseScrollInteraction();
+  }, { passive: true });
+  window.addEventListener('keydown', function (event) {
+    if (event.defaultPrevented || ['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].indexOf(event.key) === -1) return;
+    var target = event.target;
+    if (target.isContentEditable || target.closest('input, textarea, select')) return;
+    if (event.key === ' ' && target.closest('button, summary, [role="tab"]')) return;
+    releaseScrollInteraction();
+  });
+  window.addEventListener('hashchange', function () { restoreFragment(false); });
   window.addEventListener('resize', function () {
     readAnchorOffset();
     syncMobileMenu();
@@ -183,4 +354,5 @@
   root.classList.add('js');
   readAnchorOffset();
   updateScrollState();
+  restoreFragment(true);
 })();
