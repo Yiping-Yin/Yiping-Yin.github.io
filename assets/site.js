@@ -4,24 +4,24 @@
   var root = document.documentElement;
   var themeButton = document.getElementById('theme');
   var themeStatus = document.getElementById('theme-status');
-  var modes = ['system', 'light', 'dark'];
+  var modes = ['light', 'dark', 'system'];
   var icons = {
     system: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>',
     light: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.5 1.5M17.6 17.6l1.5 1.5M19.1 4.9l-1.5 1.5M6.4 17.6l-1.5 1.5"/></svg>',
     dark: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20.5 14.6A8.6 8.6 0 1 1 9.4 3.5a6.8 6.8 0 0 0 11.1 11.1z"/></svg>'
   };
-  var mode = modes.indexOf(root.dataset.theme) !== -1 ? root.dataset.theme : 'system';
+  var mode = modes.indexOf(root.dataset.theme) !== -1 ? root.dataset.theme : 'light';
 
   try {
     var savedMode = window.localStorage.getItem('theme');
-    mode = modes.indexOf(savedMode) !== -1 ? savedMode : 'system';
+    mode = modes.indexOf(savedMode) !== -1 ? savedMode : 'light';
   } catch (error) {
     // Theme switching still works when browser storage is unavailable.
   }
 
   function applyTheme(announce) {
-    if (mode === 'system') delete root.dataset.theme;
-    else root.dataset.theme = mode;
+    // 'system' is an explicit state: the stylesheet only follows the OS preference when it is set.
+    root.dataset.theme = mode;
 
     if (themeButton) {
       var nextMode = modes[(modes.indexOf(mode) + 1) % modes.length];
@@ -39,8 +39,7 @@
       mode = modes[(modes.indexOf(mode) + 1) % modes.length];
       applyTheme(true);
       try {
-        if (mode === 'system') window.localStorage.removeItem('theme');
-        else window.localStorage.setItem('theme', mode);
+        window.localStorage.setItem('theme', mode);
       } catch (error) {
         // Keep the selected theme for this page even if it cannot be saved.
       }

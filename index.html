@@ -42,13 +42,15 @@
 </script>
 <link rel="stylesheet" href="assets/site.css?v=editorial-layout-3">
 <script>
-  // Honor a saved choice before paint, including when storage is unavailable.
-  try {
-    var savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark' || savedTheme === 'light') {
-      document.documentElement.dataset.theme = savedTheme;
-    }
-  } catch (error) { /* The system preference remains the default. */ }
+  // Light is the default. Honor a saved choice before paint, including when storage is unavailable.
+  (function () {
+    var theme = 'light';
+    try {
+      var savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'dark' || savedTheme === 'light' || savedTheme === 'system') theme = savedTheme;
+    } catch (error) { /* Storage unavailable: stay on the default. */ }
+    document.documentElement.dataset.theme = theme;
+  })();
 </script>
 <script src="assets/site.js?v=editorial-layout-3" defer></script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>

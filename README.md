@@ -14,7 +14,7 @@ Open <http://127.0.0.1:4173>. No install or build step is required.
 
 - `index.html`: biography, projects, experience, education and share metadata.
 - `assets/site.css`: responsive layout, light/dark themes and print styles.
-- `assets/site.js`: optional theme control, mobile navigation, accessible research tabs and section tracking. Without JavaScript, all research sections remain visible. Fragment links select the relevant research tab and reveal their target.
+- `assets/site.js`: optional theme control (light is the default; the toggle cycles light, dark, then system), mobile navigation, accessible research tabs and section tracking. Without JavaScript, all research sections remain visible. Fragment links select the relevant research tab and reveal their target.
 - `assets/market-visual.mjs`: the hero visual, a ring of daily candlesticks rendered with three.js (WebGL). `assets/market-model.mjs` holds the pure geometry, timing and easing rules it uses, and `assets/market-data.mjs` the embedded price series. The static fallback is `assets/market-ring.png`.
 - `tests/market-model.test.mjs`: unit tests for the scene model, run with `node --test`.
 - `assets/Yiping-Yin-CV.pdf`: downloadable CV; replace the PDF without changing its URL.
