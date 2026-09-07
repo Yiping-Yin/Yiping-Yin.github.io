@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import * as model from '../assets/market-model.mjs';
 import series, { meta } from '../assets/market-data.mjs';
-const { TAU, GLYPH_RATIO, DEFAULT_APERTURE, DEFAULT_SLOTS, DEFAULT_PEN, TIMING, EASE } = model;
+const { TAU, GLYPH_RATIO, POSITION_SPAN, POSITION_BASE, HEIGHT_SPAN, DEFAULT_APERTURE, DEFAULT_SLOTS, DEFAULT_PEN, TIMING, EASE } = model;
 const { ringPosition, seriesBounds, priceLevel, heightPerPoint, candleMetrics, volumeBar, weekStarts } = model;
 const { windowOf, isVisible, clampOffset, slotOf, inWindow } = model;
 const { penAzimuth, drumAngle, offsetFromAngle, slotFromLocal, detentTarget, dragAngle } = model;
@@ -38,10 +38,26 @@ test('seriesBounds uses half the rows as ring slots and takes the price ceiling 
   assert.equal(b.maxVolume, 3_000);
 });
 
-test('priceLevel maps minLow to 1.3·scale and maxLow to 2.8·scale', () => {
+test('priceLevel spreads the low band over POSITION_SPAN, starting at POSITION_BASE', () => {
   const b = seriesBounds(rows);
-  near(priceLevel(90, b, 1.2), 1.3 * 1.2);
-  near(priceLevel(98, b, 1.2), 2.8 * 1.2);
+  near(priceLevel(90, b, 1.2), POSITION_BASE * 1.2);
+  near(priceLevel(98, b, 1.2), (POSITION_BASE + POSITION_SPAN) * 1.2);
+  near(priceLevel(94, b, 1.2), (POSITION_BASE + POSITION_SPAN / 2) * 1.2);
+});
+
+test('the widened band holds the middle of the last window where the 1.5 band had it', () => {
+  // POSITION_BASE exists to keep the frame the still is composed as: the
+  // middle of the terminal window sat at unit 0.815 of the low band.
+  const unit = 0.815;
+  near((unit * POSITION_SPAN + POSITION_BASE) * 1.2, (unit * 1.5 + 1.3) * 1.2, 1e-9);
+});
+
+test('the shipped series climbs across the sessions on show', () => {
+  const b = seriesBounds(series);
+  const shown = series.slice(58).map((row) => priceLevel(row.low, b, 1.2));
+  const climb = Math.max(...shown) - Math.min(...shown);
+  // 1.05 is what imc.com's own data spreads over its ring; ours is matched to it.
+  assert.ok(climb > 1.0 && climb < 1.25, `climb ${climb}`);
 });
 
 test('candleMetrics sizes wick and body from the price spans and colours by close vs open', () => {
@@ -86,17 +102,24 @@ test('cubicBezier reproduces the CSS ease-in and ease-out curves', () => {
 });
 
 test('the glyph ratio and the default aperture are the values the dial is drawn from', () => {
-  assert.equal(GLYPH_RATIO, 8.7);
+  assert.equal(GLYPH_RATIO, 4.8);
   assert.equal(DEFAULT_APERTURE, 3);
 });
 
-test('heightPerPoint is GLYPH_RATIO times the position scale of one price point', () => {
+test('heightPerPoint is HEIGHT_SPAN over the low band, and GLYPH_RATIO reports it', () => {
   const b = seriesBounds(rows);                // minLow 90, maxLow 98
-  const positionPerPoint = 1.5 * 1.2 / (b.maxLow - b.minLow);
-  assert.equal(heightPerPoint(b, 1.2) / positionPerPoint, 8.7);
+  const positionPerPoint = POSITION_SPAN * 1.2 / (b.maxLow - b.minLow);
+  near(heightPerPoint(b, 1.2) / positionPerPoint, HEIGHT_SPAN / POSITION_SPAN, 1e-12);
+  near(GLYPH_RATIO, HEIGHT_SPAN / POSITION_SPAN, 0.05);   // the caption rounds to a tenth
   const real = seriesBounds(series);           // the shipped 110-session series
-  assert.equal(heightPerPoint(real, 1.2) / (1.5 * 1.2 / (real.maxLow - real.minLow)), 8.7);
   near(heightPerPoint(real, 1.2), 0.011344291271560307, 1e-15);
+});
+
+test('widening the band leaves the glyphs the size the first build drew them', () => {
+  // HEIGHT_SPAN is 8.7 × the 1.5 band the hero first shipped with, so a candle
+  // is exactly as tall as it was before the sessions were spread apart.
+  const real = seriesBounds(series);
+  near(heightPerPoint(real, 1.2), 8.7 * 1.5 * 1.2 / (real.maxLow - real.minLow), 1e-9);
 });
 
 test('market-data exports the provenance meta the caption is built from', () => {
@@ -285,14 +308,14 @@ test('formatReturn signs the session return with a real minus sign, or says noth
 test('captionLines prints the terminal state of the hero, every figure from the data', () => {
   assert.deepEqual(captionLines(meta, series, 55, 3, GLYPH_RATIO, 109), [
     'S&P 500 · daily · 2026-03-31 → 2026-09-04 · 52 of 110 sessions · captured 2026-09-06 · not live',
-    '2026-09-04 · O 7750.19 · H 7750.19 · L 7706.12 · C 7718.60 · −0.38 % · ×8.7 vertical'
+    '2026-09-04 · O 7750.19 · H 7750.19 · L 7706.12 · C 7718.60 · −0.38 % · ×4.8 vertical'
   ]);
 });
 
 test('captionLines follows the pen to any session, and drops the return on the first row', () => {
   const [first, second] = captionLines(meta, series, 55, 3, GLYPH_RATIO, 0);
   assert.equal(first, 'S&P 500 · daily · 2026-03-31 → 2026-09-04 · 52 of 110 sessions · captured 2026-09-06 · not live');
-  assert.equal(second, '2026-03-31 · O 6395.88 · H 6539.05 · L 6395.88 · C 6528.52 · ×8.7 vertical');
+  assert.equal(second, '2026-03-31 · O 6395.88 · H 6539.05 · L 6395.88 · C 6528.52 · ×4.8 vertical');
   const mobile = captionLines(meta, series, 55, 2, GLYPH_RATIO, 51);
   assert.ok(mobile[0].includes('53 of 110 sessions'));   // a smaller aperture shows one more session
   assert.ok(mobile[1].startsWith(series[51].label + ' · O '));

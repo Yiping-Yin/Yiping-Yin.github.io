@@ -3,11 +3,25 @@
 
 export const TAU = Math.PI * 2;
 
-// Height of a candle per price point, relative to its position on the price
-// band. imc.com draws its glyphs 8.7x taller than the band they stand in;
-// keeping the ratio (rather than a fixed 0.02/point) makes the exaggeration a
-// declared constant, which is what the caption prints as `×8.7 vertical`.
-export const GLYPH_RATIO = 8.7;
+// The price band the ring stands in, and the floor it starts from, in scale
+// units. Every session is placed by its price, so a rising market lifts the
+// ring as it goes round — the climb imc.com's hero reads as. How much of that
+// climb you see is the span: at imc.com's 1.5 the sessions in view here spread
+// 0.63 units, where their own data spread 1.05, so this band is widened until
+// ours reads the same. POSITION_BASE holds the middle of the last window
+// (unit 0.815) at the height it had at 1.5, so the frame the still and the
+// reduced-motion view are composed as does not move.
+export const POSITION_SPAN = 2.7;
+export const POSITION_BASE = 0.322;   // = (0.815·1.5 + 1.3) − 0.815·POSITION_SPAN
+
+// A candle's height per price point, in the same scale units. Held at the value
+// the first build shipped (8.7 × the 1.5 band it then used), so widening the
+// band spreads the sessions apart without growing the glyphs.
+export const HEIGHT_SPAN = 13.05;
+
+// How much taller a glyph is drawn than the band it stands in, to a tenth:
+// what the caption prints as `×4.8 vertical`.
+export const GLYPH_RATIO = Math.round(HEIGHT_SPAN / POSITION_SPAN * 10) / 10;
 
 // Slots kept empty on the counter-clockwise side of the pen: the erase zone
 // the oldest session dissolves into before it can come round again.
@@ -45,13 +59,13 @@ export function seriesBounds(rows) {
 
 export function priceLevel(value, bounds, scale) {
   const unit = (value - bounds.minLow) / (bounds.maxLow - bounds.minLow);
-  return (unit * 1.5 + 1.3) * scale;
+  return (unit * POSITION_SPAN + POSITION_BASE) * scale;
 }
 
-// World units per price point for candle *heights*. The position scale is
-// 1.5·scale over the low band; heights are that, exaggerated by GLYPH_RATIO.
+// World units per price point for candle *heights* — HEIGHT_SPAN·scale over the
+// low band, which is GLYPH_RATIO times the POSITION_SPAN a price point buys.
 export function heightPerPoint(bounds, scale) {
-  return GLYPH_RATIO * 1.5 * scale / (bounds.maxLow - bounds.minLow);
+  return HEIGHT_SPAN * scale / (bounds.maxLow - bounds.minLow);
 }
 
 export function candleMetrics(row, bounds, scale) {

@@ -11,7 +11,7 @@ import * as THREE from 'three';
 import { Line2 } from 'three/addons/lines/Line2.js';
 import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
-import series, { meta } from './market-data.mjs?v=pen-and-drum-6';
+import series, { meta } from './market-data.mjs?v=pen-and-drum-7d';
 import {
   TAU, COLOURS, EASE, TIMING, GLYPH_RATIO, DEFAULT_APERTURE,
   SWAY, PARALLAX, DEPTH_REWRITE, LABEL_FACING_BAND, HOVER_STICK,
@@ -20,7 +20,7 @@ import {
   penAzimuth, drumAngle, offsetFromAngle, detentTarget,
   dragAngle, beatPhase, depthFade, retarget, tweenValue, captionLines, formatPrice,
   swayAngle, pointerNormal, parallaxTarget, damp, cameraPose, facingWeight, stickySlot
-} from './market-model.mjs?v=pen-and-drum-6';
+} from './market-model.mjs?v=pen-and-drum-7d';
 
 // Geometry — the three radii and the tilt are the reference composition's.
 const SCALE = 1.2;
@@ -373,11 +373,28 @@ function boot(canvas) {
   const counters = { renders: 0 };
   const perf = { tier: 0, slow: 0, frames: 0, sum: 0, min: Infinity, mean: 0 };
   const baseEye = [0, 0, 0];
-  // The candle band's middle, 2.46: the height the pointer picks at and the
-  // depth the fade is measured at.
-  const pickY = (priceLevel(bounds.minLow, bounds, SCALE) + priceLevel(bounds.maxLow, bounds, SCALE)) / 2;
+  // The height the pointer picks at and the depth the fade is measured at: the
+  // middle of the sessions actually on show, not of the whole record. The band
+  // is wide enough now that the two are far apart — the oldest sessions sit at
+  // 0.39 and the newest at 3.63 — and a plane a unit below the candles picks
+  // the wrong slot near the ring's edges.
+  let pickY = 0;
   const raycaster = new THREE.Raycaster();
-  const pickPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -pickY);
+  const pickPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+  const refinePlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+  function updatePickY() {
+    let low = Infinity;
+    let high = -Infinity;
+    for (const item of items) {
+      if (!isVisible(state.offset, item.index, slots, aperture)) continue;
+      const y = item.candle.wick.y;
+      if (y < low) low = y;
+      if (y > high) high = y;
+    }
+    if (!Number.isFinite(low)) return;
+    pickY = (low + high) / 2;
+    pickPlane.constant = -pickY;
+  }
   const pickPoint = new THREE.Vector3();
   const pickRay = new THREE.Ray();
   const outerInverse = new THREE.Matrix4();
@@ -507,6 +524,7 @@ function boot(canvas) {
   }
 
   function afterStep() {
+    updatePickY();
     updateDepthRange();
     writeDepthFade();
     updateLabels();
@@ -1051,16 +1069,33 @@ function boot(canvas) {
     outerInverse.copy(outer.matrixWorld).invert();
     pickRay.copy(raycaster.ray).applyMatrix4(outerInverse);
     if (!pickRay.intersectPlane(pickPlane, pickPoint)) return null;
+    // A session stands at the height of its own price, and the band those
+    // heights spread over is wider than the ring is deep, so one plane cannot
+    // serve them all: read a slot off the pick height, then read the pointer
+    // again at the height of the candle that answered, and judge both the
+    // distance from the ring and the slot there. One step is enough — a third
+    // pass never moves it, and it takes a pointer on a candle's own centre
+    // from picking its neighbour half the time to 51 sessions in 52.
+    const guess = itemAtSlot(slotFrom(pickPoint, null));
+    if (guess && !pickRay.intersectPlane(planeAt(guess.candle.body.y), pickPoint)) return null;
     const radius = Math.hypot(pickPoint.x, pickPoint.z);
     // The annulus gets the same hysteresis as the slot: a pointer parked at
     // its edge must not see the ring drift in and out under the sway.
     const stick = hover.item ? PICK_STICK : 0;
     if (radius < PICK_INNER - stick || radius > PICK_OUTER + stick) return null;
-    pickPoint.applyAxisAngle(UP, -state.R);  // outer-local → drum-local
-    // The fractional slot, held to the one already under the pointer through a
-    // sixth of a slot, so a boundary does not flicker as the eye drifts past it.
-    const k = Math.atan2(-pickPoint.z, pickPoint.x) / stepAngle;
-    return itemAtSlot(stickySlot(k, hover.item ? hover.item.slot : null, slots, HOVER_STICK));
+    return itemAtSlot(slotFrom(pickPoint, hover.item ? hover.item.slot : null));
+  }
+
+  // outer-local hit → the slot under it. `current` carries the slot already
+  // hovered, so a boundary does not flicker as the eye drifts past it.
+  function slotFrom(point, current) {
+    point.applyAxisAngle(UP, -state.R);  // outer-local → drum-local
+    return stickySlot(Math.atan2(-point.z, point.x) / stepAngle, current, slots, HOVER_STICK);
+  }
+
+  function planeAt(height) {
+    refinePlane.constant = -height;
+    return refinePlane;
   }
 
   // The pointer has not moved, but the camera has: read the same screen point
@@ -1152,6 +1187,7 @@ function boot(canvas) {
       state.offset = next;
       drag.crossed = time;
       nib.tween = retarget(nib.level, items[next + count - 1].close, DRAG_PRINT, EASE.easeOut, 0, time);
+      updatePickY();   // the drag walks the window up and down the price band
       writeDepthFade();
       writeSession(sessionIndex());
       writeAria();
@@ -1472,7 +1508,8 @@ function boot(canvas) {
     canvas.__market = {
       items, camera, renderer, scene, inner, outer, dial, resize, render, state, setOffset, placeCamera,
       captionEl, frame, showTerminal, arrival, beat, hover, view,
-      sway, setSway, parallax, setParallax, pose, project, counters, lights, perf
+      sway, setSway, parallax, setParallax, pose, project, counters, lights, perf,
+      pickHeight: () => pickY
     };
   }
 }
