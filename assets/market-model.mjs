@@ -155,6 +155,24 @@ export function slotFromLocal(x, z, slots) {
   return ((k % slots) + slots) % slots;
 }
 
+// Hover hysteresis in slots: once a slot is picked it keeps the pointer until
+// the pointer is this far past the boundary, so the hover cannot flicker while
+// the camera drifts across a slot edge.
+export const HOVER_STICK = 0.15;
+
+// The slot a fractional slot position `k` (from atan2, see slotFromLocal) picks
+// out, given the slot the pointer is already on. Inside the hysteresis band the
+// current slot keeps it; outside, `k` rounds to its own slot. Wrapping is done
+// on the difference, so the band works across the seam at slot 0 too.
+export function stickySlot(k, current, slots, band = HOVER_STICK) {
+  if (current !== null && current !== undefined) {
+    const delta = k - current;
+    const wrapped = delta - Math.round(delta / slots) * slots;
+    if (Math.abs(wrapped) <= 0.5 + band) return current;
+  }
+  return ((Math.round(k) % slots) + slots) % slots;
+}
+
 // Nearest resting angle to `angle`: the drum only ever stops on a tick, so a
 // released drag settles on pen - k·(TAU/slots) for some integer k.
 export function detentTarget(angle, slots = DEFAULT_SLOTS, pen = DEFAULT_PEN) {
@@ -303,3 +321,96 @@ export const EASE = {
   easeInOut: cubicBezier(0.42, 0, 0.58, 1),
   camera: cubicBezier(0.37, 0, 0.17, 1)
 };
+
+// The drifting viewpoint. The eye never leaves the sphere the composition was
+// designed on: it swings a slow 14° either side of the design azimuth and
+// leans a couple more degrees toward the pointer. Both are angles about the
+// look-at point, so the distance, the framing and the pen all hold still.
+export const SWAY = { amplitude: 14 * Math.PI / 180, period: 48 };
+
+// Pointer parallax: a lean of 2° in azimuth and 1° in elevation, reached with
+// a quarter-second exponential. There is no velocity state, so it never
+// overshoots however coarse or fine the frames are.
+export const PARALLAX = { azimuth: 2 * Math.PI / 180, elevation: Math.PI / 180, tau: 0.25 };
+
+// How far the view may drift before the depth fade is worth rewriting. Half a
+// degree of azimuth moves an instance colour by less than one level, so the
+// rewrite cannot be seen as a step.
+export const DEPTH_REWRITE = { azimuth: 0.5 * Math.PI / 180, elevation: 0.25 * Math.PI / 180 };
+
+// Width of the fade band a date label crosses as it turns away from the camera,
+// in units of the facing dot product. A hard threshold would make labels blink
+// on and off as the viewpoint drifts.
+export const LABEL_FACING_BAND = 0.12;
+
+// Where the sway has carried the camera azimuth at `t` seconds on the sway
+// clock. An odd function through the origin, so t = 0 is the design frame the
+// still, the share card and the fallback image were all rendered from.
+export function swayAngle(t, amplitude = SWAY.amplitude, period = SWAY.period) {
+  return amplitude * Math.sin(TAU * t / period);
+}
+
+const clampUnit = (u) => (u < -1 ? -1 : u > 1 ? 1 : u);
+
+// Pointer position inside the hero box as (-1, -1) bottom left to (1, 1) top
+// right, clamped so a pointer that has slid off the box still reads as a corner.
+// A box with no extent (not laid out yet) reads as centred.
+export function pointerNormal(clientX, clientY, box) {
+  if (!box || !(box.width > 0) || !(box.height > 0)) return { nx: 0, ny: 0 };
+  return {
+    nx: clampUnit(2 * (clientX - box.left) / box.width - 1),
+    ny: clampUnit(1 - 2 * (clientY - box.top) / box.height)
+  };
+}
+
+// The view offset the pointer is asking for. This is only ever a target: the
+// view reaches it through `damp`, never in one frame.
+export function parallaxTarget(nx, ny, maxAz = PARALLAX.azimuth, maxEl = PARALLAX.elevation) {
+  return {
+    az: clampUnit(Number.isFinite(nx) ? nx : 0) * maxAz,
+    el: clampUnit(Number.isFinite(ny) ? ny : 0) * maxEl
+  };
+}
+
+// First-order approach to a target over `dt` seconds with time constant `tau`.
+// The blend is exp-based rather than a fixed fraction, so the curve is the same
+// at 30, 60 or 144 fps; there is no velocity term, so it cannot overshoot.
+export function damp(current, target, dt, tau) {
+  if (dt <= 0) return current;
+  if (!(tau > 0) || !Number.isFinite(dt)) return target;
+  return current + (target - current) * (1 - Math.exp(-dt / tau));
+}
+
+// The eye, moved around the look-at point by two angles. The vector from the
+// look-at point to the eye is read as (distance, azimuth, elevation), the two
+// offsets are added, and it is put back: the distance and the look-at point are
+// untouched, so a zero offset returns the design eye to the last bit and the
+// dolly keeps its own job. Azimuth follows the model's convention, atan2(-z, x).
+export function cameraPose(baseEye, lookAt, azimuthOffset = 0, elevationOffset = 0) {
+  const vx = baseEye[0] - lookAt[0];
+  const vy = baseEye[1] - lookAt[1];
+  const vz = baseEye[2] - lookAt[2];
+  const distance = Math.hypot(vx, vy, vz);
+  const azimuth = Math.atan2(-vz, vx) + azimuthOffset;
+  const elevation = Math.atan2(vy, Math.hypot(vx, vz)) + elevationOffset;
+  const flat = distance * Math.cos(elevation);
+  return {
+    eye: [
+      lookAt[0] + flat * Math.cos(azimuth),
+      lookAt[1] + distance * Math.sin(elevation),
+      lookAt[2] - flat * Math.sin(azimuth)
+    ],
+    azimuth,
+    elevation,
+    distance
+  };
+}
+
+// How much of a date label to draw, from the dot product of its plane normal
+// with the direction to the camera. A smoothstep across LABEL_FACING_BAND, so a
+// label fades as the drifting viewpoint turns it away rather than blinking off
+// at a threshold. The renderer multiplies this into the label's alpha.
+export function facingWeight(dot, threshold = 0.30, band = LABEL_FACING_BAND) {
+  const u = clamp01((dot - threshold) / band);
+  return u * u * (3 - 2 * u);
+}

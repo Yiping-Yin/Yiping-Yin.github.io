@@ -14,10 +14,12 @@ import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 import series, { meta } from './market-data.mjs';
 import {
   TAU, COLOURS, EASE, TIMING, GLYPH_RATIO, DEFAULT_APERTURE,
+  SWAY, PARALLAX, DEPTH_REWRITE, LABEL_FACING_BAND, HOVER_STICK,
   ringPosition, seriesBounds, priceLevel, candleMetrics, volumeBar,
   cubicBezier, weekStarts, windowOf, isVisible, clampOffset, slotOf,
-  penAzimuth, drumAngle, offsetFromAngle, slotFromLocal, detentTarget,
-  dragAngle, beatPhase, depthFade, retarget, tweenValue, captionLines, formatPrice
+  penAzimuth, drumAngle, offsetFromAngle, detentTarget,
+  dragAngle, beatPhase, depthFade, retarget, tweenValue, captionLines, formatPrice,
+  swayAngle, pointerNormal, parallaxTarget, damp, cameraPose, facingWeight, stickySlot
 } from './market-model.mjs';
 
 // Geometry — the three radii and the tilt are the reference composition's.
@@ -57,6 +59,55 @@ const TICK_Y = 0.002;
 const PEN_Y = 0.008;
 const NIB_SIZE = 0.06;
 
+// The plinth. A dark disc the drum stands on, wide enough to clear the ink of
+// the date labels (their outermost mark sits at r 8.91) and unlit, so its
+// colour is a fixed reading rather than a light's. The dial lines all live
+// above its top face, which is the only opaque surface at y = 0.
+const DISC_R = 9.40;
+const DISC_T = 0.12;
+const DISC_SEGMENTS = 180;
+const DISC_COLOUR = 0x061c3a;
+const DISC_SIDE_COLOUR = 0x03101f;
+const DISC_EDGE_COLOUR = 0x8fb0d6;
+const DISC_EDGE_W = 0.10;       // bevel band width, in world units
+const DISC_EDGE_ALPHA = 0.35;
+const DISC_EDGE_Y = 0.003;
+const SHADOW_Y = 0.001;
+const SHADOW_ALPHA = 0.60;
+const SHADOW_MAP = 2048;
+const SHADOW_MAP_LOW = 1024;
+const SHADOW_BIAS = -0.0004;
+const SHADOW_NORMAL_BIAS = 0.01;
+const SHADOW_EXTENT = 10;     // orthographic half-width, in world units, around the origin
+const SHADOW_NEAR = 10;
+const SHADOW_FAR = 28;
+
+// Lights. The key comes from over the reader's left shoulder at 55°, so the
+// faces turned to the reader are the lit ones and each candle's shadow falls
+// behind it and to the right, onto the disc; the rim is the cold edge from
+// the far side. RIM_* is that light, not the
+// dial's rim line above.
+const AMBIENT = 1.5;
+const KEY_POS = [8.80, 16.20, 7.40];
+const KEY_INTENSITY = 3.0;
+const RIM_POS = [-12, 7, -5];
+const RIM_COLOUR = 0x8fc0ff;
+const RIM_INTENSITY = 1.6;
+const CANDLE_ROUGHNESS = 0.45;
+const CANDLE_METALNESS = 0.25;
+const BLADE_LIFT = 0.006;     // the blade's ground leg would be eaten by the disc at y = 0
+const LABEL_LIFT = 0.205;     // planeHeight/2 + 0.02: the date stands on the disc
+
+// Motion. The eye swings 14° either side of the design azimuth every 48 s and
+// leans up to 2° toward the pointer; both rules are the model's, only their
+// clocks live here.
+const VIEW_EPSILON = 1e-6;    // rad of view change worth a lookAt
+const FRAME_DT_MAX = 0.1;     // s; a tab that was away never fast-forwards the sway
+const PHONE_FRAME_MS = 28;    // pure sway frames run at 30 fps on a phone
+const PERF_WINDOW = 120;      // render frames between auto-downgrade checks
+const PERF_SLOW_MS = 20;
+const PERF_VERY_SLOW_MS = 24;
+
 // Depth cue: instance colours are pulled toward the page's navy once per step,
 // never per frame, and never through a fog that would touch the line materials.
 const DEPTH_FADE = 0.30;
@@ -66,7 +117,7 @@ const DEPTH_SAMPLES = 32;
 const MOBILE_QUERY = '(max-width: 850px)';          // the stylesheet's 260 px box: no labels, no ticks, aperture 2
 const CAPTION_COMPACT_QUERY = '(max-width: 1100px)'; // the hero box narrows below the full source line
 const MOBILE_APERTURE = 2;
-const LABEL_FACING = 0.30;    // a date is drawn only when its plane faces the camera
+const LABEL_FACING = 0.30;    // a date fades in as its plane turns to the camera, over LABEL_FACING_BAND
 const LABEL_FONT = '500 40px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif';
 const LABEL_WIDTH = 320;
 const LABEL_HEIGHT = 56;
@@ -123,6 +174,7 @@ function boot(canvas) {
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const compact = window.matchMedia(MOBILE_QUERY);
   const narrow = window.matchMedia(CAPTION_COMPACT_QUERY);
+  const hoverPointer = window.matchMedia('(hover: hover)');  // a finger never steers the parallax
 
   // Series shape ---------------------------------------------------------
   const bounds = seriesBounds(series);
@@ -162,6 +214,11 @@ function boot(canvas) {
   renderer.setClearColor(0x000000, 0);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
+  // The shadow map is drawn in the key light's frame, so it does not depend on
+  // the camera: it is redrawn only on the frames where a caster actually moved.
+  renderer.shadowMap.enabled = !compact.matches;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.autoUpdate = false;
   writeSession(startOffset + count - 1);
 
   // Scene graph ----------------------------------------------------------
@@ -175,15 +232,37 @@ function boot(canvas) {
   focus.add(outer);
   outer.add(inner, dial);
 
-  scene.add(new THREE.AmbientLight(0xffffff, 2));
-  const sun = new THREE.DirectionalLight(0xffffff, 0.5);
-  sun.position.set(0, 1, 0);
-  scene.add(sun);
+  // Lights live in world space, under the scene rather than the tilted group,
+  // so the key's shadow camera is a fixed box around the origin.
+  const ambient = new THREE.AmbientLight(0xffffff, AMBIENT);
+  const key = new THREE.DirectionalLight(0xffffff, KEY_INTENSITY);
+  key.position.set(KEY_POS[0], KEY_POS[1], KEY_POS[2]);
+  key.target.position.set(0, 0, 0);
+  key.castShadow = !compact.matches;
+  key.shadow.mapSize.set(SHADOW_MAP, SHADOW_MAP);
+  key.shadow.camera.left = -SHADOW_EXTENT;
+  key.shadow.camera.right = SHADOW_EXTENT;
+  key.shadow.camera.top = SHADOW_EXTENT;
+  key.shadow.camera.bottom = -SHADOW_EXTENT;
+  key.shadow.camera.near = SHADOW_NEAR;
+  key.shadow.camera.far = SHADOW_FAR;
+  key.shadow.camera.updateProjectionMatrix();
+  key.shadow.bias = SHADOW_BIAS;
+  key.shadow.normalBias = SHADOW_NORMAL_BIAS;
+  const rimLight = new THREE.DirectionalLight(RIM_COLOUR, RIM_INTENSITY);
+  rimLight.position.set(RIM_POS[0], RIM_POS[1], RIM_POS[2]);
+  rimLight.target.position.set(0, 0, 0);
+  scene.add(ambient, key, key.target, rimLight, rimLight.target);
+  const lights = { ambient, key, rim: rimLight };
 
   // Instances: one box mesh holds bodies (0..n), volume bars (n..2n) and the
-  // nib (2n); one cylinder mesh holds the wicks.
-  const boxes = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial(), total * 2 + 1);
-  const wicks = new THREE.InstancedMesh(new THREE.CylinderGeometry(1, 1, 1), new THREE.MeshStandardMaterial(), total);
+  // nib (2n); one cylinder mesh holds the wicks. Both cast onto the plinth and
+  // neither receives: the only receiver in the scene is the shadow plane.
+  const candleMaterial = () => new THREE.MeshStandardMaterial({ roughness: CANDLE_ROUGHNESS, metalness: CANDLE_METALNESS });
+  const boxes = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), candleMaterial(), total * 2 + 1);
+  const wicks = new THREE.InstancedMesh(new THREE.CylinderGeometry(1, 1, 1), candleMaterial(), total);
+  boxes.castShadow = !compact.matches;
+  wicks.castShadow = !compact.matches;
   inner.add(boxes, wicks);
 
   const accent = new THREE.Color(COLOURS.accent);
@@ -211,7 +290,7 @@ function boot(canvas) {
       p: 0,            // volume bar, blade and label printedness
       candleP: 0,      // body and wick printedness, 0.06 s behind the bar
       emphasis: 0,     // 0..1, hover widening
-      facing: false,
+      facingW: 0,      // 0..1, how squarely the date faces the camera
       tween: null, candleTween: null, emphasisTween: null,
       blade: null, label: null
     };
@@ -225,6 +304,8 @@ function boot(canvas) {
       const geometry = new LineGeometry();
       geometry.setPositions([0, 0, 0, 0, bar.height, 0, barPos.x, bar.height, barPos.z, barPos.x, 0, barPos.z, 0, 0, 0]);
       const blade = new Line2(geometry, lineMaterial(0xffffff, 0));
+      blade.position.y = BLADE_LIFT;  // its ground leg would otherwise lie inside the disc's top face
+      blade.renderOrder = 1;          // after the shadow plane, with the rest of the dial
       blade.scale.y = 0.0001;
       blade.visible = false;
       inner.add(blade);
@@ -232,8 +313,9 @@ function boot(canvas) {
 
       const label = makeLabel(row.label, renderer);
       const labelPos = ringPosition(LABEL_RING, slots, slot);
-      label.position.set(labelPos.x, 0, labelPos.z);
+      label.position.set(labelPos.x, LABEL_LIFT, labelPos.z);  // the plane is centred on its own y, so lift it clear of the disc
       label.rotation.y = stepAngle * slot;
+      label.renderOrder = 1;
       label.visible = false;
       inner.add(label);
       item.label = label;
@@ -244,6 +326,53 @@ function boot(canvas) {
   boxes.setColorAt(nibIndex, new THREE.Color(0xffffff)); // the nib never fades
   boxes.instanceColor.needsUpdate = true;
   wicks.instanceColor.needsUpdate = true;
+
+  // The plinth ------------------------------------------------------------
+  // Disc, side and shadow plane hang under `outer`, so they take the same tilt
+  // as the dial and the feet of the volume bars never leave the surface.
+  const disc = new THREE.Mesh(
+    new THREE.CircleGeometry(DISC_R, DISC_SEGMENTS),
+    new THREE.MeshBasicMaterial({ color: DISC_COLOUR, toneMapped: false })
+  );
+  disc.rotation.x = -Math.PI / 2;   // the circle is drawn in xy; lay it flat, facing up
+  outer.add(disc);
+
+  const discSide = new THREE.Mesh(
+    new THREE.CylinderGeometry(DISC_R, DISC_R, DISC_T, DISC_SEGMENTS, 1, true),
+    new THREE.MeshBasicMaterial({ color: DISC_SIDE_COLOUR, toneMapped: false, side: THREE.FrontSide })
+  );
+  discSide.position.y = -DISC_T / 2;  // its top edge meets the top face
+  outer.add(discSide);
+
+  // A bevel band, not a hairline: a tenth of a unit of pale blue at the rim
+  // is what makes the disc read as a machined plinth rather than a cut-out.
+  const discEdge = new THREE.Mesh(
+    new THREE.RingGeometry(DISC_R - DISC_EDGE_W, DISC_R, DISC_SEGMENTS),
+    new THREE.MeshBasicMaterial({ color: DISC_EDGE_COLOUR, transparent: true, opacity: DISC_EDGE_ALPHA, toneMapped: false, depthWrite: false })
+  );
+  discEdge.rotation.x = -Math.PI / 2;
+  discEdge.position.y = DISC_EDGE_Y;
+  discEdge.renderOrder = 1;
+  outer.add(discEdge);
+
+  // The one surface in the scene that receives: a shadow-only plane a
+  // millimetre above the top face, offset toward the eye so the two never
+  // fight. A phone has no shadows, so it has no plane either.
+  let shadowPlane = null;
+  if (!compact.matches) {
+    shadowPlane = new THREE.Mesh(
+      new THREE.CircleGeometry(DISC_R, DISC_SEGMENTS),
+      new THREE.ShadowMaterial({
+        color: 0x000000, opacity: SHADOW_ALPHA, transparent: true, depthWrite: false,
+        polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1
+      })
+    );
+    shadowPlane.rotation.x = -Math.PI / 2;
+    shadowPlane.position.y = SHADOW_Y;
+    shadowPlane.receiveShadow = true;
+    outer.add(shadowPlane);
+  }
+  outer.userData.disc = { top: disc, side: discSide, edge: discEdge, plane: shadowPlane };
 
   // The dial ------------------------------------------------------------
   const gapFar = pen + (aperture + 0.5) * stepAngle;   // the far edge of the erased slots
@@ -314,13 +443,28 @@ function boot(canvas) {
   const beat = { active: false, from: state.R, to: state.R, stepped: true, nibFrom: 0, nibTo: 0 };
   const arrival = { active: false, begun: false, start: 0, plan: ARRIVAL.first, captioned: false };
   const glide = { active: false, from: 0, to: 0, start: 0, duration: DETENT_SECONDS };
-  const nib = { level: items[startOffset + count - 1].close, scale: 0, tween: null };
+  const nib = { level: items[startOffset + count - 1].close, scale: 0, tween: null, wrote: { angle: NaN, level: NaN, scale: NaN } };
   const drag = { id: -1, down: false, captured: false, touch: false, x0: 0, y0: 0, R0: 0, targetR: 0, crossed: 0, moved: false };
   const hover = { item: null, x: 0, y: 0, releaseId: 0, inside: false };
   const cursor = { value: 0, tween: null };
-  const clock = { frameId: 0, wakeId: 0 };
-  const depth = { near: -1, far: -2 };
+  const clock = { frameId: 0, wakeId: 0, last: NaN, lastRender: 0, busy: false };
+  const depth = { near: -1, far: -2, azAtWrite: 0, elAtWrite: 0 };
   const size = { width: 0, height: 0 };
+  // The eye's own state. `view` is the offset from the design azimuth the next
+  // frame wants, `placed` the one the camera actually holds; the sway clock is
+  // not the wall clock, so a hidden tab loses no phase.
+  const view = { az: 0, el: 0 };
+  const placed = { az: NaN, el: NaN };
+  const sway = { t: 0, paused: false, enabled: true };
+  const parallax = {
+    az: 0, el: 0, target: { az: 0, el: 0 },
+    enabled: !compact.matches && !reducedMotion.matches && hoverPointer.matches
+  };
+  const shadows = { enabled: !compact.matches, size: SHADOW_MAP };
+  const casters = { dirty: true };   // the shadow map is redrawn only after a caster moved
+  const counters = { renders: 0, shadowPasses: 0 };
+  const perf = { tier: 0, frames: 0, sum: 0, mean: 0 };
+  const baseEye = [0, 0, 0];
   // The candle band's middle, 2.46: the height the pointer picks at and the
   // depth the fade is measured at.
   const pickY = (priceLevel(bounds.minLow, bounds, SCALE) + priceLevel(bounds.maxLow, bounds, SCALE)) / 2;
@@ -372,9 +516,11 @@ function boot(canvas) {
       item.blade.visible = alpha > 0.001;
     }
     if (item.label) {
-      const alpha = LABEL_ALPHA * item.p * chrome;
+      // The facing weight is a fade, not a switch, so a date turning away in
+      // the sway dims out over 7° instead of blinking.
+      const alpha = LABEL_ALPHA * item.p * chrome * item.facingW;
       item.label.material.opacity = alpha;
-      item.label.visible = chromeOn && item.facing && alpha > 0.001;
+      item.label.visible = chromeOn && alpha > 0.001;
     }
   }
 
@@ -390,10 +536,19 @@ function boot(canvas) {
     scale.setScalar(Math.max(nib.scale, 1e-4));
     boxes.setMatrixAt(nibIndex, matrix.compose(position, quaternion, scale));
     boxes.instanceMatrix.needsUpdate = true;
+    // Only a nib that actually moved is worth a shadow pass: the rest of a beat
+    // writes the same matrix every frame.
+    if (angle !== nib.wrote.angle || nib.level !== nib.wrote.level || nib.scale !== nib.wrote.scale) {
+      nib.wrote.angle = angle;
+      nib.wrote.level = nib.level;
+      nib.wrote.scale = nib.scale;
+      casters.dirty = true;
+    }
     dirty = true;
   }
 
   function setDrumAngle(R) {
+    if (R !== state.R) casters.dirty = true;
     state.R = R;
     inner.rotation.y = R;
     setNib();
@@ -438,14 +593,14 @@ function boot(canvas) {
   }
 
   // A date is legible only when its plane faces the camera; mirrored and
-  // edge-on ones are hidden rather than drawn backwards.
+  // edge-on ones fade out rather than being drawn backwards.
   function updateLabels() {
     for (const item of weekItems) {
       if (!item.label) continue;
       item.label.getWorldPosition(toCamera);
       toCamera.subVectors(camera.position, toCamera).normalize();
       item.label.getWorldDirection(normal);
-      item.facing = normal.dot(toCamera) > LABEL_FACING;
+      item.facingW = facingWeight(normal.dot(toCamera), LABEL_FACING, LABEL_FACING_BAND);
     }
     applyChrome();
   }
@@ -454,20 +609,70 @@ function boot(canvas) {
     updateDepthRange();
     writeDepthFade();
     updateLabels();
+    depth.azAtWrite = view.az;
+    depth.elAtWrite = view.el;
   }
 
+  // The band is measured in view space, so the sway slowly invalidates it. Half
+  // a degree of azimuth moves a faded colour by less than one level, which is
+  // why this runs at a few hertz instead of every frame.
+  function maybeRewriteDepth() {
+    if (Math.abs(view.az - depth.azAtWrite) < DEPTH_REWRITE.azimuth
+      && Math.abs(view.el - depth.elAtWrite) < DEPTH_REWRITE.elevation) return;
+    updateDepthRange();
+    writeDepthFade();
+    depth.azAtWrite = view.az;
+    depth.elAtWrite = view.el;
+  }
+
+  // Camera ---------------------------------------------------------------
+  // The dolly is the arrival's; the swing around it is the sway plus the
+  // pointer's lean. At zero offset cameraPose hands back the design eye to the
+  // last bit, so the still, the fallback image and the reduced-motion frame are
+  // all the frame this composition was drawn as.
   function placeCamera(dolly, tilt = dolly) {
     const eased = EASE.camera(clamp01(dolly));
     const distance = CAMERA_FAR_DISTANCE + (CAMERA_NEAR_DISTANCE - CAMERA_FAR_DISTANCE) * eased;
-    camera.position.set(EYE[0], EYE[1], EYE[2]).setLength(distance);
+    const k = distance / CAMERA_NEAR_DISTANCE;   // |EYE| is CAMERA_NEAR_DISTANCE
+    baseEye[0] = EYE[0] * k;
+    baseEye[1] = EYE[1] * k;
+    baseEye[2] = EYE[2] * k;
+    const pose = cameraPose(baseEye, LOOK_AT, view.az, view.el);
+    camera.position.set(pose.eye[0], pose.eye[1], pose.eye[2]);
     camera.lookAt(LOOK_AT[0], LOOK_AT[1], LOOK_AT[2]);
     camera.updateMatrixWorld(true);
     camera.matrixWorldInverse.copy(camera.matrixWorld).invert();
+    placed.az = view.az;
+    placed.el = view.el;
     const lean = EASE.camera(clamp01(tilt));
     outer.rotation.x = TILT * lean;
     outer.rotation.z = -TILT * lean;
     outer.updateMatrixWorld(true);
     dirty = true;
+  }
+
+  function motionOn() { return sway.enabled && !reducedMotion.matches; }
+
+  // The sway clock advances only on frames that are actually drawn and only
+  // while the drum is not being dragged; the parallax is a first-order lag with
+  // no velocity state, so it cannot overshoot whatever the pointer does.
+  function updateView(dt) {
+    const motion = motionOn();
+    if (motion && !sway.paused) sway.t += dt;
+    if (parallax.enabled) {
+      parallax.az = damp(parallax.az, parallax.target.az, dt, PARALLAX.tau);
+      parallax.el = damp(parallax.el, parallax.target.el, dt, PARALLAX.tau);
+    } else {
+      parallax.az = 0;
+      parallax.el = 0;
+      parallax.target.az = 0;
+      parallax.target.el = 0;
+    }
+    view.az = (motion ? swayAngle(sway.t, SWAY.amplitude, SWAY.period) : 0) + parallax.az;
+    view.el = parallax.el;
+    // Written as a negated `within`, so the first call — with `placed` still
+    // NaN — reads as moved and the camera is placed.
+    return !(Math.abs(view.az - placed.az) <= VIEW_EPSILON && Math.abs(view.el - placed.el) <= VIEW_EPSILON);
   }
 
   // Tweens ---------------------------------------------------------------
@@ -501,6 +706,7 @@ function boot(canvas) {
     if (changed) {
       boxes.instanceMatrix.needsUpdate = true;
       wicks.instanceMatrix.needsUpdate = true;
+      casters.dirty = true;
       dirty = true;
     }
     if (nib.tween) {
@@ -536,6 +742,7 @@ function boot(canvas) {
       item.tween = retarget(item.p, target, duration, ease, 0, at);
       item.candleTween = retarget(item.candleP, target, duration, ease, 0, at);
     }
+    casters.dirty = true;
   }
 
   function itemAtSlot(slot) {
@@ -618,6 +825,17 @@ function boot(canvas) {
     arrival.start = at;
     arrival.captioned = false;
     arrival.begun = false;
+    // Frame 0 of every arrival is the design frame: the sway starts here, on
+    // the first frame that really runs, and a revisit does not inherit a phase.
+    sway.t = 0;
+    sway.paused = false;
+    parallax.az = 0;
+    parallax.el = 0;
+    parallax.target.az = 0;
+    parallax.target.el = 0;
+    view.az = 0;
+    view.el = 0;
+    casters.dirty = true;
     chrome = 0;
     nib.scale = 0;
     nib.tween = null;
@@ -701,6 +919,7 @@ function boot(canvas) {
     penLine.visible = true;
     nib.scale = NIB_SIZE;
     chrome = 1;
+    casters.dirty = true;
     setNib();
     afterStep();
     remember(state.offset);
@@ -730,6 +949,7 @@ function boot(canvas) {
     wicks.instanceMatrix.needsUpdate = true;
     nib.level = penItem().close;
     nib.scale = NIB_SIZE;
+    casters.dirty = true;
     setDrumAngle(drumAngle(next, slots, pen, aperture));
     afterStep();
     writeSession(sessionIndex());
@@ -740,6 +960,17 @@ function boot(canvas) {
   function showTerminal() {
     arrival.active = false;
     chrome = 1;
+    // Reduced motion is a still: no sway, no lean, and the eye exactly where
+    // the composition was designed.
+    sway.enabled = false;
+    sway.paused = false;
+    parallax.enabled = false;
+    parallax.az = 0;
+    parallax.el = 0;
+    parallax.target.az = 0;
+    parallax.target.el = 0;
+    view.az = 0;
+    view.el = 0;
     placeCamera(1, 1);
     rimGeometry.setDrawRange(0, RIM_POINTS);
     rimMaterial.opacity = RIM_ALPHA;
@@ -754,11 +985,25 @@ function boot(canvas) {
   }
 
   // Frame loop -----------------------------------------------------------
+  // The eye never stops, so a visible canvas asks for every frame; the rest
+  // between beats no longer parks the loop on a timer, and only a page that
+  // cannot be seen — or a debugger that switched the sway off — does.
   function frame(stamp) {
     clock.frameId = 0;
+    // A phone (and a desktop that has been downgraded) draws pure sway at
+    // 30 fps. The skip happens before the clock is read, so the interval it
+    // gives up lands in the next frame's dt and the sway keeps its phase.
+    if (throttling() && stamp - clock.lastRender < PHONE_FRAME_MS) { requestFrame(); return; }
     if (canvas.clientWidth !== size.width || canvas.clientHeight !== size.height) resize();
     const time = stamp / 1000;
+    // clock.last is NaN after a stop, so the first frame back is worth no time
+    // at all and the sway cannot jump the interval the page spent away.
+    const dt = Number.isFinite(clock.last) ? Math.min(Math.max(time - clock.last, 0), FRAME_DT_MAX) : 0;
+    clock.last = time;
+    const viewChanged = updateView(dt);
+    samplePerf(dt);
     let busy = false;
+    if (viewChanged && !arrival.active) placeCamera(1, 1);  // during the arrival updateArrival places it
     // A hidden or throttled tab returns with a stale beat: land it and rest,
     // never fast-forward a run of beats at frame rate.
     if (beat.active && !arrival.active && time - state.beatStart > timing.period * 2) {
@@ -781,14 +1026,84 @@ function boot(canvas) {
     }
     if (updateTweens(time)) busy = true;
     if (updateCursor(time)) busy = true;
-    if (dirty) render();
-    if (busy) requestFrame();
+    // Everything that reads the camera is recomputed here, once, and only on
+    // the frames where the eye actually moved. The arrival keeps the depth band
+    // it measured against the camera it ends on.
+    if (viewChanged) {
+      updateLabels();
+      if (hover.inside && !drag.captured) repick();
+      if (!arrival.active) maybeRewriteDepth();
+    }
+    if (dirty) { render(); clock.lastRender = stamp; }
+    clock.busy = busy;
+    // A lean that has not finished settling keeps the loop alive on its own, so
+    // the damping still runs when the swing is switched off.
+    if (busy || leaning() || (motionOn() && canDraw())) requestFrame();
     else if (beat.active) scheduleBeat(state.beatStart + timing.period);
   }
 
+  function leaning() {
+    return parallax.enabled
+      && (Math.abs(parallax.target.az - parallax.az) > VIEW_EPSILON
+        || Math.abs(parallax.target.el - parallax.el) > VIEW_EPSILON);
+  }
+
+  // Only pure sway frames are halved; a beat, a drag or a tween runs at the
+  // display's rate. `clock.busy` is the previous frame's verdict, so the worst
+  // a change of state costs is one skipped frame.
+  function throttling() { return !clock.busy && (compact.matches || perf.tier >= 3); }
+
   function render() {
+    // The shadow map lives in the key light's frame: a camera-only frame reuses
+    // it, and it is redrawn only where a caster has moved since the last one.
+    if (casters.dirty && shadows.enabled) {
+      renderer.shadowMap.needsUpdate = true;
+      counters.shadowPasses += 1;
+    }
+    casters.dirty = false;
     renderer.render(scene, camera);
+    counters.renders += 1;
     dirty = false;
+  }
+
+  // Shadows are the one thing this scene gives up under load: first the map
+  // size, then the shadows themselves, then half the sway frames. It only ever
+  // steps down, and it never reads the hardware.
+  function samplePerf(dt) {
+    if (compact.matches || arrival.active || perf.tier >= 3 || !motionOn()) return;
+    if (!(dt > 0) || dt >= FRAME_DT_MAX) return;
+    perf.sum += dt;
+    perf.frames += 1;
+    if (perf.frames < PERF_WINDOW) return;
+    perf.mean = perf.sum / perf.frames * 1000;
+    perf.sum = 0;
+    perf.frames = 0;
+    if (perf.tier === 0 && perf.mean > PERF_SLOW_MS) { perf.tier = 1; setShadows(SHADOW_MAP_LOW); }
+    else if (perf.tier === 1 && perf.mean > PERF_SLOW_MS) { perf.tier = 2; setShadows(false); }
+    else if (perf.tier === 2 && perf.mean > PERF_VERY_SLOW_MS) perf.tier = 3;
+  }
+
+  // `false`, 1024 or 2048. A phone booted without a shadow plane has nothing to
+  // receive, so it stays off whatever the width does afterwards.
+  function setShadows(mapSize) {
+    const on = !!mapSize && shadowPlane !== null;
+    shadows.enabled = on;
+    if (on) shadows.size = mapSize;
+    renderer.shadowMap.enabled = on;
+    key.castShadow = on;
+    boxes.castShadow = on;
+    wicks.castShadow = on;
+    if (on && key.shadow.mapSize.width !== mapSize) {
+      if (key.shadow.map) { key.shadow.map.dispose(); key.shadow.map = null; }
+      key.shadow.mapSize.set(mapSize, mapSize);
+    }
+    if (shadowPlane) shadowPlane.visible = on;
+    // Turning the pass on or off changes the programs the lit materials need.
+    boxes.material.needsUpdate = true;
+    wicks.material.needsUpdate = true;
+    casters.dirty = true;
+    dirty = true;
+    requestFrame();
   }
 
   function canDraw() { return inView && !document.hidden; }
@@ -800,6 +1115,7 @@ function boot(canvas) {
   function stopFrame() {
     if (clock.frameId) window.cancelAnimationFrame(clock.frameId);
     clock.frameId = 0;
+    clock.last = NaN;   // the frame that comes back is worth no time, so the sway keeps its phase
     clearWake();
   }
 
@@ -837,11 +1153,13 @@ function boot(canvas) {
 
   // Hover ----------------------------------------------------------------
   // One plane intersection and an atan2, so the mouse, the pen and the finger
-  // all take the same path and no 2 px instance is ever ray-tested.
-  function pickItem(event) {
+  // all take the same path and no 2 px instance is ever ray-tested. It takes
+  // coordinates rather than an event, because the moving camera re-picks the
+  // same pointer position on frames where nothing was moved by hand.
+  function pickAt(clientX, clientY) {
     const box = canvas.getBoundingClientRect();
     if (!box.width || !box.height) return null;
-    ndc.set(((event.clientX - box.left) / box.width) * 2 - 1, -((event.clientY - box.top) / box.height) * 2 + 1);
+    ndc.set(((clientX - box.left) / box.width) * 2 - 1, -((clientY - box.top) / box.height) * 2 + 1);
     raycaster.setFromCamera(ndc, camera);
     // The candle band lives in the tilted outer group, so intersect in that
     // frame rather than against a world-horizontal plane.
@@ -852,7 +1170,16 @@ function boot(canvas) {
     const radius = Math.hypot(pickPoint.x, pickPoint.z);
     if (radius < PICK_INNER || radius > PICK_OUTER) return null;
     pickPoint.applyAxisAngle(UP, -state.R);  // outer-local → drum-local
-    return itemAtSlot(slotFromLocal(pickPoint.x, pickPoint.z, slots));
+    // The fractional slot, held to the one already under the pointer through a
+    // sixth of a slot, so a boundary does not flicker as the eye drifts past it.
+    const k = Math.atan2(-pickPoint.z, pickPoint.x) / stepAngle;
+    return itemAtSlot(stickySlot(k, hover.item ? hover.item.slot : null, slots, HOVER_STICK));
+  }
+
+  // The pointer has not moved, but the camera has: read the same screen point
+  // against the pose this frame is drawing.
+  function repick() {
+    setHover(pickAt(hover.x, hover.y));
   }
 
   function setHover(item) {
@@ -884,7 +1211,31 @@ function boot(canvas) {
     if (Math.hypot(event.clientX - hover.x, event.clientY - hover.y) <= HOVER_SLOP) return;
     hover.x = event.clientX;
     hover.y = event.clientY;
-    setHover(pickItem(event));
+    setHover(pickAt(event.clientX, event.clientY));
+  }
+
+  // Parallax ---------------------------------------------------------------
+  // The lean is read against the figure, not the canvas, so the corners of the
+  // box the reader sees are the ±1 of the input. A finger never steers it, and
+  // a captured drag freezes the target where it was: the pointer is on the
+  // drum, not on the camera.
+  function trackParallax(event) {
+    if (!parallax.enabled || event.pointerType === 'touch' || drag.captured) return;
+    const box = (figure || canvas).getBoundingClientRect();
+    const point = pointerNormal(event.clientX, event.clientY, box);
+    const target = parallaxTarget(point.nx, point.ny, PARALLAX.azimuth, PARALLAX.elevation);
+    parallax.target.az = target.az;
+    parallax.target.el = target.el;
+    requestFrame();
+  }
+
+  // A captured drag keeps the target it was caught with, even when the pointer
+  // leaves the box: the hand is on the drum, not on the camera.
+  function releaseParallax() {
+    if (drag.captured) return;
+    parallax.target.az = 0;
+    parallax.target.el = 0;
+    requestFrame();
   }
 
   // Drag -----------------------------------------------------------------
@@ -960,6 +1311,8 @@ function boot(canvas) {
       return;
     }
     drag.captured = false;
+    sway.paused = false;    // the eye picks its swing up where it left it
+    releaseParallax();      // the frozen lean is stale; the next move re-aims it
     // Snap to the nearest tick that still lies inside the record.
     const snapped = detentTarget(state.R, slots, pen);
     goTo(clampOffset(offsetFromAngle(snapped, slots, pen, aperture), total, slots, aperture), now());
@@ -979,6 +1332,7 @@ function boot(canvas) {
   });
 
   canvas.addEventListener('pointermove', (event) => {
+    trackParallax(event);
     if (!drag.down) { onHoverMove(event); return; }
     const dx = event.clientX - drag.x0;
     const dy = event.clientY - drag.y0;
@@ -987,6 +1341,7 @@ function boot(canvas) {
       const moved = drag.touch ? Math.abs(dx) >= TOUCH_SLOP : Math.hypot(dx, dy) >= MOUSE_SLOP;
       if (!moved) return;
       drag.captured = true;
+      sway.paused = true;   // a hand on the drum stops the eye, not the other way round
       state.mode = 'frozen';
       stopBeats();
       glide.active = false;
@@ -997,7 +1352,9 @@ function boot(canvas) {
       drag.y0 = event.clientY;
       setHover(null);
       canvas.style.cursor = 'grabbing';
-      if (canvas.setPointerCapture) canvas.setPointerCapture(drag.id);
+      // A pointer that is already gone (a cancelled touch, a synthetic event)
+      // must not abort the press half-way through.
+      try { if (canvas.setPointerCapture) canvas.setPointerCapture(drag.id); } catch (_) { /* uncaptured drag still works */ }
     }
     const box = canvas.getBoundingClientRect();
     const width = Math.max(1, box.width);
@@ -1014,8 +1371,11 @@ function boot(canvas) {
   canvas.addEventListener('pointerup', (event) => { if (event.pointerId === drag.id) endDrag(false); });
   canvas.addEventListener('pointercancel', (event) => { if (event.pointerId === drag.id) endDrag(true); });
   canvas.addEventListener('lostpointercapture', (event) => { if (event.pointerId === drag.id && drag.down && drag.captured) endDrag(true); });
-  window.addEventListener('blur', () => { if (drag.down) endDrag(true); });
+  window.addEventListener('blur', () => { releaseParallax(); if (drag.down) endDrag(true); });
   canvas.addEventListener('pointerleave', (event) => {
+    // The lean goes back to centre at once; the cursor and the caption still
+    // get their 0.55 s of grace.
+    releaseParallax();
     // A captured drag keeps running outside the box; only a gesture that never
     // became one is cancelled here.
     if (drag.down && !drag.captured && event.pointerId === drag.id) endDrag(true);
@@ -1029,9 +1389,10 @@ function boot(canvas) {
     hover.inside = true;
     hover.x = event.clientX;
     hover.y = event.clientY;
+    trackParallax(event);
     // The drum finishes the step it is in and then waits.
     if (state.mode === 'idle') state.mode = 'held';
-    setHover(pickItem(event));
+    setHover(pickAt(event.clientX, event.clientY));
   });
   canvas.style.cursor = 'grab';
 
@@ -1101,7 +1462,16 @@ function boot(canvas) {
   // Lifecycle ------------------------------------------------------------
   function onMotionPreference() {
     if (reducedMotion.matches) { stopFrame(); showTerminal(); requestFrame(); }
-    else { state.mode = 'idle'; resumeBeats(); requestFrame(); }
+    else {
+      // Coming back to motion starts the swing over from the design frame.
+      sway.enabled = true;
+      sway.paused = false;
+      sway.t = 0;
+      parallax.enabled = !compact.matches && hoverPointer.matches;
+      state.mode = 'idle';
+      resumeBeats();
+      requestFrame();
+    }
   }
   if (reducedMotion.addEventListener) reducedMotion.addEventListener('change', onMotionPreference);
   else reducedMotion.addListener(onMotionPreference);
@@ -1109,9 +1479,18 @@ function boot(canvas) {
     chromeOn = !compact.matches;
     timing = compact.matches ? TIMING.mobile : TIMING.desktop;
     if (ticks) ticks.visible = chromeOn;
+    setShadows(compact.matches ? false : shadowTier());
+    parallax.enabled = !compact.matches && !reducedMotion.matches && hoverPointer.matches;
     applyChrome();
     writeSource();
     requestFrame();
+  }
+
+  // The map size this machine has earned, so a width change does not undo an
+  // auto-downgrade.
+  function shadowTier() {
+    if (perf.tier >= 2) return false;
+    return perf.tier >= 1 ? SHADOW_MAP_LOW : SHADOW_MAP;
   }
   if (compact.addEventListener) compact.addEventListener('change', onCompactChange);
   if (narrow.addEventListener) narrow.addEventListener('change', writeSource);
@@ -1137,6 +1516,7 @@ function boot(canvas) {
   canvas.addEventListener('webglcontextrestored', () => {
     if (figure) figure.classList.add('market-ready');
     dirty = true;
+    casters.dirty = true;  // the shadow map went with the context and only a caster's move redraws it
     resize();
     requestFrame();
   });
@@ -1156,7 +1536,38 @@ function boot(canvas) {
   if (figure) figure.classList.add('market-ready');
   requestFrame();
   if (/[?&]debug\b/.test(window.location.search)) {
-    canvas.__market = { items, camera, renderer, scene, inner, outer, dial, resize, render, state, setOffset, placeCamera, captionEl, frame, showTerminal, arrival, beat };
+    // Everything the acceptance pass reads: seek the swing, freeze either
+    // motion, rebuild the shadow map, and turn a point in the tilted frame into
+    // the CSS pixels a screenshot is measured in.
+    sway.seek = (t) => {
+      sway.enabled = true;   // seeking the swing means showing it, even after showTerminal()
+      sway.paused = false;
+      sway.t = t;
+      updateView(0);
+      placeCamera(1, 1);
+      updateLabels();
+      maybeRewriteDepth();
+      render();
+    };
+    const setSway = (on) => { sway.enabled = !!on; clock.last = NaN; requestFrame(); };
+    const setParallax = (on) => {
+      parallax.enabled = !!on;
+      if (!parallax.enabled) { parallax.target.az = 0; parallax.target.el = 0; }
+      requestFrame();
+    };
+    const pose = () => ({ az: view.az, el: view.el, eye: camera.position.toArray() });
+    const project = (point) => {
+      outer.updateWorldMatrix(true, false);
+      probe.set(point[0], point[1], point[2]);
+      outer.localToWorld(probe).project(camera);
+      return [(probe.x * 0.5 + 0.5) * canvas.clientWidth, (0.5 - probe.y * 0.5) * canvas.clientHeight];
+    };
+    canvas.__market = {
+      items, camera, renderer, scene, inner, outer, dial, resize, render, state, setOffset, placeCamera,
+      captionEl, frame, showTerminal, arrival, beat, hover, view,
+      sway, setSway, parallax, setParallax, setShadows, shadows, pose, project, counters,
+      disc: outer.userData.disc, lights, perf
+    };
   }
 }
 

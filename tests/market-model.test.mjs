@@ -8,6 +8,8 @@ const { windowOf, isVisible, clampOffset, slotOf, inWindow } = model;
 const { penAzimuth, drumAngle, offsetFromAngle, slotFromLocal, detentTarget, dragAngle } = model;
 const { beatPhase, depthFade, retarget, tweenValue, cubicBezier } = model;
 const { formatPrice, formatReturn, captionLines } = model;
+const { SWAY, PARALLAX, DEPTH_REWRITE, LABEL_FACING_BAND, HOVER_STICK } = model;
+const { swayAngle, pointerNormal, parallaxTarget, damp, cameraPose, facingWeight, stickySlot } = model;
 
 const near = (actual, expected, eps = 1e-9) =>
   assert.ok(Math.abs(actual - expected) <= eps, `expected ${actual} ≈ ${expected}`);
@@ -347,4 +349,220 @@ test('depthFade works with the renderer\'s view-space band where near is larger 
   near(depthFade(-13.35, -6.9, -19.8, 0.3), 0.15);
   near(depthFade(-3, -6.9, -19.8, 0.3), 0);
   near(depthFade(-25, -6.9, -19.8, 0.3), 0.3);
+});
+
+test('the drift constants are the angles and the time constant the viewpoint is specified in', () => {
+  near(SWAY.amplitude, 0.24434609527920614);
+  near(SWAY.amplitude, 14 * Math.PI / 180, 0);           // 14° each way
+  assert.equal(SWAY.period, 48);
+  near(PARALLAX.azimuth, 0.03490658503988659);
+  near(PARALLAX.azimuth, 2 * Math.PI / 180, 0);
+  near(PARALLAX.elevation, 0.017453292519943295);
+  near(PARALLAX.elevation, Math.PI / 180, 0);
+  assert.equal(PARALLAX.tau, 0.25);
+  near(DEPTH_REWRITE.azimuth, 0.5 * Math.PI / 180, 0);
+  near(DEPTH_REWRITE.elevation, 0.25 * Math.PI / 180, 0);
+  assert.equal(LABEL_FACING_BAND, 0.12);
+  assert.equal(HOVER_STICK, 0.15);
+});
+
+test('swayAngle is the 48 s sine the camera azimuth rides, 14° either way', () => {
+  const A = SWAY.amplitude, P = SWAY.period;
+  assert.equal(swayAngle(0), 0);                        // t = 0 is the design frame
+  near(swayAngle(P / 4), A, 1e-12);
+  near(swayAngle(P / 2), 0, 1e-12);
+  near(swayAngle(3 * P / 4), -A, 1e-12);
+  near(swayAngle(P / 8), A * Math.SQRT1_2, 1e-12);
+  near(swayAngle(P / 8), 0.172779, 5e-7);               // the spec table quotes six decimals
+  near(swayAngle(3.3), 0.102298, 5e-7);                 // first beat of a first visit: 5.861°
+  near(swayAngle(1.1), 0.035062, 5e-7);                 // first beat of a return visit: 2.009°
+  near(swayAngle(-12), -A, 1e-12);                      // odd, though the sway clock never runs back
+  near((swayAngle(1e-4) - 0) / 1e-4, 0.031985, 1e-6);   // peak angular speed A·ω, 1.833°/s
+  near(swayAngle(3, 2, 12), 2, 1e-12);                  // amplitude and period are overridable
+});
+
+test('sway plus parallax keeps the camera within 16° of the design azimuth, so the pen stays in front', () => {
+  const limit = 16 * Math.PI / 180;
+  for (let i = 0; i <= 960; i += 1) {
+    const t = i / 10;                                   // [0, 96] s, two full periods
+    const off = Math.abs(swayAngle(t)) + PARALLAX.azimuth;
+    assert.ok(off <= limit, `t = ${t}: ${off} > ${limit}`);
+  }
+});
+
+const heroBox = { left: 100, top: 50, width: 680, height: 460 };
+
+test('pointerNormal maps the hero box to [-1, 1] with y up, and clamps outside it', () => {
+  assert.deepEqual(pointerNormal(100, 50, heroBox), { nx: -1, ny: 1 });      // top left
+  assert.deepEqual(pointerNormal(780, 510, heroBox), { nx: 1, ny: -1 });     // bottom right
+  assert.deepEqual(pointerNormal(440, 280, heroBox), { nx: 0, ny: 0 });      // centre
+  assert.deepEqual(pointerNormal(900, 280, heroBox), { nx: 1, ny: 0 });      // off to the right
+  assert.deepEqual(pointerNormal(440, -400, heroBox), { nx: 0, ny: 1 });     // off the top
+  const quarter = pointerNormal(270, 165, heroBox);
+  near(quarter.nx, -0.5); near(quarter.ny, 0.5);
+  // A box that has not been laid out yet cannot be normalised against.
+  assert.deepEqual(pointerNormal(440, 280, { left: 0, top: 0, width: 0, height: 460 }), { nx: 0, ny: 0 });
+  assert.deepEqual(pointerNormal(440, 280, { left: 0, top: 0, width: 680, height: 0 }), { nx: 0, ny: 0 });
+});
+
+test('parallaxTarget scales the clamped pointer to 2° of azimuth and 1° of elevation', () => {
+  assert.deepEqual(parallaxTarget(0, 0), { az: 0, el: 0 });
+  const tr = parallaxTarget(1, 1);
+  near(tr.az, 0.034907, 5e-7); near(tr.el, 0.017453, 5e-7);   // six decimals in the spec table
+  near(tr.az, PARALLAX.azimuth, 0); near(tr.el, PARALLAX.elevation, 0);
+  const bl = parallaxTarget(-1, -1);
+  near(bl.az, -PARALLAX.azimuth, 0); near(bl.el, -PARALLAX.elevation, 0);
+  const br = parallaxTarget(1, -1);
+  near(br.az, PARALLAX.azimuth, 0); near(br.el, -PARALLAX.elevation, 0);
+  const out = parallaxTarget(2, -3);                          // clamped, not scaled past the limit
+  near(out.az, PARALLAX.azimuth, 0); near(out.el, -PARALLAX.elevation, 0);
+  const half = parallaxTarget(NaN, 0.5);                      // a non-finite axis reads as centred
+  assert.equal(half.az, 0);
+  near(half.el, 0.008727, 5e-7);
+  near(half.el, PARALLAX.elevation / 2);
+  const wide = parallaxTarget(1, 1, 0.1, 0.05);               // the limits are overridable
+  near(wide.az, 0.1); near(wide.el, 0.05);
+});
+
+test('damp is the frame-rate independent exponential the parallax rides in on', () => {
+  near(damp(0, 1, 0.25, 0.25), 0.632121, 5e-7);        // one time constant
+  near(damp(0, 1, 0.25, 0.25), 1 - Math.exp(-1));
+  near(damp(0, 1, 0.75, 0.25), 0.950213, 5e-7);        // 3τ is 95 % of the way there
+  assert.ok(damp(0, 1, 0.75, 0.25) >= 0.95);
+  near(damp(0, 1, 1 / 60, 0.25), 0.064493, 5e-7);      // the blend a 60 fps frame applies
+  // Three short frames land where one long frame does: dt never changes the curve.
+  let stepped = 0;
+  for (let i = 0; i < 3; i += 1) stepped = damp(stepped, 1, 0.25, 0.25);
+  near(stepped, damp(0, 1, 0.75, 0.25), 1e-12);
+  assert.equal(damp(5, 5, 0.1, 0.25), 5);              // already there
+  assert.equal(damp(0, 1, 0, 0.25), 0);                // a zero-length frame moves nothing
+  assert.equal(damp(0, 1, -1, 0.25), 0);               // nor does a clock that went backwards
+  near(damp(0, 1, 10, 0.25), 1);                       // 40τ has arrived
+  assert.equal(damp(0, 1, 0.1, 0), 1);                 // no time constant: snap
+  assert.equal(damp(0, 1, NaN, 0.25), 1);              // a broken dt snaps rather than poisoning the state
+});
+
+test('damp never overshoots, at any frame length or in either direction', () => {
+  // Once the exponential has fully decayed the result is the target to within a
+  // rounding step of it (a - (a - b)·1 is not bit-exact); the spec allows 1e-9
+  // there, and the real bound is an ulp, so hold the interval to 1e-12.
+  const slack = 1e-12;
+  const between = (v, a, b) => v >= Math.min(a, b) - slack && v <= Math.max(a, b) + slack;
+  for (const dt of [0, 1e-6, 1 / 240, 1 / 60, 0.1, 0.5, 3, 1e4]) {
+    assert.ok(between(damp(0.2, 0.8, dt, 0.25), 0.2, 0.8), `rising, dt = ${dt}`);
+    assert.ok(between(damp(0.8, 0.2, dt, 0.25), 0.2, 0.8), `falling, dt = ${dt}`);
+    const signed = damp(-PARALLAX.azimuth, PARALLAX.azimuth, dt, PARALLAX.tau);
+    assert.ok(between(signed, -PARALLAX.azimuth, PARALLAX.azimuth), `signed, dt = ${dt}`);
+    // Monotone: it only ever moves toward the target.
+    assert.ok(damp(0.2, 0.8, dt, 0.25) >= 0.2 - slack && damp(0.8, 0.2, dt, 0.25) <= 0.8 + slack);
+  }
+});
+
+const DESIGN_EYE = [13, 8, 4];
+const DESIGN_LOOK = [0, -0.5, 0];
+const deg = (d) => d * Math.PI / 180;
+const nearEye = (pose, expected, eps) => {
+  near(pose.eye[0], expected[0], eps);
+  near(pose.eye[1], expected[1], eps);
+  near(pose.eye[2], expected[2], eps);
+};
+
+test('cameraPose offsets the design eye in azimuth and elevation without moving it off its sphere', () => {
+  const base = cameraPose(DESIGN_EYE, DESIGN_LOOK, 0, 0);
+  nearEye(base, DESIGN_EYE, 1e-12);                     // no offset: the frame today ships
+  near(base.azimuth, -0.298499, 5e-7);                  // −17.103°, six decimals in the spec table
+  near(base.elevation, 0.558551, 5e-7);                 // 32.003°
+  near(base.distance, 16.039015, 5e-7);
+  near(base.distance, Math.sqrt(257.25));               // |(13, 8.5, 4)|
+  nearEye(cameraPose(DESIGN_EYE, DESIGN_LOOK, Math.PI / 2, 0), [4, 8, -13], 1e-12);
+  nearEye(cameraPose(DESIGN_EYE, DESIGN_LOOK, deg(14), 0), [13.581532, 8, 0.736198], 5e-7);
+  nearEye(cameraPose(DESIGN_EYE, DESIGN_LOOK, deg(-14), 0), [11.646, 8, 7.026], 1e-3);
+  nearEye(cameraPose(DESIGN_EYE, DESIGN_LOOK, deg(2), deg(1)), [12.986457, 8.236084, 3.504679], 5e-7);
+  // Straight overhead and dead level. The spec quotes the elevation offset to
+  // six decimals, so the residual tilt is ~5e-7 rad and moves the eye ~1e-5.
+  nearEye(cameraPose(DESIGN_EYE, DESIGN_LOOK, 0, Math.PI / 2 - 0.558551), [0, 15.539015, 0], 1e-5);
+  nearEye(cameraPose(DESIGN_EYE, DESIGN_LOOK, 0, -0.558551), [15.329754, -0.5, 4.716847], 1e-5);
+  // Exactly, with the elevation the pose itself reports rather than the printed one.
+  nearEye(cameraPose(DESIGN_EYE, DESIGN_LOOK, 0, Math.PI / 2 - base.elevation),
+    [0, DESIGN_LOOK[1] + base.distance, 0], 1e-9);
+  nearEye(cameraPose(DESIGN_EYE, DESIGN_LOOK, 0, -base.elevation),
+    [base.distance * Math.cos(base.azimuth), -0.5, -base.distance * Math.sin(base.azimuth)], 1e-9);
+});
+
+test('cameraPose holds the distance and adds the azimuth offset, for every offset the drift can reach', () => {
+  const base = cameraPose(DESIGN_EYE, DESIGN_LOOK, 0, 0);
+  const reach = SWAY.amplitude + PARALLAX.azimuth;
+  for (let i = 0; i <= 200; i += 1) {
+    const az = -reach + 2 * reach * i / 200;
+    const el = -PARALLAX.elevation + 2 * PARALLAX.elevation * i / 200;
+    const pose = cameraPose(DESIGN_EYE, DESIGN_LOOK, az, el);
+    const radius = Math.hypot(pose.eye[0] - DESIGN_LOOK[0], pose.eye[1] - DESIGN_LOOK[1], pose.eye[2] - DESIGN_LOOK[2]);
+    near(radius, base.distance);
+    near(radius, 16.039015, 5e-7);
+    near(pose.azimuth, base.azimuth + az, 1e-12);
+    near(pose.elevation, base.elevation + el, 1e-12);
+    near(pose.distance, base.distance, 0);
+  }
+});
+
+test('cameraPose is the identity on the dolly start, so the arrival is the composition it always was', () => {
+  const far = DESIGN_EYE.map((v) => v * 17.4 / 15.78);
+  nearEye(cameraPose(far, DESIGN_LOOK, 0, 0), far, 1e-12);
+  const exact = DESIGN_EYE.map((v) => v * 17.4 / Math.hypot(...DESIGN_EYE));
+  nearEye(cameraPose(exact, DESIGN_LOOK, 0, 0), exact, 1e-12);
+  near(cameraPose(exact, DESIGN_LOOK, 0, 0).distance, Math.hypot(exact[0], exact[1] + 0.5, exact[2]));
+});
+
+test('facingWeight smoothsteps a label across the facing band instead of blinking it on', () => {
+  assert.equal(facingWeight(0.30), 0);                  // the old hard threshold, now the band's floor
+  assert.equal(facingWeight(0.42), 1);                  // threshold + band
+  near(facingWeight(0.36), 0.5);                        // the middle of a smoothstep is a half
+  near(facingWeight(0.33), 0.15625);                    // u = 0.25 → 0.25²(3 − 0.5)
+  assert.equal(facingWeight(0), 0);                     // edge on
+  assert.equal(facingWeight(1), 1);                     // square on
+  assert.equal(facingWeight(-1), 0);                    // facing away
+  assert.equal(facingWeight(0.29), 0);                  // clamped below, not negative
+  // Monotone and inside [0, 1] across and beyond the band.
+  let previous = -1;
+  for (let i = 0; i <= 100; i += 1) {
+    const w = facingWeight(0.25 + 0.25 * i / 100);
+    assert.ok(w >= 0 && w <= 1);
+    assert.ok(w >= previous);
+    previous = w;
+  }
+  // The four labels the terminal frame shows all clear the band, so the
+  // reduced-motion still frame keeps exactly the labels it has today.
+  for (const dot of [0.746, 0.833, 0.711, 0.453]) assert.equal(facingWeight(dot), 1);
+  // The threshold and the band are overridable.
+  near(facingWeight(0.5, 0.4, 0.2), 0.5);
+  assert.equal(facingWeight(0.5, 0.5, 0.2), 0);
+});
+
+test('stickySlot holds the slot it has until the pointer is a sixth of a slot past the boundary', () => {
+  assert.equal(stickySlot(3.6, 3, 55), 3);              // 0.60 inside the 0.65 band: held
+  assert.equal(stickySlot(3.66, 3, 55), 4);             // 0.66 past it: let go
+  assert.equal(stickySlot(2.36, 3, 55), 3);
+  assert.equal(stickySlot(2.34, 3, 55), 2);
+  assert.equal(stickySlot(54.6, 0, 55), 0);             // the band wraps round the ring
+  assert.equal(stickySlot(-0.5, 54, 55), 54);           // and wraps the other way
+  assert.equal(stickySlot(0.4, 54, 55), 0);             // 1.4 slots round the ring: not held
+  assert.equal(stickySlot(0.7, null, 55), 1);           // nothing hovered yet: nearest slot
+  assert.equal(stickySlot(-0.3, null, 55), 0);
+  assert.equal(stickySlot(-0.6, null, 55), 54);
+  assert.equal(stickySlot(54.7, null, 55), 0);          // wrapped past the end of the ring
+  assert.ok(Object.is(stickySlot(-0.3, null, 55), 0));  // +0, so the slot indexes an array
+  assert.equal(stickySlot(3.6, undefined, 55), 4);      // no current slot, however it is spelled
+  assert.equal(stickySlot(3.9, 3, 55, 0.5), 3);         // the band is overridable
+  assert.equal(stickySlot(3.6, 3, 55, 0), 4);           // and a zero band is just rounding
+});
+
+test('stickySlot with no current slot is exactly slotFromLocal, over a hundred angles', () => {
+  const step = TAU / 55;
+  for (let i = 0; i < 100; i += 1) {
+    const k = i * 0.37;                                 // a fractional slot, deterministic
+    const angle = k * step;                             // the angle ringPosition would place it at
+    const x = 7.2 * Math.cos(angle);
+    const z = -7.2 * Math.sin(angle);                   // ringPosition negates z
+    assert.equal(stickySlot(k, null, 55), slotFromLocal(x, z, 55), `k = ${k}`);
+  }
 });
