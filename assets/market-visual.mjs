@@ -11,7 +11,7 @@ import * as THREE from 'three';
 import { Line2 } from 'three/addons/lines/Line2.js';
 import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
-import series, { meta } from './market-data.mjs';
+import series, { meta } from './market-data.mjs?v=pen-and-drum-4';
 import {
   TAU, COLOURS, EASE, TIMING, GLYPH_RATIO, DEFAULT_APERTURE,
   SWAY, PARALLAX, DEPTH_REWRITE, LABEL_FACING_BAND, HOVER_STICK,
@@ -20,7 +20,7 @@ import {
   penAzimuth, drumAngle, offsetFromAngle, detentTarget,
   dragAngle, beatPhase, depthFade, retarget, tweenValue, captionLines, formatPrice,
   swayAngle, pointerNormal, parallaxTarget, damp, cameraPose, facingWeight, stickySlot
-} from './market-model.mjs';
+} from './market-model.mjs?v=pen-and-drum-4';
 
 // Geometry — the three radii and the tilt are the reference composition's.
 const SCALE = 1.2;
@@ -102,11 +102,14 @@ const LABEL_LIFT = 0.205;     // planeHeight/2 + 0.02: the date stands on the di
 // leans up to 2° toward the pointer; both rules are the model's, only their
 // clocks live here.
 const VIEW_EPSILON = 1e-6;    // rad of view change worth a lookAt
+const ARRIVAL_INSTANT = 0.01;  // s; a dolly or tilt this short starts at its end pose
 const FRAME_DT_MAX = 0.1;     // s; a tab that was away never fast-forwards the sway
 const PHONE_FRAME_MS = 28;    // pure sway frames run at 30 fps on a phone
 const PERF_WINDOW = 120;      // render frames between auto-downgrade checks
 const PERF_SLOW_MS = 20;
 const PERF_VERY_SLOW_MS = 24;
+const PERF_CADENCE_RATIO = 1.4;  // a window is slow only when its mean is this far above its fastest frame
+const PERF_FLOOR_MS = 48;        // ...or slower than any display refreshes
 
 // Depth cue: instance colours are pulled toward the page's navy once per step,
 // never per frame, and never through a fog that would touch the line materials.
@@ -223,7 +226,7 @@ function boot(canvas) {
 
   // Scene graph ----------------------------------------------------------
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(BASE_FOV, 1, 0.1, 1000);
+  const camera = new THREE.PerspectiveCamera(BASE_FOV, 1, 2, 200);
   const focus = new THREE.Group();
   const outer = new THREE.Group();   // holds the tilt; the dial rides here, fixed
   const inner = new THREE.Group();   // the drum; its rotation.y is the only motion
@@ -357,21 +360,20 @@ function boot(canvas) {
 
   // The one surface in the scene that receives: a shadow-only plane a
   // millimetre above the top face, offset toward the eye so the two never
-  // fight. A phone has no shadows, so it has no plane either.
-  let shadowPlane = null;
-  if (!compact.matches) {
-    shadowPlane = new THREE.Mesh(
-      new THREE.CircleGeometry(DISC_R, DISC_SEGMENTS),
-      new THREE.ShadowMaterial({
-        color: 0x000000, opacity: SHADOW_ALPHA, transparent: true, depthWrite: false,
-        polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1
-      })
-    );
-    shadowPlane.rotation.x = -Math.PI / 2;
-    shadowPlane.position.y = SHADOW_Y;
-    shadowPlane.receiveShadow = true;
-    outer.add(shadowPlane);
-  }
+  // fight. It is built on every device and shown only while the pass runs, so
+  // a window that boots narrow still gets its shadows when it widens.
+  const shadowPlane = new THREE.Mesh(
+    new THREE.CircleGeometry(DISC_R, DISC_SEGMENTS),
+    new THREE.ShadowMaterial({
+      color: 0x000000, opacity: SHADOW_ALPHA, transparent: true, depthWrite: false,
+      polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1
+    })
+  );
+  shadowPlane.rotation.x = -Math.PI / 2;
+  shadowPlane.position.y = SHADOW_Y;
+  shadowPlane.receiveShadow = true;
+  shadowPlane.visible = !compact.matches;
+  outer.add(shadowPlane);
   outer.userData.disc = { top: disc, side: discSide, edge: discEdge, plane: shadowPlane };
 
   // The dial ------------------------------------------------------------
@@ -457,13 +459,13 @@ function boot(canvas) {
   const placed = { az: NaN, el: NaN };
   const sway = { t: 0, paused: false, enabled: true };
   const parallax = {
-    az: 0, el: 0, target: { az: 0, el: 0 },
+    az: 0, el: 0, target: { az: 0, el: 0 }, last: { x: NaN, y: NaN },
     enabled: !compact.matches && !reducedMotion.matches && hoverPointer.matches
   };
   const shadows = { enabled: !compact.matches, size: SHADOW_MAP };
   const casters = { dirty: true };   // the shadow map is redrawn only after a caster moved
   const counters = { renders: 0, shadowPasses: 0 };
-  const perf = { tier: 0, frames: 0, sum: 0, mean: 0 };
+  const perf = { tier: 0, frames: 0, sum: 0, min: Infinity, mean: 0 };
   const baseEye = [0, 0, 0];
   // The candle band's middle, 2.46: the height the pointer picks at and the
   // depth the fade is measured at.
@@ -476,9 +478,11 @@ function boot(canvas) {
   const UP = new THREE.Vector3(0, 1, 0);
   const PICK_INNER = 0.6 * CANDLE_RING;
   const PICK_OUTER = CURSOR_OUTER;
+  const PICK_STICK = 0.25;   // radial hysteresis while a session is held, in world units
   const ndc = new THREE.Vector2();
   let chrome = 0;   // blades and labels fade up together at the end of the arrival
-  let inView = true;
+  let inView = !('IntersectionObserver' in window);   // with an observer, the first frame waits for its verdict
+  let contextLost = false;
   let dirty = true;
 
   function now() { return performance.now() / 1000; }
@@ -645,6 +649,7 @@ function boot(canvas) {
     placed.az = view.az;
     placed.el = view.el;
     const lean = EASE.camera(clamp01(tilt));
+    if (outer.rotation.x !== TILT * lean) casters.dirty = true;   // the tilt carries every caster with it
     outer.rotation.x = TILT * lean;
     outer.rotation.z = -TILT * lean;
     outer.updateMatrixWorld(true);
@@ -857,19 +862,25 @@ function boot(canvas) {
     }
     boxes.instanceMatrix.needsUpdate = true;
     wicks.instanceMatrix.needsUpdate = true;
-    // Measure the depth band and the label facings against the camera the
-    // arrival ends on, so nothing changes colour when it gets there.
+    // Measure the depth band and the label facings at the design frame; the
+    // sway then rewrites them at a few hertz, during the arrival like any
+    // other time, so nothing steps when it ends.
     placeCamera(1, 1);
     afterStep();
-    placeCamera(0);
+    placeCamera(arrivalPhase(0, plan.dollySeconds), arrivalPhase(0, plan.tiltSeconds));
     if (captionEl) captionEl.classList.toggle('is-pending', plan.captionAt > 0);
     requestFrame();
   }
 
+  // A phase the plan makes instantaneous (the revisit's dolly and tilt) is at
+  // its end from the first frame, so the plinth is never painted small and
+  // untilted for one frame before the cut.
+  function arrivalPhase(t, seconds) { return seconds <= ARRIVAL_INSTANT ? 1 : t / seconds; }
+
   function updateArrival(time) {
     const t = time - arrival.start;
     const plan = arrival.plan;
-    placeCamera(t / plan.dollySeconds, t / plan.tiltSeconds);
+    placeCamera(arrivalPhase(t, plan.dollySeconds), arrivalPhase(t, plan.tiltSeconds));
     const drawn = span(t, plan.dialFrom, plan.dialTo);
     if (plan.drawRim) {
       rimGeometry.setDrawRange(0, Math.max(2, Math.round(RIM_POINTS * drawn)));
@@ -1027,12 +1038,11 @@ function boot(canvas) {
     if (updateTweens(time)) busy = true;
     if (updateCursor(time)) busy = true;
     // Everything that reads the camera is recomputed here, once, and only on
-    // the frames where the eye actually moved. The arrival keeps the depth band
-    // it measured against the camera it ends on.
+    // the frames where the eye actually moved.
     if (viewChanged) {
       updateLabels();
       if (hover.inside && !drag.captured) repick();
-      if (!arrival.active) maybeRewriteDepth();
+      maybeRewriteDepth();
     }
     if (dirty) { render(); clock.lastRender = stamp; }
     clock.busy = busy;
@@ -1069,35 +1079,45 @@ function boot(canvas) {
   // Shadows are the one thing this scene gives up under load: first the map
   // size, then the shadows themselves, then half the sway frames. It only ever
   // steps down, and it never reads the hardware.
+  // The interval between drawn frames is the only clock a page has, but it is
+  // the display's clock too: a 30 Hz screen or a low-power cap reads as 33 ms
+  // over an idle GPU. So a window counts as slow only when its mean sits well
+  // above its own fastest frame — the renderer, not the refresh, is stretching
+  // it — or is slower than any display runs at. Stalled frames count in full.
   function samplePerf(dt) {
     if (compact.matches || arrival.active || perf.tier >= 3 || !motionOn()) return;
-    if (!(dt > 0) || dt >= FRAME_DT_MAX) return;
+    if (!(dt > 0)) return;
     perf.sum += dt;
     perf.frames += 1;
+    if (dt < perf.min) perf.min = dt;
     if (perf.frames < PERF_WINDOW) return;
     perf.mean = perf.sum / perf.frames * 1000;
+    const cadence = perf.min * 1000 * PERF_CADENCE_RATIO;
+    const slow = perf.mean > Math.max(PERF_SLOW_MS, cadence) || perf.mean > PERF_FLOOR_MS;
+    const verySlow = perf.mean > Math.max(PERF_VERY_SLOW_MS, cadence) || perf.mean > PERF_FLOOR_MS;
     perf.sum = 0;
     perf.frames = 0;
-    if (perf.tier === 0 && perf.mean > PERF_SLOW_MS) { perf.tier = 1; setShadows(SHADOW_MAP_LOW); }
-    else if (perf.tier === 1 && perf.mean > PERF_SLOW_MS) { perf.tier = 2; setShadows(false); }
-    else if (perf.tier === 2 && perf.mean > PERF_VERY_SLOW_MS) perf.tier = 3;
+    perf.min = Infinity;
+    if (perf.tier === 0 && slow) { perf.tier = 1; setShadows(SHADOW_MAP_LOW); }
+    else if (perf.tier === 1 && slow) { perf.tier = 2; setShadows(false); }
+    else if (perf.tier === 2 && verySlow) perf.tier = 3;
   }
 
-  // `false`, 1024 or 2048. A phone booted without a shadow plane has nothing to
-  // receive, so it stays off whatever the width does afterwards.
+  // `false`, 1024 or 2048. Turning the pass off drops the map as well, so a
+  // machine judged too slow for shadows is not left holding their memory.
   function setShadows(mapSize) {
-    const on = !!mapSize && shadowPlane !== null;
+    const on = !!mapSize;
     shadows.enabled = on;
     if (on) shadows.size = mapSize;
     renderer.shadowMap.enabled = on;
     key.castShadow = on;
     boxes.castShadow = on;
     wicks.castShadow = on;
-    if (on && key.shadow.mapSize.width !== mapSize) {
-      if (key.shadow.map) { key.shadow.map.dispose(); key.shadow.map = null; }
-      key.shadow.mapSize.set(mapSize, mapSize);
-    }
-    if (shadowPlane) shadowPlane.visible = on;
+    // The map is dropped when the pass goes off or changes size; three.js
+    // allocates it again at the next pass, at the size set here.
+    if (key.shadow.map && (!on || key.shadow.mapSize.width !== mapSize)) { key.shadow.map.dispose(); key.shadow.map = null; }
+    if (on) key.shadow.mapSize.set(mapSize, mapSize);
+    shadowPlane.visible = on;
     // Turning the pass on or off changes the programs the lit materials need.
     boxes.material.needsUpdate = true;
     wicks.material.needsUpdate = true;
@@ -1106,7 +1126,7 @@ function boot(canvas) {
     requestFrame();
   }
 
-  function canDraw() { return inView && !document.hidden; }
+  function canDraw() { return inView && !contextLost && !document.hidden; }
 
   function requestFrame() {
     if (!clock.frameId && canDraw()) clock.frameId = window.requestAnimationFrame(frame);
@@ -1168,7 +1188,10 @@ function boot(canvas) {
     pickRay.copy(raycaster.ray).applyMatrix4(outerInverse);
     if (!pickRay.intersectPlane(pickPlane, pickPoint)) return null;
     const radius = Math.hypot(pickPoint.x, pickPoint.z);
-    if (radius < PICK_INNER || radius > PICK_OUTER) return null;
+    // The annulus gets the same hysteresis as the slot: a pointer parked at
+    // its edge must not see the ring drift in and out under the sway.
+    const stick = hover.item ? PICK_STICK : 0;
+    if (radius < PICK_INNER - stick || radius > PICK_OUTER + stick) return null;
     pickPoint.applyAxisAngle(UP, -state.R);  // outer-local → drum-local
     // The fractional slot, held to the one already under the pointer through a
     // sixth of a slot, so a boundary does not flicker as the eye drifts past it.
@@ -1220,9 +1243,17 @@ function boot(canvas) {
   // a captured drag freezes the target where it was: the pointer is on the
   // drum, not on the camera.
   function trackParallax(event) {
-    if (!parallax.enabled || event.pointerType === 'touch' || drag.captured) return;
+    if (!parallax.enabled) return;
+    if (event.pointerType === 'touch') { releaseParallax(); return; }   // a finger never steers the eye
+    parallax.last.x = event.clientX;
+    parallax.last.y = event.clientY;
+    if (drag.captured) return;   // the hand is on the drum; the lean is re-aimed at release
+    aimParallax(event.clientX, event.clientY);
+  }
+
+  function aimParallax(x, y) {
     const box = (figure || canvas).getBoundingClientRect();
-    const point = pointerNormal(event.clientX, event.clientY, box);
+    const point = pointerNormal(x, y, box);
     const target = parallaxTarget(point.nx, point.ny, PARALLAX.azimuth, PARALLAX.elevation);
     parallax.target.az = target.az;
     parallax.target.el = target.el;
@@ -1230,8 +1261,12 @@ function boot(canvas) {
   }
 
   // A captured drag keeps the target it was caught with, even when the pointer
-  // leaves the box: the hand is on the drum, not on the camera.
+  // leaves the box: the hand is on the drum, not on the camera. The pointer's
+  // last position is forgotten either way, so a release after it has left
+  // does not re-aim at a stale point.
   function releaseParallax() {
+    parallax.last.x = NaN;
+    parallax.last.y = NaN;
     if (drag.captured) return;
     parallax.target.az = 0;
     parallax.target.el = 0;
@@ -1312,7 +1347,9 @@ function boot(canvas) {
     }
     drag.captured = false;
     sway.paused = false;    // the eye picks its swing up where it left it
-    releaseParallax();      // the frozen lean is stale; the next move re-aims it
+    // The lean picks the pointer up where it is, or lets go if it has left.
+    if (parallax.enabled && Number.isFinite(parallax.last.x)) aimParallax(parallax.last.x, parallax.last.y);
+    else releaseParallax();
     // Snap to the nearest tick that still lies inside the record.
     const snapped = detentTarget(state.R, slots, pen);
     goTo(clampOffset(offsetFromAngle(snapped, slots, pen, aperture), total, slots, aperture), now());
@@ -1325,6 +1362,7 @@ function boot(canvas) {
     drag.moved = false;
     drag.down = true;
     drag.captured = false;
+    sway.paused = false;   // a press that never becomes a drag must not leave the eye frozen
     drag.touch = event.pointerType === 'touch';
     drag.x0 = event.clientX;
     drag.y0 = event.clientY;
@@ -1461,15 +1499,21 @@ function boot(canvas) {
 
   // Lifecycle ------------------------------------------------------------
   function onMotionPreference() {
-    if (reducedMotion.matches) { stopFrame(); showTerminal(); requestFrame(); }
-    else {
-      // Coming back to motion starts the swing over from the design frame.
+    if (reducedMotion.matches) {
+      // A hand still on the drum lets go first, so the still is really still.
+      if (drag.down) endDrag(true);
+      glide.active = false;
+      stopFrame(); showTerminal(); requestFrame();
+    } else {
+      // Coming back to motion replays the revisit from where the record had
+      // got to before the still (its start on a first visit), swing and all;
+      // a drag in progress keeps its grip and the arrival waits for it.
       sway.enabled = true;
-      sway.paused = false;
-      sway.t = 0;
       parallax.enabled = !compact.matches && hoverPointer.matches;
-      state.mode = 'idle';
-      resumeBeats();
+      if (!drag.captured) {
+        setOffset(stored.seen ? stored.offset : 0);
+        startArrival(ARRIVAL.revisit, now());
+      }
       requestFrame();
     }
   }
@@ -1493,6 +1537,7 @@ function boot(canvas) {
     return perf.tier >= 1 ? SHADOW_MAP_LOW : SHADOW_MAP;
   }
   if (compact.addEventListener) compact.addEventListener('change', onCompactChange);
+  if (hoverPointer.addEventListener) hoverPointer.addEventListener('change', onCompactChange);   // a mouse plugged in later still earns the lean
   if (narrow.addEventListener) narrow.addEventListener('change', writeSource);
 
   document.addEventListener('visibilitychange', () => {
@@ -1509,11 +1554,13 @@ function boot(canvas) {
   }
   canvas.addEventListener('webglcontextlost', () => {
     // three.js allows the restore itself; show the still until it happens.
+    contextLost = true;
     stopFrame();
     clearWake();
     if (figure) figure.classList.remove('market-ready');
   });
   canvas.addEventListener('webglcontextrestored', () => {
+    contextLost = false;
     if (figure) figure.classList.add('market-ready');
     dirty = true;
     casters.dirty = true;  // the shadow map went with the context and only a caster's move redraws it
@@ -1540,16 +1587,19 @@ function boot(canvas) {
     // motion, rebuild the shadow map, and turn a point in the tilted frame into
     // the CSS pixels a screenshot is measured in.
     sway.seek = (t) => {
-      sway.enabled = true;   // seeking the swing means showing it, even after showTerminal()
-      sway.paused = false;
+      // Seeking shows the swing at t and holds it there: enabled so the angle
+      // applies, paused so no later frame advances it. setSway lets it go.
+      sway.enabled = true;
+      sway.paused = true;
       sway.t = t;
+      clock.last = NaN;
       updateView(0);
       placeCamera(1, 1);
       updateLabels();
       maybeRewriteDepth();
       render();
     };
-    const setSway = (on) => { sway.enabled = !!on; clock.last = NaN; requestFrame(); };
+    const setSway = (on) => { sway.enabled = !!on; sway.paused = false; clock.last = NaN; requestFrame(); };
     const setParallax = (on) => {
       parallax.enabled = !!on;
       if (!parallax.enabled) { parallax.target.az = 0; parallax.target.el = 0; }
@@ -1591,7 +1641,7 @@ function makeLabel(text, renderer) {
   context.font = LABEL_FONT;
   context.textBaseline = 'middle';
   context.fillStyle = COLOURS.accent;
-  context.fillText(text, 0, LABEL_HEIGHT / 2);
+  context.fillText(text, 0, LABEL_HEIGHT / 2, LABEL_WIDTH);   // a wide fallback face condenses rather than overflowing the plinth
   const texture = new THREE.CanvasTexture(source);
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
