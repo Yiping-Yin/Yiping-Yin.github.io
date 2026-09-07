@@ -11,7 +11,7 @@ import * as THREE from 'three';
 import { Line2 } from 'three/addons/lines/Line2.js';
 import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
-import series, { meta } from './market-data.mjs?v=pen-and-drum-5';
+import series, { meta } from './market-data.mjs?v=pen-and-drum-6';
 import {
   TAU, COLOURS, EASE, TIMING, GLYPH_RATIO, DEFAULT_APERTURE,
   SWAY, PARALLAX, DEPTH_REWRITE, LABEL_FACING_BAND, HOVER_STICK,
@@ -20,7 +20,7 @@ import {
   penAzimuth, drumAngle, offsetFromAngle, detentTarget,
   dragAngle, beatPhase, depthFade, retarget, tweenValue, captionLines, formatPrice,
   swayAngle, pointerNormal, parallaxTarget, damp, cameraPose, facingWeight, stickySlot
-} from './market-model.mjs?v=pen-and-drum-5';
+} from './market-model.mjs?v=pen-and-drum-6';
 
 // Geometry — the three radii and the tilt are the reference composition's.
 const SCALE = 1.2;
@@ -59,34 +59,11 @@ const TICK_Y = 0.002;
 const PEN_Y = 0.008;
 const NIB_SIZE = 0.06;
 
-// The plinth. A dark disc the drum stands on, wide enough to clear the ink of
-// the date labels (their outermost mark sits at r 8.91) and unlit, so its
-// colour is a fixed reading rather than a light's. The dial lines all live
-// above its top face, which is the only opaque surface at y = 0.
-const DISC_R = 9.40;
-const DISC_T = 0.12;
-const DISC_SEGMENTS = 180;
-const DISC_COLOUR = 0x061c3a;
-const DISC_SIDE_COLOUR = 0x03101f;
-const DISC_EDGE_COLOUR = 0x8fb0d6;
-const DISC_EDGE_W = 0.10;       // bevel band width, in world units
-const DISC_EDGE_ALPHA = 0.35;
-const DISC_EDGE_Y = 0.003;
-const SHADOW_Y = 0.001;
-const SHADOW_ALPHA = 0.60;
-const SHADOW_MAP = 2048;
-const SHADOW_MAP_LOW = 1024;
-const SHADOW_BIAS = -0.0004;
-const SHADOW_NORMAL_BIAS = 0.01;
-const SHADOW_EXTENT = 10;     // orthographic half-width, in world units, around the origin
-const SHADOW_NEAR = 10;
-const SHADOW_FAR = 28;
-
-// Lights. The key comes from over the reader's left shoulder at 55°, so the
-// faces turned to the reader are the lit ones and each candle's shadow falls
-// behind it and to the right, onto the disc; the rim is the cold edge from
-// the far side. RIM_* is that light, not the
-// dial's rim line above.
+// Lights. The instrument stands on the page itself — there is no ground under
+// it and so no shadows — but the key still comes from over the reader's left
+// shoulder at 55°, so the faces turned to the reader are the lit ones and the
+// bodies have a form to them; the rim is the cold edge from the far side.
+// RIM_* is that light, not the dial's rim line above.
 const AMBIENT = 1.5;
 const KEY_POS = [8.80, 16.20, 7.40];
 const KEY_INTENSITY = 3.0;
@@ -95,8 +72,6 @@ const RIM_COLOUR = 0x8fc0ff;
 const RIM_INTENSITY = 1.6;
 const CANDLE_ROUGHNESS = 0.45;
 const CANDLE_METALNESS = 0.25;
-const BLADE_LIFT = 0.006;     // the blade's ground leg would be eaten by the disc at y = 0
-const LABEL_LIFT = 0.205;     // planeHeight/2 + 0.02: the date stands on the disc
 
 // Motion. The eye swings 14° either side of the design azimuth every 48 s and
 // leans up to 2° toward the pointer; both rules are the model's, only their
@@ -105,9 +80,8 @@ const VIEW_EPSILON = 1e-6;    // rad of view change worth a lookAt
 const ARRIVAL_INSTANT = 0.01;  // s; a dolly or tilt this short starts at its end pose
 const FRAME_DT_MAX = 0.1;     // s; a tab that was away never fast-forwards the sway
 const PHONE_FRAME_MS = 28;    // pure sway frames run at 30 fps on a phone
-const PERF_WINDOW = 120;      // render frames between auto-downgrade checks
-const PERF_SLOW_MS = 20;
-const PERF_VERY_SLOW_MS = 24;
+const PERF_WINDOW = 120;      // drawn frames between frame-rate checks
+const PERF_SLOW_MS = 24;
 const PERF_CADENCE_RATIO = 1.4;  // a window is slow only when its mean is this far above its fastest frame
 const PERF_FLOOR_MS = 48;        // ...or slower than any display refreshes
 
@@ -217,11 +191,6 @@ function boot(canvas) {
   renderer.setClearColor(0x000000, 0);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  // The shadow map is drawn in the key light's frame, so it does not depend on
-  // the camera: it is redrawn only on the frames where a caster actually moved.
-  renderer.shadowMap.enabled = !compact.matches;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  renderer.shadowMap.autoUpdate = false;
   writeSession(startOffset + count - 1);
 
   // Scene graph ----------------------------------------------------------
@@ -236,22 +205,11 @@ function boot(canvas) {
   outer.add(inner, dial);
 
   // Lights live in world space, under the scene rather than the tilted group,
-  // so the key's shadow camera is a fixed box around the origin.
+  // so the drum's tilt does not swing them with it.
   const ambient = new THREE.AmbientLight(0xffffff, AMBIENT);
   const key = new THREE.DirectionalLight(0xffffff, KEY_INTENSITY);
   key.position.set(KEY_POS[0], KEY_POS[1], KEY_POS[2]);
   key.target.position.set(0, 0, 0);
-  key.castShadow = !compact.matches;
-  key.shadow.mapSize.set(SHADOW_MAP, SHADOW_MAP);
-  key.shadow.camera.left = -SHADOW_EXTENT;
-  key.shadow.camera.right = SHADOW_EXTENT;
-  key.shadow.camera.top = SHADOW_EXTENT;
-  key.shadow.camera.bottom = -SHADOW_EXTENT;
-  key.shadow.camera.near = SHADOW_NEAR;
-  key.shadow.camera.far = SHADOW_FAR;
-  key.shadow.camera.updateProjectionMatrix();
-  key.shadow.bias = SHADOW_BIAS;
-  key.shadow.normalBias = SHADOW_NORMAL_BIAS;
   const rimLight = new THREE.DirectionalLight(RIM_COLOUR, RIM_INTENSITY);
   rimLight.position.set(RIM_POS[0], RIM_POS[1], RIM_POS[2]);
   rimLight.target.position.set(0, 0, 0);
@@ -259,13 +217,10 @@ function boot(canvas) {
   const lights = { ambient, key, rim: rimLight };
 
   // Instances: one box mesh holds bodies (0..n), volume bars (n..2n) and the
-  // nib (2n); one cylinder mesh holds the wicks. Both cast onto the plinth and
-  // neither receives: the only receiver in the scene is the shadow plane.
+  // nib (2n); one cylinder mesh holds the wicks.
   const candleMaterial = () => new THREE.MeshStandardMaterial({ roughness: CANDLE_ROUGHNESS, metalness: CANDLE_METALNESS });
   const boxes = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), candleMaterial(), total * 2 + 1);
   const wicks = new THREE.InstancedMesh(new THREE.CylinderGeometry(1, 1, 1), candleMaterial(), total);
-  boxes.castShadow = !compact.matches;
-  wicks.castShadow = !compact.matches;
   inner.add(boxes, wicks);
 
   const accent = new THREE.Color(COLOURS.accent);
@@ -307,8 +262,7 @@ function boot(canvas) {
       const geometry = new LineGeometry();
       geometry.setPositions([0, 0, 0, 0, bar.height, 0, barPos.x, bar.height, barPos.z, barPos.x, 0, barPos.z, 0, 0, 0]);
       const blade = new Line2(geometry, lineMaterial(0xffffff, 0));
-      blade.position.y = BLADE_LIFT;  // its ground leg would otherwise lie inside the disc's top face
-      blade.renderOrder = 1;          // after the shadow plane, with the rest of the dial
+      blade.renderOrder = 1;          // with the rest of the dial
       blade.scale.y = 0.0001;
       blade.visible = false;
       inner.add(blade);
@@ -316,7 +270,7 @@ function boot(canvas) {
 
       const label = makeLabel(row.label, renderer);
       const labelPos = ringPosition(LABEL_RING, slots, slot);
-      label.position.set(labelPos.x, LABEL_LIFT, labelPos.z);  // the plane is centred on its own y, so lift it clear of the disc
+      label.position.set(labelPos.x, 0, labelPos.z);
       label.rotation.y = stepAngle * slot;
       label.renderOrder = 1;
       label.visible = false;
@@ -329,52 +283,6 @@ function boot(canvas) {
   boxes.setColorAt(nibIndex, new THREE.Color(0xffffff)); // the nib never fades
   boxes.instanceColor.needsUpdate = true;
   wicks.instanceColor.needsUpdate = true;
-
-  // The plinth ------------------------------------------------------------
-  // Disc, side and shadow plane hang under `outer`, so they take the same tilt
-  // as the dial and the feet of the volume bars never leave the surface.
-  const disc = new THREE.Mesh(
-    new THREE.CircleGeometry(DISC_R, DISC_SEGMENTS),
-    new THREE.MeshBasicMaterial({ color: DISC_COLOUR, toneMapped: false })
-  );
-  disc.rotation.x = -Math.PI / 2;   // the circle is drawn in xy; lay it flat, facing up
-  outer.add(disc);
-
-  const discSide = new THREE.Mesh(
-    new THREE.CylinderGeometry(DISC_R, DISC_R, DISC_T, DISC_SEGMENTS, 1, true),
-    new THREE.MeshBasicMaterial({ color: DISC_SIDE_COLOUR, toneMapped: false, side: THREE.FrontSide })
-  );
-  discSide.position.y = -DISC_T / 2;  // its top edge meets the top face
-  outer.add(discSide);
-
-  // A bevel band, not a hairline: a tenth of a unit of pale blue at the rim
-  // is what makes the disc read as a machined plinth rather than a cut-out.
-  const discEdge = new THREE.Mesh(
-    new THREE.RingGeometry(DISC_R - DISC_EDGE_W, DISC_R, DISC_SEGMENTS),
-    new THREE.MeshBasicMaterial({ color: DISC_EDGE_COLOUR, transparent: true, opacity: DISC_EDGE_ALPHA, toneMapped: false, depthWrite: false })
-  );
-  discEdge.rotation.x = -Math.PI / 2;
-  discEdge.position.y = DISC_EDGE_Y;
-  discEdge.renderOrder = 1;
-  outer.add(discEdge);
-
-  // The one surface in the scene that receives: a shadow-only plane a
-  // millimetre above the top face, offset toward the eye so the two never
-  // fight. It is built on every device and shown only while the pass runs, so
-  // a window that boots narrow still gets its shadows when it widens.
-  const shadowPlane = new THREE.Mesh(
-    new THREE.CircleGeometry(DISC_R, DISC_SEGMENTS),
-    new THREE.ShadowMaterial({
-      color: 0x000000, opacity: SHADOW_ALPHA, transparent: true, depthWrite: false,
-      polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1
-    })
-  );
-  shadowPlane.rotation.x = -Math.PI / 2;
-  shadowPlane.position.y = SHADOW_Y;
-  shadowPlane.receiveShadow = true;
-  shadowPlane.visible = !compact.matches;
-  outer.add(shadowPlane);
-  outer.userData.disc = { top: disc, side: discSide, edge: discEdge, plane: shadowPlane };
 
   // The dial ------------------------------------------------------------
   const gapFar = pen + (aperture + 0.5) * stepAngle;   // the far edge of the erased slots
@@ -445,7 +353,7 @@ function boot(canvas) {
   const beat = { active: false, from: state.R, to: state.R, stepped: true, nibFrom: 0, nibTo: 0 };
   const arrival = { active: false, begun: false, start: 0, plan: ARRIVAL.first, captioned: false };
   const glide = { active: false, from: 0, to: 0, start: 0, duration: DETENT_SECONDS };
-  const nib = { level: items[startOffset + count - 1].close, scale: 0, tween: null, wrote: { angle: NaN, level: NaN, scale: NaN } };
+  const nib = { level: items[startOffset + count - 1].close, scale: 0, tween: null };
   const drag = { id: -1, down: false, captured: false, touch: false, x0: 0, y0: 0, R0: 0, targetR: 0, crossed: 0, moved: false };
   const hover = { item: null, x: 0, y: 0, releaseId: 0, inside: false };
   const cursor = { value: 0, tween: null };
@@ -462,9 +370,7 @@ function boot(canvas) {
     az: 0, el: 0, target: { az: 0, el: 0 }, last: { x: NaN, y: NaN },
     enabled: !compact.matches && !reducedMotion.matches && hoverPointer.matches
   };
-  const shadows = { enabled: !compact.matches, size: SHADOW_MAP };
-  const casters = { dirty: true };   // the shadow map is redrawn only after a caster moved
-  const counters = { renders: 0, shadowPasses: 0 };
+  const counters = { renders: 0 };
   const perf = { tier: 0, frames: 0, sum: 0, min: Infinity, mean: 0 };
   const baseEye = [0, 0, 0];
   // The candle band's middle, 2.46: the height the pointer picks at and the
@@ -540,19 +446,10 @@ function boot(canvas) {
     scale.setScalar(Math.max(nib.scale, 1e-4));
     boxes.setMatrixAt(nibIndex, matrix.compose(position, quaternion, scale));
     boxes.instanceMatrix.needsUpdate = true;
-    // Only a nib that actually moved is worth a shadow pass: the rest of a beat
-    // writes the same matrix every frame.
-    if (angle !== nib.wrote.angle || nib.level !== nib.wrote.level || nib.scale !== nib.wrote.scale) {
-      nib.wrote.angle = angle;
-      nib.wrote.level = nib.level;
-      nib.wrote.scale = nib.scale;
-      casters.dirty = true;
-    }
     dirty = true;
   }
 
   function setDrumAngle(R) {
-    if (R !== state.R) casters.dirty = true;
     state.R = R;
     inner.rotation.y = R;
     setNib();
@@ -649,7 +546,6 @@ function boot(canvas) {
     placed.az = view.az;
     placed.el = view.el;
     const lean = EASE.camera(clamp01(tilt));
-    if (outer.rotation.x !== TILT * lean) casters.dirty = true;   // the tilt carries every caster with it
     outer.rotation.x = TILT * lean;
     outer.rotation.z = -TILT * lean;
     outer.updateMatrixWorld(true);
@@ -711,7 +607,6 @@ function boot(canvas) {
     if (changed) {
       boxes.instanceMatrix.needsUpdate = true;
       wicks.instanceMatrix.needsUpdate = true;
-      casters.dirty = true;
       dirty = true;
     }
     if (nib.tween) {
@@ -747,7 +642,6 @@ function boot(canvas) {
       item.tween = retarget(item.p, target, duration, ease, 0, at);
       item.candleTween = retarget(item.candleP, target, duration, ease, 0, at);
     }
-    casters.dirty = true;
   }
 
   function itemAtSlot(slot) {
@@ -840,7 +734,6 @@ function boot(canvas) {
     parallax.target.el = 0;
     view.az = 0;
     view.el = 0;
-    casters.dirty = true;
     chrome = 0;
     nib.scale = 0;
     nib.tween = null;
@@ -930,7 +823,6 @@ function boot(canvas) {
     penLine.visible = true;
     nib.scale = NIB_SIZE;
     chrome = 1;
-    casters.dirty = true;
     setNib();
     afterStep();
     remember(state.offset);
@@ -960,7 +852,6 @@ function boot(canvas) {
     wicks.instanceMatrix.needsUpdate = true;
     nib.level = penItem().close;
     nib.scale = NIB_SIZE;
-    casters.dirty = true;
     setDrumAngle(drumAngle(next, slots, pen, aperture));
     afterStep();
     writeSession(sessionIndex());
@@ -1061,16 +952,9 @@ function boot(canvas) {
   // Only pure sway frames are halved; a beat, a drag or a tween runs at the
   // display's rate. `clock.busy` is the previous frame's verdict, so the worst
   // a change of state costs is one skipped frame.
-  function throttling() { return !clock.busy && (compact.matches || perf.tier >= 3); }
+  function throttling() { return !clock.busy && (compact.matches || perf.tier >= 1); }
 
   function render() {
-    // The shadow map lives in the key light's frame: a camera-only frame reuses
-    // it, and it is redrawn only where a caster has moved since the last one.
-    if (casters.dirty && shadows.enabled) {
-      renderer.shadowMap.needsUpdate = true;
-      counters.shadowPasses += 1;
-    }
-    casters.dirty = false;
     renderer.render(scene, camera);
     // The fallback still gives way only once the canvas has really been drawn
     // — the first frame may wait for the IntersectionObserver's verdict.
@@ -1079,16 +963,15 @@ function boot(canvas) {
     dirty = false;
   }
 
-  // Shadows are the one thing this scene gives up under load: first the map
-  // size, then the shadows themselves, then half the sway frames. It only ever
-  // steps down, and it never reads the hardware.
+  // Half the sway frames is the one thing this scene gives up under load. It
+  // only ever steps down, and it never reads the hardware.
   // The interval between drawn frames is the only clock a page has, but it is
   // the display's clock too: a 30 Hz screen or a low-power cap reads as 33 ms
   // over an idle GPU. So a window counts as slow only when its mean sits well
   // above its own fastest frame — the renderer, not the refresh, is stretching
   // it — or is slower than any display runs at. Stalled frames count in full.
   function samplePerf(dt) {
-    if (compact.matches || arrival.active || perf.tier >= 3 || !motionOn()) return;
+    if (compact.matches || arrival.active || perf.tier >= 1 || !motionOn()) return;
     if (!(dt > 0)) return;
     perf.sum += dt;
     perf.frames += 1;
@@ -1097,37 +980,12 @@ function boot(canvas) {
     perf.mean = perf.sum / perf.frames * 1000;
     const cadence = perf.min * 1000 * PERF_CADENCE_RATIO;
     const slow = perf.mean > Math.max(PERF_SLOW_MS, cadence) || perf.mean > PERF_FLOOR_MS;
-    const verySlow = perf.mean > Math.max(PERF_VERY_SLOW_MS, cadence) || perf.mean > PERF_FLOOR_MS;
     perf.sum = 0;
     perf.frames = 0;
     perf.min = Infinity;
-    if (perf.tier === 0 && slow) { perf.tier = 1; setShadows(SHADOW_MAP_LOW); }
-    else if (perf.tier === 1 && slow) { perf.tier = 2; setShadows(false); }
-    else if (perf.tier === 2 && verySlow) perf.tier = 3;
+    if (slow) perf.tier = 1;
   }
 
-  // `false`, 1024 or 2048. Turning the pass off drops the map as well, so a
-  // machine judged too slow for shadows is not left holding their memory.
-  function setShadows(mapSize) {
-    const on = !!mapSize;
-    shadows.enabled = on;
-    if (on) shadows.size = mapSize;
-    renderer.shadowMap.enabled = on;
-    key.castShadow = on;
-    boxes.castShadow = on;
-    wicks.castShadow = on;
-    // The map is dropped when the pass goes off or changes size; three.js
-    // allocates it again at the next pass, at the size set here.
-    if (key.shadow.map && (!on || key.shadow.mapSize.width !== mapSize)) { key.shadow.map.dispose(); key.shadow.map = null; }
-    if (on) key.shadow.mapSize.set(mapSize, mapSize);
-    shadowPlane.visible = on;
-    // Turning the pass on or off changes the programs the lit materials need.
-    boxes.material.needsUpdate = true;
-    wicks.material.needsUpdate = true;
-    casters.dirty = true;
-    dirty = true;
-    requestFrame();
-  }
 
   function canDraw() { return inView && !contextLost && !document.hidden; }
 
@@ -1528,19 +1386,12 @@ function boot(canvas) {
     chromeOn = !compact.matches;
     timing = compact.matches ? TIMING.mobile : TIMING.desktop;
     if (ticks) ticks.visible = chromeOn;
-    setShadows(compact.matches ? false : shadowTier());
     parallax.enabled = !compact.matches && !reducedMotion.matches && hoverPointer.matches;
     applyChrome();
     writeSource();
     requestFrame();
   }
 
-  // The map size this machine has earned, so a width change does not undo an
-  // auto-downgrade.
-  function shadowTier() {
-    if (perf.tier >= 2) return false;
-    return perf.tier >= 1 ? SHADOW_MAP_LOW : SHADOW_MAP;
-  }
   if (compact.addEventListener) compact.addEventListener('change', onCompactChange);
   if (hoverPointer.addEventListener) hoverPointer.addEventListener('change', onCompactChange);   // a mouse plugged in later still earns the lean
   if (narrow.addEventListener) narrow.addEventListener('change', writeSource);
@@ -1568,7 +1419,6 @@ function boot(canvas) {
     contextLost = false;
     if (figure) figure.classList.add('market-ready');
     dirty = true;
-    casters.dirty = true;  // the shadow map went with the context and only a caster's move redraws it
     resize();
     requestFrame();
   });
@@ -1588,8 +1438,8 @@ function boot(canvas) {
   requestFrame();
   if (/[?&]debug\b/.test(window.location.search)) {
     // Everything the acceptance pass reads: seek the swing, freeze either
-    // motion, rebuild the shadow map, and turn a point in the tilted frame into
-    // the CSS pixels a screenshot is measured in.
+    // motion, and turn a point in the tilted frame into the CSS pixels a
+    // screenshot is measured in.
     sway.seek = (t) => {
       // Seeking shows the swing at t and holds it there: enabled so the angle
       // applies, paused so no later frame advances it. setSway lets it go.
@@ -1619,8 +1469,7 @@ function boot(canvas) {
     canvas.__market = {
       items, camera, renderer, scene, inner, outer, dial, resize, render, state, setOffset, placeCamera,
       captionEl, frame, showTerminal, arrival, beat, hover, view,
-      sway, setSway, parallax, setParallax, setShadows, shadows, pose, project, counters,
-      disc: outer.userData.disc, lights, perf
+      sway, setSway, parallax, setParallax, pose, project, counters, lights, perf
     };
   }
 }
