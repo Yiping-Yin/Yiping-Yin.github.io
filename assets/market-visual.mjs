@@ -11,7 +11,7 @@ import * as THREE from 'three';
 import { Line2 } from 'three/addons/lines/Line2.js';
 import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
-import series, { meta } from './market-data.mjs?v=pen-and-drum-4';
+import series, { meta } from './market-data.mjs?v=pen-and-drum-5';
 import {
   TAU, COLOURS, EASE, TIMING, GLYPH_RATIO, DEFAULT_APERTURE,
   SWAY, PARALLAX, DEPTH_REWRITE, LABEL_FACING_BAND, HOVER_STICK,
@@ -20,7 +20,7 @@ import {
   penAzimuth, drumAngle, offsetFromAngle, detentTarget,
   dragAngle, beatPhase, depthFade, retarget, tweenValue, captionLines, formatPrice,
   swayAngle, pointerNormal, parallaxTarget, damp, cameraPose, facingWeight, stickySlot
-} from './market-model.mjs?v=pen-and-drum-4';
+} from './market-model.mjs?v=pen-and-drum-5';
 
 // Geometry — the three radii and the tilt are the reference composition's.
 const SCALE = 1.2;
@@ -1072,6 +1072,9 @@ function boot(canvas) {
     }
     casters.dirty = false;
     renderer.render(scene, camera);
+    // The fallback still gives way only once the canvas has really been drawn
+    // — the first frame may wait for the IntersectionObserver's verdict.
+    if (counters.renders === 0 && figure) figure.classList.add('market-ready');
     counters.renders += 1;
     dirty = false;
   }
@@ -1505,13 +1508,15 @@ function boot(canvas) {
       glide.active = false;
       stopFrame(); showTerminal(); requestFrame();
     } else {
-      // Coming back to motion replays the revisit from where the record had
-      // got to before the still (its start on a first visit), swing and all;
-      // a drag in progress keeps its grip and the arrival waits for it.
+      // Coming back to motion replays the revisit from where this visit had
+      // got to before the still (its start on a first visit), swing, beat and
+      // all; a drag in progress keeps its grip and simply ends as usual.
       sway.enabled = true;
       parallax.enabled = !compact.matches && hoverPointer.matches;
       if (!drag.captured) {
-        setOffset(stored.seen ? stored.offset : 0);
+        const back = recall();
+        setOffset(back.seen ? back.offset : 0);
+        state.mode = hover.inside ? 'held' : 'idle';
         startArrival(ARRIVAL.revisit, now());
       }
       requestFrame();
@@ -1580,7 +1585,6 @@ function boot(canvas) {
   canvas.setAttribute('role', 'slider');
   canvas.setAttribute('aria-label', 'Session under the pen');
   writeAria();
-  if (figure) figure.classList.add('market-ready');
   requestFrame();
   if (/[?&]debug\b/.test(window.location.search)) {
     // Everything the acceptance pass reads: seek the swing, freeze either
