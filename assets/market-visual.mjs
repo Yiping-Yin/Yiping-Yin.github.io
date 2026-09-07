@@ -371,7 +371,7 @@ function boot(canvas) {
     enabled: !compact.matches && !reducedMotion.matches && hoverPointer.matches
   };
   const counters = { renders: 0 };
-  const perf = { tier: 0, frames: 0, sum: 0, min: Infinity, mean: 0 };
+  const perf = { tier: 0, slow: 0, frames: 0, sum: 0, min: Infinity, mean: 0 };
   const baseEye = [0, 0, 0];
   // The candle band's middle, 2.46: the height the pointer picks at and the
   // depth the fade is measured at.
@@ -766,7 +766,7 @@ function boot(canvas) {
   }
 
   // A phase the plan makes instantaneous (the revisit's dolly and tilt) is at
-  // its end from the first frame, so the plinth is never painted small and
+  // its end from the first frame, so the instrument is never painted small and
   // untilted for one frame before the cut.
   function arrivalPhase(t, seconds) { return seconds <= ARRIVAL_INSTANT ? 1 : t / seconds; }
 
@@ -892,9 +892,10 @@ function boot(canvas) {
   // cannot be seen — or a debugger that switched the sway off — does.
   function frame(stamp) {
     clock.frameId = 0;
-    // A phone (and a desktop that has been downgraded) draws pure sway at
-    // 30 fps. The skip happens before the clock is read, so the interval it
-    // gives up lands in the next frame's dt and the sway keeps its phase.
+    // A phone (and a desktop that has been downgraded) holds pure sway frames
+    // to one per PHONE_FRAME_MS — 30 fps on a 60 Hz screen, slower on a faster
+    // one. The skip happens before the clock is read, so the interval it gives
+    // up lands in the next frame's dt and the sway keeps its phase.
     if (throttling() && stamp - clock.lastRender < PHONE_FRAME_MS) { requestFrame(); return; }
     if (canvas.clientWidth !== size.width || canvas.clientHeight !== size.height) resize();
     const time = stamp / 1000;
@@ -983,9 +984,11 @@ function boot(canvas) {
     perf.sum = 0;
     perf.frames = 0;
     perf.min = Infinity;
-    if (slow) perf.tier = 1;
+    // Two slow windows in a row, not one: the sway is the only thing left to
+    // give up, so it is worth six seconds of evidence before halving it.
+    perf.slow = slow ? perf.slow + 1 : 0;
+    if (perf.slow >= 2) perf.tier = 1;
   }
-
 
   function canDraw() { return inView && !contextLost && !document.hidden; }
 
@@ -1494,7 +1497,7 @@ function makeLabel(text, renderer) {
   context.font = LABEL_FONT;
   context.textBaseline = 'middle';
   context.fillStyle = COLOURS.accent;
-  context.fillText(text, 0, LABEL_HEIGHT / 2, LABEL_WIDTH);   // a wide fallback face condenses rather than overflowing the plinth
+  context.fillText(text, 0, LABEL_HEIGHT / 2, LABEL_WIDTH);   // a wide fallback face condenses rather than overflowing its canvas
   const texture = new THREE.CanvasTexture(source);
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
