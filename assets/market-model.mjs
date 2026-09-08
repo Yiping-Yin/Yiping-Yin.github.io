@@ -8,9 +8,10 @@ export const TAU = Math.PI * 2;
 // ring as it goes round — the climb imc.com's hero reads as. How much of that
 // climb you see is the span: at imc.com's 1.5 the sessions in view here spread
 // 0.63 units, where their own data spread 1.05, so this band is widened until
-// ours reads the same. POSITION_BASE holds the middle of the last window
-// (unit 0.815) at the height it had at 1.5, so the frame the still and the
-// reduced-motion view are composed as does not move.
+// ours reads at least as far (1.13). The ring is 1.8x taller in view for it;
+// POSITION_BASE is what keeps that growth centred, holding unit 0.815 — the
+// middle of the last window, near enough — at the height it had at 1.5, so the
+// still and the reduced-motion view stay the composition they were drawn as.
 export const POSITION_SPAN = 2.7;
 export const POSITION_BASE = 0.322;   // = (0.815·1.5 + 1.3) − 0.815·POSITION_SPAN
 

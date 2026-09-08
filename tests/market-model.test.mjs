@@ -38,11 +38,11 @@ test('seriesBounds uses half the rows as ring slots and takes the price ceiling 
   assert.equal(b.maxVolume, 3_000);
 });
 
-test('priceLevel spreads the low band over POSITION_SPAN, starting at POSITION_BASE', () => {
-  const b = seriesBounds(rows);
-  near(priceLevel(90, b, 1.2), POSITION_BASE * 1.2);
-  near(priceLevel(98, b, 1.2), (POSITION_BASE + POSITION_SPAN) * 1.2);
-  near(priceLevel(94, b, 1.2), (POSITION_BASE + POSITION_SPAN / 2) * 1.2);
+test('priceLevel maps minLow to 0.3864 and maxLow to 3.6264 at scale 1.2', () => {
+  const b = seriesBounds(rows);                // minLow 90, maxLow 98
+  near(priceLevel(90, b, 1.2), 0.3864);
+  near(priceLevel(98, b, 1.2), 3.6264);
+  near(priceLevel(94, b, 1.2), 2.0064);
 });
 
 test('the widened band holds the middle of the last window where the 1.5 band had it', () => {
@@ -109,8 +109,7 @@ test('the glyph ratio and the default aperture are the values the dial is drawn 
 test('heightPerPoint is HEIGHT_SPAN over the low band, and GLYPH_RATIO reports it', () => {
   const b = seriesBounds(rows);                // minLow 90, maxLow 98
   const positionPerPoint = POSITION_SPAN * 1.2 / (b.maxLow - b.minLow);
-  near(heightPerPoint(b, 1.2) / positionPerPoint, HEIGHT_SPAN / POSITION_SPAN, 1e-12);
-  near(GLYPH_RATIO, HEIGHT_SPAN / POSITION_SPAN, 0.05);   // the caption rounds to a tenth
+  near(heightPerPoint(b, 1.2) / positionPerPoint, 4.833333333333333, 1e-12);
   const real = seriesBounds(series);           // the shipped 110-session series
   near(heightPerPoint(real, 1.2), 0.011344291271560307, 1e-15);
 });

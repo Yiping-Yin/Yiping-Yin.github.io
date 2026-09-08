@@ -11,7 +11,7 @@ import * as THREE from 'three';
 import { Line2 } from 'three/addons/lines/Line2.js';
 import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
-import series, { meta } from './market-data.mjs?v=pen-and-drum-7d';
+import series, { meta } from './market-data.mjs?v=pen-and-drum-8';
 import {
   TAU, COLOURS, EASE, TIMING, GLYPH_RATIO, DEFAULT_APERTURE,
   SWAY, PARALLAX, DEPTH_REWRITE, LABEL_FACING_BAND, HOVER_STICK,
@@ -20,7 +20,7 @@ import {
   penAzimuth, drumAngle, offsetFromAngle, detentTarget,
   dragAngle, beatPhase, depthFade, retarget, tweenValue, captionLines, formatPrice,
   swayAngle, pointerNormal, parallaxTarget, damp, cameraPose, facingWeight, stickySlot
-} from './market-model.mjs?v=pen-and-drum-7d';
+} from './market-model.mjs?v=pen-and-drum-8';
 
 // Geometry — the three radii and the tilt are the reference composition's.
 const SCALE = 1.2;
@@ -398,7 +398,6 @@ function boot(canvas) {
   const pickPoint = new THREE.Vector3();
   const pickRay = new THREE.Ray();
   const outerInverse = new THREE.Matrix4();
-  const UP = new THREE.Vector3(0, 1, 0);
   const PICK_INNER = 0.6 * CANDLE_RING;
   const PICK_OUTER = CURSOR_OUTER;
   const PICK_STICK = 0.25;   // radial hysteresis while a session is held, in world units
@@ -674,6 +673,7 @@ function boot(canvas) {
     const previous = state.offset;
     const next = previous + 1;
     state.offset = next;
+    updatePickY();   // the window moves now; the plane must not wait for the landing
     state.beatStart = at;
     beat.active = true;
     beat.stepped = false;
@@ -1072,12 +1072,18 @@ function boot(canvas) {
     // A session stands at the height of its own price, and the band those
     // heights spread over is wider than the ring is deep, so one plane cannot
     // serve them all: read a slot off the pick height, then read the pointer
-    // again at the height of the candle that answered, and judge both the
-    // distance from the ring and the slot there. One step is enough — a third
-    // pass never moves it, and it takes a pointer on a candle's own centre
-    // from picking its neighbour half the time to 51 sessions in 52.
-    const guess = itemAtSlot(slotFrom(pickPoint, null));
-    if (guess && !pickRay.intersectPlane(planeAt(guess.candle.body.y), pickPoint)) return null;
+    // again at the height of the candle that answered, until the answer
+    // repeats. One pass carries the terminal window; the oldest sessions are
+    // spread more than twice as far and want a second. Three never differs
+    // from two. A pointer on a candle's own centre picked its neighbour more
+    // often than not before this; it now finds it 51 times in 52.
+    let guess = itemAtSlot(slotFrom(pickPoint, null));
+    for (let pass = 0; pass < 2 && guess; pass += 1) {
+      if (!pickRay.intersectPlane(planeAt(guess.candle.body.y), pickPoint)) return null;
+      const next = itemAtSlot(slotFrom(pickPoint, null));
+      if (next === guess) break;
+      guess = next;
+    }
     const radius = Math.hypot(pickPoint.x, pickPoint.z);
     // The annulus gets the same hysteresis as the slot: a pointer parked at
     // its edge must not see the ring drift in and out under the sway.
@@ -1086,11 +1092,16 @@ function boot(canvas) {
     return itemAtSlot(slotFrom(pickPoint, hover.item ? hover.item.slot : null));
   }
 
-  // outer-local hit → the slot under it. `current` carries the slot already
-  // hovered, so a boundary does not flicker as the eye drifts past it.
+  // outer-local hit → the slot under it. Subtracting the drum's angle from the
+  // bearing is the same as rotating the point into the drum's frame, and it
+  // leaves the caller's vector alone: rotating it in place would be applied
+  // twice on the path where the first pass lands in the erased gap, and since
+  // the drum only ever rests a whole number of slots round, that lands on a
+  // real session on the far side rather than on nothing. `current` carries the
+  // slot already hovered, so a boundary does not flicker as the eye drifts.
   function slotFrom(point, current) {
-    point.applyAxisAngle(UP, -state.R);  // outer-local → drum-local
-    return stickySlot(Math.atan2(-point.z, point.x) / stepAngle, current, slots, HOVER_STICK);
+    const bearing = Math.atan2(-point.z, point.x) - state.R;
+    return stickySlot(bearing / stepAngle, current, slots, HOVER_STICK);
   }
 
   function planeAt(height) {
@@ -1218,6 +1229,7 @@ function boot(canvas) {
     if (next !== state.offset) {
       applyWindow(state.offset, next, time, DRAG_PRINT);
       state.offset = next;
+      updatePickY();
       remember(next);
     }
     if (hover.item && !isVisible(next, hover.item.index, slots, aperture)) setHover(null);
