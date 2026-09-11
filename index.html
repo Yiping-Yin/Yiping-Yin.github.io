@@ -55,7 +55,7 @@
 <script src="assets/site.js?v=pen-and-drum-1" defer></script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"}}</script>
-<script type="module" src="assets/market-visual.mjs?v=craft-3"></script>
+<script type="module" src="assets/market-arcs.mjs?v=arcs-1"></script>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -89,10 +89,10 @@
           <p class="hero-focus">Quantitative research<br>&amp; intelligent systems.</p>
           <div class="hero-actions"><a href="#research" class="hero-cta">Explore my research <span aria-hidden="true">↗</span></a></div>
         </div>
-        <figure class="hero-visual" aria-label="A ring of daily S&amp;P 500 candlesticks that advances one session per beat; the newest session sits under a fixed pen; the viewpoint drifts slowly. Fixed snapshot, not live.">
-          <img class="market-fallback" src="assets/market-ring.png?v=20260911-craft" alt="Static view of a ring of daily candlesticks with volume bars and date labels" width="1240" height="1240">
+        <figure class="hero-visual" aria-label="Three arcs of S&amp;P 500 candlesticks — a year of days, a month of hours and a day of 5-minute bars — rising from the bottom of the box; one pen at the top reads the same moment on all three, and the day replays bar by bar. Fixed snapshot, not live.">
+          <img class="market-fallback" src="assets/market-arcs.png?v=20260911-arcs" alt="Static view of three concentric arcs of candlesticks with a pen at the top" width="2280" height="956">
           <canvas id="market-canvas" aria-hidden="true"></canvas>
-          <figcaption class="market-caption is-pending"><span class="market-caption-source">S&amp;P 500 · daily · 2026-03-31 → 2026-09-04 · 52 of 110 sessions · captured 2026-09-06 · not live</span><span class="market-caption-session"><span class="market-caption-date">2026-09-04</span> · O 7750.19 · H 7750.19 · L 7706.12 · C 7718.60 · −0.38 % · ×6.3 vertical</span></figcaption>
+          <figcaption class="market-caption sr-only"><span class="market-caption-source">S&amp;P 500 · 2026-09-10 · a year of days · a month of hours · a day of 5-minute bars · captured 2026-09-11 · not live</span><span class="market-caption-session"><span class="market-caption-date">15:55–16:00</span> · O 7592.05 · H 7592.92 · L 7589.65 · C 7592.30 · +0.00 %</span></figcaption>
         </figure>
       </div>
     </section>
