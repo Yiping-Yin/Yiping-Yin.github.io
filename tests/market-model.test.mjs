@@ -66,9 +66,9 @@ test('candleMetrics sizes wick and body from the price spans and colours by clos
   const up = candleMetrics(rows[0], b, 1.2);   // close 104 > open 100
   assert.equal(up.colour, '#73E27F');
   near(up.body.height, h * 4);                 // |open - close|
-  near(up.body.width, 0.04 * 1.2);
+  near(up.body.width, 0.058 * 1.2);
   near(up.wick.height, h * 15);                // high - low
-  near(up.wick.diameter, 0.01 * 1.2);
+  near(up.wick.diameter, 0.0145 * 1.2);
   near(up.body.y, priceLevel(100, b, 1.2));    // min(open, close)
   near(up.wick.y, priceLevel(95, b, 1.2));     // low
   const down = candleMetrics(rows[1], b, 1.2);  // close 98 < open 104
@@ -76,12 +76,12 @@ test('candleMetrics sizes wick and body from the price spans and colours by clos
   near(down.body.y, priceLevel(98, b, 1.2));
 });
 
-test('volumeBar height runs from 0.4·scale at the minimum volume to 2.0·scale at the maximum', () => {
+test('volumeBar height runs from 0.6·scale at the minimum volume to 3.0·scale at the maximum', () => {
   const b = seriesBounds(rows);
-  near(volumeBar(rows[0], b, 1.2).height, 0.4 * 1.2);
-  near(volumeBar(rows[1], b, 1.2).height, 2.0 * 1.2);
-  near(volumeBar(rows[0], b, 1.2).width, 0.01 * 1.2);
-  near(volumeBar(rows[0], b, 1.2).depth, 0.03 * 1.2);
+  near(volumeBar(rows[0], b, 1.2).height, 0.6 * 1.2);
+  near(volumeBar(rows[1], b, 1.2).height, 3.0 * 1.2);
+  near(volumeBar(rows[0], b, 1.2).width, 0.016 * 1.2);
+  near(volumeBar(rows[0], b, 1.2).depth, 0.048 * 1.2);
 });
 
 test('inWindow admits the run of `slots` indices starting at the offset, wrapping past the end', () => {
@@ -102,23 +102,21 @@ test('cubicBezier reproduces the CSS ease-in and ease-out curves', () => {
 });
 
 test('the glyph ratio and the default aperture are the values the dial is drawn from', () => {
-  assert.equal(GLYPH_RATIO, 4.8);
+  assert.equal(GLYPH_RATIO, 6.3);
   assert.equal(DEFAULT_APERTURE, 3);
 });
 
 test('heightPerPoint is HEIGHT_SPAN over the low band, and GLYPH_RATIO reports it', () => {
   const b = seriesBounds(rows);                // minLow 90, maxLow 98
   const positionPerPoint = POSITION_SPAN * 1.2 / (b.maxLow - b.minLow);
-  near(heightPerPoint(b, 1.2) / positionPerPoint, 4.833333333333333, 1e-12);
+  near(heightPerPoint(b, 1.2) / positionPerPoint, 6.283333333333333, 1e-12);
   const real = seriesBounds(series);           // the shipped 110-session series
-  near(heightPerPoint(real, 1.2), 0.011344291271560307, 1e-15);
+  near(heightPerPoint(real, 1.2), 16.965 * 1.2 / (real.maxLow - real.minLow), 1e-15);
 });
 
-test('widening the band leaves the glyphs the size the first build drew them', () => {
-  // HEIGHT_SPAN is 8.7 × the 1.5 band the hero first shipped with, so a candle
-  // is exactly as tall as it was before the sessions were spread apart.
+test('the glyph height is imc.com\'s 8.7 over its 1.5 band, then 1.3 x for the square box', () => {
   const real = seriesBounds(series);
-  near(heightPerPoint(real, 1.2), 8.7 * 1.5 * 1.2 / (real.maxLow - real.minLow), 1e-9);
+  near(heightPerPoint(real, 1.2), 8.7 * 1.5 * 1.3 * 1.2 / (real.maxLow - real.minLow), 1e-9);
 });
 
 test('market-data exports the provenance meta the caption is built from', () => {
@@ -307,14 +305,14 @@ test('formatReturn signs the session return with a real minus sign, or says noth
 test('captionLines prints the terminal state of the hero, every figure from the data', () => {
   assert.deepEqual(captionLines(meta, series, 55, 3, GLYPH_RATIO, 109), [
     'S&P 500 · daily · 2026-03-31 → 2026-09-04 · 52 of 110 sessions · captured 2026-09-06 · not live',
-    '2026-09-04 · O 7750.19 · H 7750.19 · L 7706.12 · C 7718.60 · −0.38 % · ×4.8 vertical'
+    '2026-09-04 · O 7750.19 · H 7750.19 · L 7706.12 · C 7718.60 · −0.38 % · ×6.3 vertical'
   ]);
 });
 
 test('captionLines follows the pen to any session, and drops the return on the first row', () => {
   const [first, second] = captionLines(meta, series, 55, 3, GLYPH_RATIO, 0);
   assert.equal(first, 'S&P 500 · daily · 2026-03-31 → 2026-09-04 · 52 of 110 sessions · captured 2026-09-06 · not live');
-  assert.equal(second, '2026-03-31 · O 6395.88 · H 6539.05 · L 6395.88 · C 6528.52 · ×4.8 vertical');
+  assert.equal(second, '2026-03-31 · O 6395.88 · H 6539.05 · L 6395.88 · C 6528.52 · ×6.3 vertical');
   const mobile = captionLines(meta, series, 55, 2, GLYPH_RATIO, 51);
   assert.ok(mobile[0].includes('53 of 110 sessions'));   // a smaller aperture shows one more session
   assert.ok(mobile[1].startsWith(series[51].label + ' · O '));

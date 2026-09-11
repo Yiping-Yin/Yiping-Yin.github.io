@@ -62,7 +62,7 @@ p { margin-bottom: 16px; }
 .page-shell { width: 100%; }
 main { min-width: 0; }
 .hero { position: relative; overflow: hidden; background-color: #041624; background-image: radial-gradient(ellipse 64% 112% at 81% 56%, #103969b8 0%, #082a524d 49%, #04162400 79%), linear-gradient(90deg, #041624 0%, #051a2d 52%, #061c32 100%); color: #fff; }
-.hero-inner { position: relative; display: flex; align-items: center; min-height: 510px; max-width: 1240px; padding: 72px 50px; margin: auto; }
+.hero-inner { --hero-box: 620px; position: relative; display: flex; align-items: center; min-height: calc(var(--hero-box) + 88px); max-width: 1240px; padding: 72px 50px; margin: auto; }
 .hero-inner::before { content: ""; position: absolute; inset: 0 50px; pointer-events: none; border-right: 1px solid #b8d3ed0a; background-image: linear-gradient(to right, #b8d3ed0c .7px, transparent .7px); background-size: 33.3333% 100%; }
 .hero-copy { position: relative; z-index: 2; max-width: 455px; }
 h1 { font: 68px/1.1 Georgia, "Times New Roman", serif; font-weight: 400; letter-spacing: -2px; margin: 0 0 17px; }
@@ -71,8 +71,9 @@ h1 > span { color: #8facd0; }
 .hero-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 28px; margin-top: 29px; }
 .hero-cta { display: inline-flex; align-items: center; gap: 24px; padding: 9px 0; font-size: 13px; font-weight: 500; color: #fff; text-decoration: none; border-bottom: 1px solid #7e98b6; }
 .hero-cta:hover { border-bottom-color: #fff; }
-.hero-visual { position: absolute; margin: 0; width: 680px; height: 460px; top: 22px; right: 0; }
-.market-fallback, #market-canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: contain; }
+.hero-visual { position: absolute; margin: 0; width: var(--hero-box); height: calc(var(--hero-box) + 44px); top: 22px; right: 0; }
+.hero-visual::before { content: ""; position: absolute; left: -24%; right: -24%; top: -14%; height: calc(100% - 44px); background: radial-gradient(ellipse 48% 40% at 50% 54%, rgba(7, 81, 226, .32) 0%, rgba(7, 81, 226, 0) 100%); pointer-events: none; }
+.market-fallback, #market-canvas { position: absolute; inset: 0; display: block; width: 100%; height: var(--hero-box); object-fit: contain; }
 #market-canvas { touch-action: pan-y; cursor: grab; }
 .market-ready .market-fallback { display: none; }
 .market-caption { position: absolute; left: 0; bottom: 8px; max-width: 100%; margin: 0; font-size: 11.5px; line-height: 1.65; font-weight: 500; letter-spacing: .04em; font-variant-numeric: tabular-nums; white-space: nowrap; color: #8ea8c4; pointer-events: none; transition: opacity .5s ease, transform .5s ease; }
@@ -194,12 +195,13 @@ footer a { color: var(--muted); text-decoration: none; padding: 8px 0; }
   .hero-inner { padding-left: 35px; padding-right: 35px; }
   .hero-inner::before { left: 35px; right: 35px; }
   .hero-copy { max-width: 400px; }
-  .hero-visual { right: 0; width: min(560px, calc(100% - 430px)); }
+  .hero-inner { --hero-box: min(560px, calc(100vw - 500px)); }
+  .hero-visual { right: 0; }
   .recognition-grid,.background-section { column-gap: 40px; }
   .recognition { gap: 13px; }
 }
 @media (max-width: 870px) {
-  .market-caption { bottom: 1px; }
+  .hero-visual { height: calc(var(--hero-box) + 28px); }
   .market-caption > .market-caption-session { display: none; }
 }
 @media (max-width: 850px) {
@@ -207,6 +209,8 @@ footer a { color: var(--muted); text-decoration: none; padding: 8px 0; }
   .hero-inner { display: block; min-height: 0; padding: 48px 35px 300px; }
   .hero-visual { top: auto; right: 35px; bottom: 18px; width: calc(100% - 70px); height: 278px; }
   .market-fallback, #market-canvas { height: calc(100% - 18px); }
+  .market-fallback { transform: scale(1.57); }
+  .market-caption { bottom: 1px; }
   .hero-copy { max-width: none; }
   h1 { font-size: 61px; }
   .hero-focus { font-size: 24px; }
@@ -304,6 +308,7 @@ footer a { color: var(--muted); text-decoration: none; padding: 8px 0; }
   .hero-inner::before { left: 21px; right: 21px; }
   .hero-actions { gap: 12px; }
   .hero-visual { width: calc(100% - 10px); right: 5px; }
+  .market-fallback { transform: scale(1.4); }
   h1 { font-size: 52px; }
   .research-tabs { gap: 8px 18px; }
   .contact-email { font-size: 18px; }

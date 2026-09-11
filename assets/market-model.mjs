@@ -15,13 +15,13 @@ export const TAU = Math.PI * 2;
 export const POSITION_SPAN = 2.7;
 export const POSITION_BASE = 0.322;   // = (0.815·1.5 + 1.3) − 0.815·POSITION_SPAN
 
-// A candle's height per price point, in the same scale units. Held at the value
-// the first build shipped (8.7 × the 1.5 band it then used), so widening the
-// band spreads the sessions apart without growing the glyphs.
-export const HEIGHT_SPAN = 13.05;
+// A candle's height per price point, in the same scale units: 8.7 × the 1.5
+// band the first build used, then 1.3 × again once the hero moved into a square
+// box — at the size imc.com draws its glyphs the 1.0 figure read as a miniature.
+export const HEIGHT_SPAN = 16.965;
 
 // How much taller a glyph is drawn than the band it stands in, to a tenth:
-// what the caption prints as `×4.8 vertical`.
+// what the caption prints as `×6.3 vertical`.
 export const GLYPH_RATIO = Math.round(HEIGHT_SPAN / POSITION_SPAN * 10) / 10;
 
 // Slots kept empty on the counter-clockwise side of the pen: the erase zone
@@ -69,6 +69,12 @@ export function heightPerPoint(bounds, scale) {
   return HEIGHT_SPAN * scale / (bounds.maxLow - bounds.minLow);
 }
 
+// Glyph widths in scale units. imc.com's are 0.04 and 0.01; ours are 1.45 ×
+// that, the factor that matched their reference screenshot glyph for glyph in
+// the square box (the box ratio alone would give about 1.25).
+export const CANDLE_WIDTH = 0.058;
+export const WICK_DIAMETER = 0.0145;
+
 export function candleMetrics(row, bounds, scale) {
   const up = row.close > row.open;
   const perPoint = heightPerPoint(bounds, scale);
@@ -78,12 +84,12 @@ export function candleMetrics(row, bounds, scale) {
     body: {
       y: priceLevel(Math.min(row.open, row.close), bounds, scale),
       height: perPoint * Math.abs(row.open - row.close),
-      width: 0.04 * scale
+      width: CANDLE_WIDTH * scale
     },
     wick: {
       y: priceLevel(row.low, bounds, scale),
       height: perPoint * (row.high - row.low),
-      diameter: 0.01 * scale
+      diameter: WICK_DIAMETER * scale
     }
   };
 }
@@ -109,9 +115,15 @@ export function weekStarts(rows) {
   return starts;
 }
 
+// Bar sizes in scale units: imc.com's 0.4 / 0.01 / 0.03, drawn 1.5 × taller and
+// 1.6 × wider, again matched by eye to the reference rather than derived.
+export const BAR_UNIT = 0.6;
+export const BAR_WIDTH = 0.016;
+export const BAR_DEPTH = 0.048;
+
 export function volumeBar(row, bounds, scale) {
   const unit = (row.volume - bounds.minVolume) / (bounds.maxVolume - bounds.minVolume);
-  return { height: 0.4 * scale * (unit * 4 + 1), width: 0.01 * scale, depth: 0.03 * scale };
+  return { height: BAR_UNIT * scale * (unit * 4 + 1), width: BAR_WIDTH * scale, depth: BAR_DEPTH * scale };
 }
 
 // The drum shows a contiguous run of sessions: `slots - aperture` of them,

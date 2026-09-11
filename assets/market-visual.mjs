@@ -1,7 +1,7 @@
 // Hero visual — "Pen and Drum". A drum of daily candlesticks steps one session
 // clockwise per beat; a pen fixed at the point of the ring nearest the camera
 // prints the newest session, and the three slots on the pen's other side are
-// the erased gap the oldest session dissolves into. The dial (rim, ticks, gap
+// the erased gap the oldest session dissolves into. The dial (ticks, gap
 // boundaries, pen) is fixed in the world; only the drum turns.
 //
 // The pure rules live in market-model.mjs; this file owns the scene graph,
@@ -11,7 +11,7 @@ import * as THREE from 'three';
 import { Line2 } from 'three/addons/lines/Line2.js';
 import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
-import series, { meta } from './market-data.mjs?v=pen-and-drum-8';
+import series, { meta } from './market-data.mjs?v=craft-3';
 import {
   TAU, COLOURS, EASE, TIMING, GLYPH_RATIO, DEFAULT_APERTURE,
   SWAY, PARALLAX, DEPTH_REWRITE, LABEL_FACING_BAND, HOVER_STICK,
@@ -20,13 +20,13 @@ import {
   penAzimuth, drumAngle, offsetFromAngle, detentTarget,
   dragAngle, beatPhase, depthFade, retarget, tweenValue, captionLines, formatPrice,
   swayAngle, pointerNormal, parallaxTarget, damp, cameraPose, facingWeight, stickySlot
-} from './market-model.mjs?v=pen-and-drum-8';
+} from './market-model.mjs?v=craft-3';
 
 // Geometry — the three radii and the tilt are the reference composition's.
 const SCALE = 1.2;
 const RADIUS = 6;
 const CANDLE_RING = (RADIUS - 0.6) * SCALE;  // 6.48
-const BAR_RING = RADIUS * SCALE;             // 7.20, also the dial's rim
+const BAR_RING = RADIUS * SCALE;             // 7.20, the ticks' ring too
 const LABEL_RING = (RADIUS + 0.3) * SCALE;   // 7.56
 const TICK_RING = BAR_RING + 0.12;           // 7.32
 const GAP_RING = BAR_RING + 0.30;            // 7.50
@@ -40,21 +40,21 @@ const EYE = [13, 8, 4];
 const CAMERA_NEAR_DISTANCE = Math.hypot(EYE[0], EYE[1], EYE[2]); // 15.78
 const CAMERA_FAR_DISTANCE = 17.4;
 const BASE_FOV = 75;
-const VIEW_FOV = 82;          // horizontal field of view used for framing; wider than the reference so the near labels clear the box
+const VIEW_FOV = 75;          // horizontal field of view used for framing: imc.com's 75° in a square box
 const MIN_VERTICAL_FOV = 52;  // very wide boxes would otherwise crop the ring top and bottom
 const LOOK_AT = [0, -0.5, 0]; // aim a little below the ring so it sits higher in the box
 
-// Dial and drum opacities — one four-step ladder, all tone-mapping disabled so
-// the whites stay in step with each other.
-const RIM_ALPHA = 0.22;
+// Dial and drum opacities — one ladder read in opacity alone (ticks and gap
+// markers are 1 device px LineBasicMaterial; blades, pen and cursor are fat
+// lines LINE_WIDTH wide), all tone-mapping disabled so the whites stay in step.
 const TICK_ALPHA = 0.24;
 const GAP_ALPHA = 0.50;
 const PEN_ALPHA = 0.90;
 const CURSOR_ALPHA = 0.55;
-const BLADE_ALPHA = 0.30;
+const BLADE_ALPHA = 0.55;
+const LINE_WIDTH = 1.6;       // blades, pen and cursor, in CSS pixels: LineMaterial's resolution is the logical viewport, so this is 3.2 device px on a retina display
 const LABEL_ALPHA = 0.85;
-const RIM_POINTS = 221;       // 220 segments; first and last vertex coincide
-const RIM_Y = 0.004;
+const GAP_Y = 0.004;
 const TICK_Y = 0.002;
 const PEN_Y = 0.008;
 const NIB_SIZE = 0.06;
@@ -62,8 +62,7 @@ const NIB_SIZE = 0.06;
 // Lights. The instrument stands on the page itself — there is no ground under
 // it and so no shadows — but the key still comes from over the reader's left
 // shoulder at 55°, so the faces turned to the reader are the lit ones and the
-// bodies have a form to them; the rim is the cold edge from the far side.
-// RIM_* is that light, not the dial's rim line above.
+// bodies have a form to them; the rim light is the cold edge from the far side.
 const AMBIENT = 1.5;
 const KEY_POS = [8.80, 16.20, 7.40];
 const KEY_INTENSITY = 3.0;
@@ -99,7 +98,7 @@ const LABEL_FONT = '500 40px -apple-system, BlinkMacSystemFont, "Segoe UI", Helv
 const LABEL_WIDTH = 320;
 const LABEL_HEIGHT = 56;
 const LABEL_FONT_PX = 40;
-const LABEL_EM = 0.22 * SCALE; // 0.264 world units per em
+const LABEL_EM = 0.33 * SCALE;  // 0.396 world units per em — 1.5 × the first build: readable on the near arc, clear of the box's right edge
 
 // Print timings the shared TIMING table does not carry: the candle follows its
 // volume bar out of the ring 0.06 s later and takes 0.22 s to grow.
@@ -125,14 +124,14 @@ const NIB_POP = 0.12;
 // The first visit builds the instrument; a revisit only fades it up.
 const ARRIVAL = {
   first: {
-    dollySeconds: 2.2, tiltSeconds: 1.6, drawRim: true,
+    dollySeconds: 2.2, tiltSeconds: 1.6,
     dialFrom: 0, dialTo: 0.60, penFrom: 0.30, penTo: 0.45,
     printFrom: 0.45, printStagger: 0.033, barSeconds: 0.30,
     candleDelay: CANDLE_DELAY, candleSeconds: CANDLE_SECONDS,
     nibAt: 2.45, chromeFrom: 2.30, chromeTo: 2.80, captionAt: 2.80, beatAt: 3.30
   },
   revisit: {
-    dollySeconds: 0.001, tiltSeconds: 0.001, drawRim: false,
+    dollySeconds: 0.001, tiltSeconds: 0.001,
     dialFrom: 0, dialTo: 0.45, penFrom: 0.20, penTo: 0.55,
     printFrom: 0, printStagger: 0, barSeconds: 0.45,
     candleDelay: 0, candleSeconds: 0.45,
@@ -288,20 +287,6 @@ function boot(canvas) {
   const gapFar = pen + (aperture + 0.5) * stepAngle;   // the far edge of the erased slots
   const gapNear = pen + 0.5 * stepAngle;
 
-  const rimGeometry = new THREE.BufferGeometry();
-  const rimPositions = new Float32Array(RIM_POINTS * 3);
-  for (let i = 0; i < RIM_POINTS; i += 1) {
-    const t = gapFar + TAU * i / (RIM_POINTS - 1);
-    rimPositions[i * 3] = BAR_RING * Math.cos(t);
-    rimPositions[i * 3 + 1] = RIM_Y;
-    rimPositions[i * 3 + 2] = -BAR_RING * Math.sin(t);
-  }
-  rimGeometry.setAttribute('position', new THREE.BufferAttribute(rimPositions, 3));
-  const rimMaterial = basicLineMaterial(RIM_ALPHA);
-  const rim = new THREE.Line(rimGeometry, rimMaterial);
-  rim.renderOrder = 1;
-  dial.add(rim);
-
   let ticks = null;
   {
     const points = [];
@@ -320,8 +305,8 @@ function boot(canvas) {
 
   const gapPoints = [];
   for (const t of [gapNear, gapFar]) {
-    gapPoints.push(BAR_RING * Math.cos(t), RIM_Y, -BAR_RING * Math.sin(t));
-    gapPoints.push(GAP_RING * Math.cos(t), RIM_Y, -GAP_RING * Math.sin(t));
+    gapPoints.push(BAR_RING * Math.cos(t), GAP_Y, -BAR_RING * Math.sin(t));
+    gapPoints.push(GAP_RING * Math.cos(t), GAP_Y, -GAP_RING * Math.sin(t));
   }
   const gapGeometry = new THREE.BufferGeometry();
   gapGeometry.setAttribute('position', new THREE.Float32BufferAttribute(gapPoints, 3));
@@ -346,7 +331,7 @@ function boot(canvas) {
   cursorLine.visible = false;
   dial.add(cursorLine);
 
-  dial.userData = { rim, ticks, gaps, pen: penLine, cursor: cursorLine };
+  dial.userData = { ticks, gaps, pen: penLine, cursor: cursorLine };
 
   // State ----------------------------------------------------------------
   const state = { offset: startOffset, mode: 'idle', beatStart: 0, R: drumAngle(startOffset, slots, pen, aperture) };
@@ -686,7 +671,7 @@ function boot(canvas) {
     const leaving = items[previous];
     leaving.tween = retarget(leaving.p, 0, timing.dissolve, EASE.easeIn, 0, at);
     leaving.candleTween = retarget(leaving.candleP, 0, timing.dissolve, EASE.easeIn, 0, at);
-    // The newest grows out of the rim under the pen, the candle a beat behind the bar.
+    // The newest grows out of the plane under the pen, the candle a beat behind the bar.
     const arriving = items[next + count - 1];
     arriving.tween = retarget(0, 1, timing.printEnd - timing.printStart, EASE.easeOut, timing.printStart, at);
     arriving.candleTween = retarget(0, 1, CANDLE_SECONDS, EASE.easeOut, timing.printStart + CANDLE_DELAY, at);
@@ -793,12 +778,6 @@ function boot(canvas) {
     const plan = arrival.plan;
     placeCamera(arrivalPhase(t, plan.dollySeconds), arrivalPhase(t, plan.tiltSeconds));
     const drawn = span(t, plan.dialFrom, plan.dialTo);
-    if (plan.drawRim) {
-      rimGeometry.setDrawRange(0, Math.max(2, Math.round(RIM_POINTS * drawn)));
-      rim.visible = drawn > 0;
-    } else {
-      rimMaterial.opacity = RIM_ALPHA * drawn;
-    }
     if (ticks) ticks.material.opacity = TICK_ALPHA * drawn;
     gaps.material.opacity = GAP_ALPHA * drawn;
     const drawnPen = span(t, plan.penFrom, plan.penTo);
@@ -832,9 +811,6 @@ function boot(canvas) {
     }
     boxes.instanceMatrix.needsUpdate = true;
     wicks.instanceMatrix.needsUpdate = true;
-    rimGeometry.setDrawRange(0, RIM_POINTS);
-    rimMaterial.opacity = RIM_ALPHA;
-    rim.visible = true;
     if (ticks) ticks.material.opacity = TICK_ALPHA;
     gaps.material.opacity = GAP_ALPHA;
     penLine.scale.x = 1;
@@ -892,9 +868,6 @@ function boot(canvas) {
     view.az = 0;
     view.el = 0;
     placeCamera(1, 1);
-    rimGeometry.setDrawRange(0, RIM_POINTS);
-    rimMaterial.opacity = RIM_ALPHA;
-    rim.visible = true;
     if (ticks) ticks.material.opacity = TICK_ALPHA;
     gaps.material.opacity = GAP_ALPHA;
     penLine.scale.x = 1;
@@ -1148,7 +1121,8 @@ function boot(canvas) {
   }
 
   // Parallax ---------------------------------------------------------------
-  // The lean is read against the figure, not the canvas, so the corners of the
+  // The lean is read against the canvas, the ring's box (the figure also holds
+  // the caption strip, which the pointer cannot reach), so the corners of the
   // box the reader sees are the ±1 of the input. A finger never steers it, and
   // a captured drag freezes the target where it was: the pointer is on the
   // drum, not on the camera.
@@ -1162,7 +1136,7 @@ function boot(canvas) {
   }
 
   function aimParallax(x, y) {
-    const box = (figure || canvas).getBoundingClientRect();
+    const box = canvas.getBoundingClientRect();
     const point = pointerNormal(x, y, box);
     const target = parallaxTarget(point.nx, point.ny, PARALLAX.azimuth, PARALLAX.elevation);
     parallax.target.az = target.az;
@@ -1529,7 +1503,7 @@ function boot(canvas) {
 // Shared line material shape: never tone-mapped, never depth-writing, so the
 // dial's four opacities read as one ladder over the candles.
 function lineMaterial(colour, opacity) {
-  return new LineMaterial({ color: colour, linewidth: 1, transparent: true, opacity, toneMapped: false, depthWrite: false });
+  return new LineMaterial({ color: colour, linewidth: LINE_WIDTH, transparent: true, opacity, toneMapped: false, depthWrite: false });
 }
 
 function basicLineMaterial(opacity) {
