@@ -90,6 +90,8 @@ test('replayState walks the day arc one bar per beat and carries the month and y
   near(s13.month.fraction, 1 / 12);
   const end = replayState(77, { day: 78, month: 147, year: 252 });
   assert.deepEqual([end.day.pen, end.month.pen, end.year.pen], [77, 146, 251]);
+  assert.equal(end.month.fraction, 0, 'the partial last hour does not creep, so the close sits under the pen');
+  near(replayState(71, { day: 78, month: 147, year: 252 }).month.fraction, 11 / 12);
   assert.equal(replayState(500, { day: 78, month: 147, year: 252 }).day.pen, 77, 'the replay stops at the close');
 });
 

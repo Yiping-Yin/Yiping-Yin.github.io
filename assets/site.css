@@ -62,7 +62,7 @@ p { margin-bottom: 16px; }
 .page-shell { width: 100%; }
 main { min-width: 0; }
 .hero { position: relative; overflow: hidden; background-color: #041624; background-image: radial-gradient(ellipse 56% 90% at 60% 96%, #103969b8 0%, #082a524d 49%, #04162400 79%), linear-gradient(90deg, #041624 0%, #051a2d 52%, #061c32 100%); color: #fff; }
-.hero-inner { position: relative; display: block; max-width: 1240px; padding: 48px 50px 0; margin: auto; }
+.hero-inner { position: relative; display: block; max-width: 1240px; padding: 40px 50px 0; margin: auto; }
 .hero-inner::before { content: ""; position: absolute; inset: 0 50px; pointer-events: none; border-right: 1px solid #b8d3ed0a; background-image: linear-gradient(to right, #b8d3ed0c .7px, transparent .7px); background-size: 33.3333% 100%; }
 .hero-copy { position: relative; z-index: 2; max-width: 455px; }
 h1 { font: 68px/1.1 Georgia, "Times New Roman", serif; font-weight: 400; letter-spacing: -2px; margin: 0 0 17px; }
@@ -71,11 +71,13 @@ h1 > span { color: #8facd0; }
 .hero-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 28px; margin-top: 29px; }
 .hero-cta { display: inline-flex; align-items: center; gap: 24px; padding: 9px 0; font-size: 13px; font-weight: 500; color: #fff; text-decoration: none; border-bottom: 1px solid #7e98b6; }
 .hero-cta:hover { border-bottom-color: #fff; }
-.hero-visual { position: relative; z-index: 1; margin: 14px 0 0; width: 100%; }
+.hero-visual { position: relative; z-index: 1; margin: 8px 0 0; width: 100%; }
 .hero-visual::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 100%; background: radial-gradient(ellipse 40% 70% at 58% 100%, rgba(7, 81, 226, .26) 0%, rgba(7, 81, 226, 0) 100%); pointer-events: none; }
-.market-fallback, #market-canvas { position: relative; display: block; width: 100%; height: auto; aspect-ratio: 1240 / 520; object-fit: contain; }
+.market-fallback, #market-canvas { display: block; width: 100%; object-fit: contain; }
+#market-canvas { position: relative; height: auto; aspect-ratio: 1240 / 496; }
 .market-fallback { position: absolute; inset: 0; height: 100%; }
-#market-canvas { touch-action: pan-y; cursor: crosshair; }
+#market-canvas { touch-action: pan-y; }
+.market-ready #market-canvas { cursor: crosshair; }
 .market-ready .market-fallback { display: none; }
 .content-shell { max-width: 1240px; margin: auto; padding: 0 50px; }
 .highlights-section { padding-top: 32px; }
@@ -193,13 +195,11 @@ footer a { color: var(--muted); text-decoration: none; padding: 8px 0; }
   .recognition-grid,.background-section { column-gap: 40px; }
   .recognition { gap: 13px; }
 }
-@media (max-width: 870px) {
-}
 @media (max-width: 850px) {
   .hero { background-image: radial-gradient(ellipse 92% 76% at 64% 82%, #103969a8 0%, #082a523d 50%, #04162400 84%), linear-gradient(120deg, #041624 0%, #051a2d 65%, #061c32 100%); }
   .hero-inner { padding: 48px 35px 0; }
   .hero-visual { margin-top: 18px; }
-  .market-fallback, #market-canvas { aspect-ratio: 375 / 232; }
+  #market-canvas { aspect-ratio: 375 / 232; }
   .market-fallback { object-fit: cover; }
   .hero-copy { max-width: none; }
   h1 { font-size: 61px; }
@@ -284,15 +284,12 @@ footer a { color: var(--muted); text-decoration: none; padding: 8px 0; }
   .contact-links { gap: 24px; }
   footer { font-size: 11px; padding-top: 16px; margin-top: 32px; }
 }
-@media (max-width: 400px) {
-}
 @media (max-width: 370px) {
   .topbar-in { padding: 0 18px; }
   .content-shell { padding: 0 18px; }
   .hero-inner { padding-left: 21px; padding-right: 21px; }
   .hero-inner::before { left: 21px; right: 21px; }
   .hero-actions { gap: 12px; }
-
   h1 { font-size: 52px; }
   .research-tabs { gap: 8px 18px; }
   .contact-email { font-size: 18px; }
@@ -306,7 +303,7 @@ footer a { color: var(--muted); text-decoration: none; padding: 8px 0; }
   .topbar,.hero-visual,.hero-actions,.research-tabs,.contact-links,footer a { display:none !important; }
   .hero { background:#fff; color:#000; }
   .hero-inner::before { display:none; }
-  .hero-inner { min-height:0; padding:0 0 25px; }
+  .hero-inner { padding:0 0 25px; }
   .hero-copy { max-width:none; }
   .hero p,.hero strong,.hero span { color:#222; }
   h1 { font-size:42px; }

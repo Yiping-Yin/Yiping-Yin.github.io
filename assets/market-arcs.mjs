@@ -16,7 +16,7 @@ import { meta, year, month, day } from './market-arcs-data.mjs?v=arcs-1';
 import {
   TAU, PEN, SEAM, ARCS, TIMING, CAMERA, EASE, PARALLAX,
   calendarSlots, sessionSlots, intradaySlots, bearingAt, slotFromBearing,
-  priceBand, level, candle, ageSink, replayState, frameCamera, pickArc, barSpan,
+  priceBand, candle, ageSink, replayState, frameCamera, pickArc, barSpan,
   formatPrice, captionLines, pointerNormal, damp, clamp01
 } from './market-arcs-model.mjs?v=arcs-1';
 
@@ -39,8 +39,6 @@ const DISSOLVE = 0.4;          // s to clear the day arc before a replay
 const REST = TIMING.rest;      // s the close holds before the replay
 const PERF_WINDOW = 120, PERF_SLOW_MS = 40;
 const HOVER_RELEASE = 0.55;    // s the caption survives a pointerleave
-const STORE_SEEN = 'arcs-seen';
-const MOBILE_QUERY = '(max-width: 850px)';
 
 function boot(canvas) {
   const figure = canvas.closest('figure');
@@ -48,7 +46,7 @@ function boot(canvas) {
   const sourceEl = captionEl ? captionEl.querySelector('.market-caption-source') : null;
   const sessionEl = captionEl ? captionEl.querySelector('.market-caption-session') : null;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const mobile = window.matchMedia(MOBILE_QUERY);
+  const hoverEl = document.getElementById('market-hover');
 
   // Caption first, so it is right even when WebGL is not there.
   function writeCaption(key, index) {
@@ -68,8 +66,7 @@ function boot(canvas) {
   try {
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
   } catch (error) {
-    if (captionEl) captionEl.classList.remove('is-pending');
-    return;
+    return;   // no WebGL: the still and the caption stand
   }
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.setClearColor(0x000000, 0);
@@ -83,6 +80,7 @@ function boot(canvas) {
   const up = new THREE.Color(COLOURS.up), down = new THREE.Color(COLOURS.down), ground = new THREE.Color(COLOURS.ground);
   const at = (r, th, y) => [r * Math.cos(th), y, -r * Math.sin(th)];
   const M = new THREE.Matrix4(), Q = new THREE.Quaternion(), P = new THREE.Vector3(), S = new THREE.Vector3(), E = new THREE.Euler();
+  const LOOK = new THREE.Vector3(), NDC = new THREE.Vector2();
   const lineMaterials = [];
 
   function lineSegments(points, alpha) {
@@ -109,6 +107,14 @@ function boot(canvas) {
     const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, transparent: true, opacity: 0.94, depthWrite: false, toneMapped: false }));
     const h = em * H / px; sprite.scale.set(h * W / H, h, 1);
     sprite.center.set(align === 'left' ? 0 : align === 'right' ? 1 : 0.5, 0.5);
+    let current = text;
+    sprite.redraw = (next) => {   // the numerals follow the replay
+      if (next === current) return;
+      current = next;
+      c.clearRect(0, 0, W, H);
+      c.fillText(next, align === 'left' ? 4 : align === 'right' ? W - 4 : W / 2, H / 2, W - 8);
+      texture.needsUpdate = true;
+    };
     return sprite;
   }
 
@@ -154,7 +160,7 @@ function boot(canvas) {
       let joint = false;
       if (spec.key === 'year') joint = i === 0 || rows[i].label.slice(0, 7) !== rows[i - 1].label.slice(0, 7);
       if (spec.key === 'month') joint = i === 0 || rows[i].label.slice(0, 10) !== rows[i - 1].label.slice(0, 10);
-      if (spec.key === 'day') joint = rows[i].label.slice(14) === '00';
+      if (spec.key === 'day') joint = i === 0 || slotOf(i) - slotOf(i - 1) > 1;   // the hour gaps the layout leaves
       if (joint) joints.push(at(rt, item.theta, 0.003), at(rt - 0.2, item.theta, 0.003));
       else if (spec.key !== 'year') ticks.push(at(rt, item.theta, 0.003), at(rt - 0.09, item.theta, 0.003));
       if (spec.key === 'year' && joint && i > 0) {
@@ -189,8 +195,7 @@ function boot(canvas) {
   });
 
   // The clock ---------------------------------------------------------------
-  const state = { beat: day.length - 1, phase: 'rest', phaseAt: 0, last: 0, seen: false };
-  try { state.seen = sessionStorage.getItem(STORE_SEEN) === '1'; sessionStorage.setItem(STORE_SEEN, '1'); } catch (e) { /* private mode */ }
+  const state = { beat: day.length - 1, phase: 'rest', phaseAt: 0 };
   const view = { az: 0, el: 0, azTarget: 0, elTarget: 0 };
   const clock = { frameId: 0, lastStamp: 0, inView: !('IntersectionObserver' in window), hidden: document.hidden, contextLost: false, dpr: Math.min(window.devicePixelRatio || 1, 2), perfFrames: 0, perfMs: 0 };
   const hover = { arc: -1, index: -1, until: 0 };
@@ -225,18 +230,32 @@ function boot(canvas) {
     arc.bodies.instanceMatrix.needsUpdate = true; arc.wicks.instanceMatrix.needsUpdate = true;
     if (u >= 1) arc.printing = null;
   }
+  function writeNumerals(beat) {
+    const s = replayState(beat, { day: day.length, month: month.length, year: year.length });
+    const pens = { day: s.day.pen, month: s.month.pen, year: s.year.pen };
+    numerals.price.redraw(formatPrice(day[s.day.pen].close));
+    arcs.forEach((arc, i) => numerals.spans[i].redraw(barSpan(arc.spec.key, arc.rows[pens[arc.spec.key]])));
+  }
   function setBeat(beat, time, animate) {
     const previous = state.beat;
     state.beat = beat;
     applyBeat(beat);
+    writeNumerals(beat);
     if (animate && beat === previous + 1) { const arc = arcs[2]; arc.printing = { index: beat, at: time }; const item = arc.items[beat]; item.p = 0; arc.place(item, 0); }
     if (hover.arc < 0) writeCaption('day', beat);
   }
   function showTerminal() {
     state.phase = 'rest'; state.phaseAt = performance.now() / 1000;
+    for (const arc of arcs) { arc.printing = null; arc.shown = -1; }   // rebuild every bar, whatever a dissolve left
     setBeat(day.length - 1, state.phaseAt, false);
-    for (const arc of arcs) arc.printing = null;
-    if (captionEl) captionEl.classList.remove('is-pending');
+  }
+  // After a stop (hidden tab, offscreen canvas, lost context) the clock resumes where it was, not where the wall clock says.
+  function resume() {
+    const now = performance.now() / 1000;
+    if (state.phase === 'replay') state.phaseAt = now - state.beat * TIMING.beat;
+    else if (state.phase === 'dissolve') { arcs[2].shown = -1; state.phase = 'replay'; state.phaseAt = now; setBeat(0, now, false); }
+    else state.phaseAt = now;
+    requestFrame();
   }
   function motionOn() { return !reducedMotion.matches; }
   // The replay loop: hold the close, dissolve the day, print it again bar by bar.
@@ -263,7 +282,7 @@ function boot(canvas) {
     if (!framing) return;
     const el = (framing.elevation * Math.PI / 180) + view.el;
     const az = -Math.PI / 2 + view.az;     // straight in front of the disc, looking across it at the pen
-    const look = new THREE.Vector3(SHIFT_X, 0.2, -framing.lookZ);
+    const look = LOOK.set(SHIFT_X, 0.2, -framing.lookZ);
     const flat = framing.distance * Math.cos(el);
     camera.position.set(look.x + flat * Math.cos(az), look.y + framing.distance * Math.sin(el), look.z - flat * Math.sin(az));
     camera.lookAt(look);
@@ -287,8 +306,8 @@ function boot(canvas) {
   const hit = new THREE.Vector3();
   function pick(clientX, clientY) {
     const box = canvas.getBoundingClientRect();
-    const ndc = new THREE.Vector2(2 * (clientX - box.left) / box.width - 1, 1 - 2 * (clientY - box.top) / box.height);
-    raycaster.setFromCamera(ndc, camera);
+    NDC.set(2 * (clientX - box.left) / box.width - 1, 1 - 2 * (clientY - box.top) / box.height);
+    raycaster.setFromCamera(NDC, camera);
     if (!raycaster.ray.intersectPlane(plane, hit)) return null;
     const x = hit.x - SHIFT_X, z = hit.z;
     const radius = Math.hypot(x, z);
@@ -305,12 +324,13 @@ function boot(canvas) {
     if (found) {
       hover.arc = found.arc; hover.index = found.index; hover.until = Infinity;
       writeCaption(arcs[found.arc].spec.key, found.index);
+      if (hoverEl) hoverEl.textContent = captionLines(meta, WINDOWS, arcs[found.arc].spec.key, found.index)[1];
     } else if (hover.arc >= 0) {
       hover.until = time + HOVER_RELEASE;
     }
   }
   function updateHover(time) {
-    if (hover.arc >= 0 && time >= hover.until) { hover.arc = -1; hover.index = -1; writeCaption('day', state.beat); }
+    if (hover.arc >= 0 && time >= hover.until) { hover.arc = -1; hover.index = -1; writeCaption('day', state.beat); if (hoverEl) hoverEl.textContent = ''; }
   }
   canvas.addEventListener('pointermove', (event) => {
     const { nx, ny } = pointerNormal(event.clientX, event.clientY, canvas.getBoundingClientRect());
@@ -323,7 +343,7 @@ function boot(canvas) {
   // Frames --------------------------------------------------------------------
   function render() {
     renderer.render(scene, camera);
-    if (figure && !figure.classList.contains('market-ready')) { figure.classList.add('market-ready'); if (captionEl) captionEl.classList.remove('is-pending'); }
+    if (figure && !figure.classList.contains('market-ready')) figure.classList.add('market-ready');
   }
   function frame(stamp) {
     clock.frameId = 0;
@@ -336,7 +356,7 @@ function boot(canvas) {
     placeCamera();
     render();
     samplePerf(dt);
-    const moving = motionOn() || Math.abs(view.az - view.azTarget) > 1e-4 || Math.abs(view.el - view.elTarget) > 1e-4 || hover.until !== Infinity;
+    const moving = motionOn() || Math.abs(view.az - view.azTarget) > 1e-4 || Math.abs(view.el - view.elTarget) > 1e-4 || (hover.arc >= 0 && hover.until !== Infinity);
     if (moving) requestFrame();
   }
   function samplePerf(dt) {
@@ -352,12 +372,12 @@ function boot(canvas) {
   function stopFrame() { if (clock.frameId) { window.cancelAnimationFrame(clock.frameId); clock.frameId = 0; } clock.lastStamp = 0; }
 
   canvas.addEventListener('webglcontextlost', (event) => { event.preventDefault(); clock.contextLost = true; stopFrame(); if (figure) figure.classList.remove('market-ready'); });
-  canvas.addEventListener('webglcontextrestored', () => { clock.contextLost = false; resize(); requestFrame(); });
-  document.addEventListener('visibilitychange', () => { clock.hidden = document.hidden; if (clock.hidden) stopFrame(); else { state.phaseAt = performance.now() / 1000 - (state.phase === 'replay' ? state.beat * TIMING.beat : 0); requestFrame(); } });
+  canvas.addEventListener('webglcontextrestored', () => { clock.contextLost = false; resize(); resume(); });
+  document.addEventListener('visibilitychange', () => { clock.hidden = document.hidden; if (clock.hidden) stopFrame(); else resume(); });
   if ('IntersectionObserver' in window) {
     new IntersectionObserver((entries) => {
       clock.inView = entries.some((entry) => entry.isIntersecting);
-      if (clock.inView) requestFrame(); else stopFrame();
+      if (clock.inView) resume(); else stopFrame();
     }, { threshold: 0.05 }).observe(canvas);
   }
   if (figure && 'ResizeObserver' in window) new ResizeObserver(() => resize()).observe(figure);
@@ -371,7 +391,7 @@ function boot(canvas) {
   if (new URLSearchParams(location.search).has('debug')) {
     canvas.__market = {
       scene, camera, renderer, disc, arcs, state, view, clock, hover, meta, windows: WINDOWS,
-      frame, render, resize, showTerminal, setBeat: (b) => setBeat(b, performance.now() / 1000, false), applyBeat, placeCamera, pick,
+      frame, render, resize, showTerminal, resume, setBeat: (b) => setBeat(b, performance.now() / 1000, false), applyBeat, placeCamera, pick,
       framing: () => framing, captionEl
     };
   }

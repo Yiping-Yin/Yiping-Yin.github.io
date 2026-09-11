@@ -29,7 +29,7 @@ Keep research context attached to numerical results: competition category, histo
 ```sh
 node --check assets/site.js
 node --check assets/market-arcs.mjs
-node --test
+node --test tests/*.test.mjs
 git diff --check
 ```
 

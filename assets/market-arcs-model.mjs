@@ -100,10 +100,14 @@ export function ageSink(i, n, fade = 0.72, power = 0.8) {
 // the session's own daily bar stays under the year arc's pen throughout.
 export function replayState(beat, counts) {
   const k = Math.max(0, Math.min(counts.day - 1, Math.floor(beat)));
+  const hours = Math.ceil(counts.day / TIMING.hourBars);
   const hour = Math.floor(k / TIMING.hourBars);
+  // the last hourly bar is a partial hour (15:30–16:00, six bars): it does not creep, so the
+  // close lands with that bar exactly under the pen — the pose the still is drawn from
+  const partial = hour === hours - 1 && counts.day % TIMING.hourBars !== 0;
   return {
     day: { pen: k },
-    month: { pen: counts.month - Math.ceil(counts.day / TIMING.hourBars) + hour, fraction: (k % TIMING.hourBars) / TIMING.hourBars },
+    month: { pen: counts.month - hours + hour, fraction: partial ? 0 : (k % TIMING.hourBars) / TIMING.hourBars },
     year: { pen: counts.year - 1 }
   };
 }
