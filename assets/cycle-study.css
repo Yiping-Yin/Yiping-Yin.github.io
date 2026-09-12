@@ -1,0 +1,30 @@
+.cycle-study .hero { background-image:radial-gradient(ellipse 56% 76% at 60% 51%,#104681a6 0%,#092e5361 46%,transparent 89%),linear-gradient(112deg,#031522,#051d33); }
+.cycle-study .hero-inner { padding-top:14px; padding-bottom:20px; }
+.cycle-study .hero-visual::before { background:radial-gradient(ellipse 36% 40% at 53% 64%,#30609b19,transparent 85%); }
+.cycle-study #market-canvas { min-height:0; aspect-ratio:1140/560; touch-action:pan-y; }
+.cycle-study .market-inscription { top:37%; bottom:auto; max-width:58%; }
+.cycle-study h1 { font-size:clamp(24px,2.3vw,30px); letter-spacing:-.8px; }
+.cycle-study .hero-focus { font-size:11px; color:#91a8bd; margin-top:10px; }
+.cycle-study .market-note { min-height:0; margin-top:8px; font-size:10px; line-height:1.6; max-width:380px; }
+.cycle-study .market-note-time { font-size:10px; color:#7f9ab1; letter-spacing:.15px; }
+.cycle-state,.cycle-detail { min-height:16px; }
+.cycle-actions { gap:24px; margin-top:10px; }
+.cycle-study .market-inscription .hero-actions { margin-top:12px; gap:24px; }
+.cycle-actions .hero-cta { font-size:11px; gap:15px; }
+.cycle-study .cycle-actions .hero-cta { padding:3px 0; }
+.cycle-pause,.cycle-foot a { font:10px -apple-system,BlinkMacSystemFont,sans-serif; color:#8ea8bf; background:none; border:0; padding:7px 0; text-decoration:none; cursor:pointer; pointer-events:auto; }
+.cycle-pause:hover,.cycle-foot a:hover { color:#e0ebf4; }
+.cycle-foot { display:flex; align-items:center; justify-content:space-between; padding:0 20px; font:9px -apple-system,BlinkMacSystemFont,sans-serif; color:#728ba1; letter-spacing:.2px; }
+.cycle-inspect { position:absolute; z-index:4; pointer-events:none; padding:8px 11px; border:1px solid #91aac32e; background:#071c2eee; box-shadow:0 4px 20px #020c1926; color:#cadbe9; font:11px/1.6 -apple-system,BlinkMacSystemFont,sans-serif; font-variant-numeric:tabular-nums; white-space:nowrap; }
+@media(max-width:1100px) and (min-width:851px) { .cycle-study h1{font-size:27px;}.cycle-study .market-note{margin-top:8px;}.cycle-study .market-inscription{top:36%;} }
+@media(max-width:850px) {
+  .cycle-study .hero-inner{padding-top:30px;padding-bottom:15px;}
+  .cycle-study .market-inscription{position:relative;left:auto;top:auto;bottom:auto;transform:none;max-width:100%;width:100%;margin-bottom:8px;}
+  .cycle-study h1{font-size:clamp(23px,5.5vw,30px);}
+  .cycle-study .hero-focus{font-size:10px;}
+  .cycle-study .market-note{margin-top:15px;}
+  .cycle-study #market-canvas,.cycle-study .hero-visual picture{aspect-ratio:780/620;}
+  .cycle-study .hero-visual picture{top:auto;bottom:28px;}
+  .cycle-foot{order:3;width:100%;padding:0;font-size:8px;}
+  .cycle-foot a{font-size:9px;}
+}

@@ -1,5 +1,15 @@
 # Yiping Yin — personal website
 
+The independent full-circle time-and-price study is available at
+[`/cycle-study.html`](https://yiping-yin.github.io/cycle-study.html).
+It combines daily-return color marks, hourly OHLC within a 97.5-degree trading
+sector, and a linked five-minute price section. The study uses its own base
+stylesheet so its layout is independent of the homepage. It reads the existing
+historical snapshot; it is not a live feed. Only the captured 2026-09-10 session
+has five-minute detail. Missing historical detail remains empty. The renderer
+supports pause, pointer selection, keyboard inspection, and static fallbacks.
+Run all model checks with `node --test tests/*.test.mjs`.
+
 A responsive portfolio served by GitHub Pages. The pages are hand-written; the only runtime dependency is three.js, loaded from jsDelivr for the hero visual.
 
 ## Preview locally
