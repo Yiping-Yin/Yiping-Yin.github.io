@@ -174,6 +174,37 @@ export function captionLines(meta, windows, key, index) {
   return [line1, line2];
 }
 
+// How much price an arc spans: its window's range as a share of its own low.
+// Each arc has its own axis, so this is the only figure that says whether a
+// year of days and a day of 5-minute bars are drawn at the same scale.
+export function bandPercent(rows) {
+  const { lo, hi } = priceBand(rows);
+  return (hi - lo) / lo * 100;
+}
+
+// A share of price: one decimal from 1 % up, two below it, so the day arc's
+// half a per cent still reads as a number and not as 0 %.
+export function formatPercent(p) {
+  return `${p >= 1 ? p.toFixed(1) : p.toFixed(2)} %`;
+}
+
+// The pen's readout, the HTML text over the canvas: the price under the pen,
+// and for each arc its name, its unit, the price it spans and the bar it is
+// reading. index.html carries the terminal beat's strings and a test holds the
+// two together, as it does for the caption.
+export function readoutStrings(meta, windows, beat) {
+  const state = replayState(beat, { day: windows.day.length, month: windows.month.length, year: windows.year.length });
+  return {
+    source: [meta.name, `captured ${meta.capturedAt}`].join(DOT),
+    price: formatPrice(windows.day[state.day.pen].close),
+    rows: ARCS.map((spec) => ({
+      key: spec.key,
+      name: [spec.name, spec.unit, formatPercent(bandPercent(windows[spec.key]))].join(DOT),
+      span: barSpan(spec.key, windows[spec.key][state[spec.key].pen])
+    }))
+  };
+}
+
 const clamp01 = (u) => (u < 0 ? 0 : u > 1 ? 1 : u);
 
 // CSS-style cubic Bézier easing, as the ring used.

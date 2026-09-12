@@ -5,6 +5,7 @@ import data, { meta, year, month, day } from '../assets/market-arcs-data.mjs';
 const { TAU, PEN, SEAM, ARCS, TIMING } = model;
 const { calendarSlots, sessionSlots, intradaySlots, bearingAt, slotFromBearing, priceBand, level, candle, ageSink } = model;
 const { replayState, frameCamera, pickArc, formatPrice, formatReturn, captionLines, barSpan } = model;
+const { bandPercent, formatPercent, readoutStrings } = model;
 
 const near = (a, b, eps = 1e-9) => assert.ok(Math.abs(a - b) < eps, `${a} ≈ ${b}`);
 
@@ -147,9 +148,56 @@ test('formatReturn and formatPrice behave as the ring\'s did', () => {
   assert.equal(formatReturn(100, 0), '');
 });
 
+test('bandPercent measures a window against its own low, formatPercent prints it to the digit that shows', () => {
+  const band = priceBand(year);
+  near(bandPercent(year), (band.hi - band.lo) / band.lo * 100);
+  near(bandPercent([{ low: 100, high: 110 }]), 10);
+  assert.equal(formatPercent(bandPercent(year)), '23.7 %');
+  assert.equal(formatPercent(bandPercent(month)), '3.1 %');
+  assert.equal(formatPercent(bandPercent(day)), '0.43 %', 'under 1 % the second decimal is the reading');
+  assert.equal(formatPercent(1), '1.0 %');
+  assert.equal(formatPercent(0.5), '0.50 %');
+});
+
+test('readoutStrings gives the pen its price and every arc the bar it is reading', () => {
+  const windows = { year, month, day };
+  const end = readoutStrings(meta, windows, day.length - 1);
+  assert.equal(end.source, 'S&P 500 · captured 2026-09-11');
+  assert.equal(end.price, '7592.30');
+  assert.deepEqual(end.rows, [
+    { key: 'year', name: '1 YEAR · days · 23.7 %', span: '2026-09-10' },
+    { key: 'month', name: '1 MONTH · hours · 3.1 %', span: '15:30–16:00' },
+    { key: 'day', name: '1 DAY · 5 min · 0.43 %', span: '15:55–16:00' }
+  ]);
+  const mid = readoutStrings(meta, windows, 30);
+  assert.equal(mid.price, formatPrice(day[30].close));
+  assert.equal(mid.price, '7599.05');
+  assert.deepEqual(mid.rows.map((row) => row.span), ['2026-09-10', '11:30–12:30', '12:00–12:05']);
+  assert.deepEqual(mid.rows.map((row) => row.name), end.rows.map((row) => row.name), 'a name belongs to the window, not to the beat');
+  assert.equal(mid.source, end.source);
+});
+
 test('index.html ships the terminal caption the data produces', async () => {
   const fs = await import('node:fs/promises');
   const html = await fs.readFile(new URL('../index.html', import.meta.url), 'utf8');
   const [line1] = captionLines(meta, { year, month, day }, 'day', day.length - 1);
   assert.ok(html.includes(line1.replace(/&/g, '&amp;')), 'the source line is in index.html');
+});
+
+test('index.html ships the readout the model prints for the terminal beat', async () => {
+  const fs = await import('node:fs/promises');
+  const html = await fs.readFile(new URL('../index.html', import.meta.url), 'utf8');
+  const block = html.match(/<div class="market-readout"[\s\S]*?<\/div>/);
+  assert.ok(block, 'the hero figure carries the readout block');
+  const escaped = (line) => line.replace(/&/g, '&amp;');
+  const textOf = (source, name) => (source.match(new RegExp(`class="market-readout-${name}"[^>]*>([^<]*)<`)) || [])[1];
+  const readout = readoutStrings(meta, { year, month, day }, day.length - 1);
+  assert.equal(textOf(block[0], 'source'), escaped(readout.source));
+  assert.equal(textOf(block[0], 'price'), escaped(readout.price));
+  for (const row of readout.rows) {
+    const line = block[0].match(new RegExp(`<p class="market-readout-row" data-arc="${row.key}">([\\s\\S]*?)</p>`));
+    assert.ok(line, `${row.key} has a row of its own`);
+    assert.equal(textOf(line[1], 'name'), escaped(row.name), `the ${row.key} name`);
+    assert.equal(textOf(line[1], 'span'), escaped(row.span), `the ${row.key} span`);
+  }
 });

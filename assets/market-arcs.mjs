@@ -12,16 +12,16 @@ import * as THREE from 'three';
 import { Line2 } from 'three/addons/lines/Line2.js';
 import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
-import { meta, year, month, day } from './market-arcs-data.mjs?v=arcs-1';
+import { meta, year, month, day } from './market-arcs-data.mjs?v=readout-1';
 import {
-  TAU, PEN, SEAM, ARCS, TIMING, CAMERA, EASE, PARALLAX,
+  TAU, PEN, ARCS, TIMING, CAMERA, EASE, PARALLAX,
   calendarSlots, sessionSlots, intradaySlots, bearingAt, slotFromBearing,
   priceBand, candle, ageSink, replayState, frameCamera, pickArc, barSpan,
-  formatPrice, captionLines, pointerNormal, damp, clamp01
-} from './market-arcs-model.mjs?v=arcs-1';
+  captionLines, readoutStrings, pointerNormal, damp, clamp01
+} from './market-arcs-model.mjs?v=readout-1';
 
 const WINDOWS = { year, month, day };
-const COLOURS = { up: '#73E27F', down: '#DC7A88', accent: '#819CC6', ground: '#10294A', silver: '#c9d6e6', numeral: '#e6eef7', dim: '#7f97b5' };
+const COLOURS = { up: '#73E27F', down: '#DC7A88', accent: '#819CC6', ground: '#10294A', dim: '#7f97b5' };
 const BAND = 0.5;              // each arc's own price axis, in world units: a low ribbon, not a wall
 const GLYPH = [5, 5, 4.5];     // candle exaggeration per arc, outer to inner: the eye should land on the pen, not the inner arc
 const CANDLE_W = 0.075;        // widest a body may be; narrower where the slots are close
@@ -29,7 +29,7 @@ const FILL = 0.55;             // share of a slot a body may fill
 const WICK_W = 0.22;           // wick width as a share of the body's
 const FADE = 0.72, FADE_POWER = 0.8;
 const LINE_WIDTH = 1.4;        // the pen, in CSS px (LineMaterial's resolution is the logical viewport)
-const ARC_ALPHA = 0.34, TICK_ALPHA = 0.26, JOINT_ALPHA = 0.5, HORIZON_ALPHA = 0.3, SEAM_ALPHA = 0.35, PEN_ALPHA = 0.75;
+const ARC_ALPHA = 0.34, TICK_ALPHA = 0.26, JOINT_ALPHA = 0.5, HORIZON_ALPHA = 0.3, PEN_ALPHA = 0.75;
 const TRACK_INSET = 0.2;       // the hairline runs this far inside the candles' radius
 const SHIFT_X = 1.2;           // the disc sits a little right of centre, under the copy's opposite column
 const LABEL_FONT = '"SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif';
@@ -45,6 +45,18 @@ function boot(canvas) {
   const captionEl = figure ? figure.querySelector('.market-caption') : null;
   const sourceEl = captionEl ? captionEl.querySelector('.market-caption-source') : null;
   const sessionEl = captionEl ? captionEl.querySelector('.market-caption-session') : null;
+  // The pen's readout is HTML over the canvas, not glyphs in the scene: it is
+  // legible at any size and it is already right before WebGL starts. index.html
+  // ships the terminal beat; this file moves it and follows the replay.
+  const readoutEl = figure ? figure.querySelector('.market-readout') : null;
+  const readout = readoutEl ? {
+    source: readoutEl.querySelector('.market-readout-source'),
+    price: readoutEl.querySelector('.market-readout-price'),
+    rows: ARCS.map((spec) => {
+      const row = readoutEl.querySelector(`.market-readout-row[data-arc="${spec.key}"]`);
+      return row && { row, name: row.querySelector('.market-readout-name'), span: row.querySelector('.market-readout-span') };
+    })
+  } : null;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const hoverEl = document.getElementById('market-hover');
 
@@ -94,11 +106,11 @@ function boot(canvas) {
     lineMaterials.push(material);
     return new Line2(g, material);
   }
-  function label(text, em, colour, align = 'left', weight = 400) {
+  function label(text, em, colour, align = 'left') {
     const W = 1024, H = 64, px = 40;
     const source = document.createElement('canvas'); source.width = W; source.height = H;
     const c = source.getContext('2d');
-    c.font = `${weight} ${px}px ${LABEL_FONT}`;
+    c.font = `400 ${px}px ${LABEL_FONT}`;
     c.textBaseline = 'middle'; c.textAlign = align; c.fillStyle = colour;
     c.fillText(text, align === 'left' ? 4 : align === 'right' ? W - 4 : W / 2, H / 2, W - 8);
     const texture = new THREE.CanvasTexture(source);
@@ -107,14 +119,6 @@ function boot(canvas) {
     const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, transparent: true, opacity: 0.94, depthWrite: false, toneMapped: false }));
     const h = em * H / px; sprite.scale.set(h * W / H, h, 1);
     sprite.center.set(align === 'left' ? 0 : align === 'right' ? 1 : 0.5, 0.5);
-    let current = text;
-    sprite.redraw = (next) => {   // the numerals follow the replay
-      if (next === current) return;
-      current = next;
-      c.clearRect(0, 0, W, H);
-      c.fillText(next, align === 'left' ? 4 : align === 'right' ? W - 4 : W / 2, H / 2, W - 8);
-      texture.needsUpdate = true;
-    };
     return sprite;
   }
 
@@ -180,19 +184,10 @@ function boot(canvas) {
   const radii = ARCS.map((a) => a.radius);
   const rOut = radii[0], rIn = radii[radii.length - 1];
 
-  // The fixed parts: the horizon the arcs rise from, the seam, the pen and its numerals.
+  // The fixed parts: the horizon the arcs rise from, and the pen. The seam keeps
+  // its empty slots on every arc; it no longer carries a line of its own.
   disc.add(lineSegments([[-(rOut + 0.6), 0.002, 0], [rOut + 0.6, 0.002, 0]], HORIZON_ALPHA));
-  const seamTheta = PEN + SEAM * TAU / arcs[0].layout.slots;   // the oldest side of the seam on the outer arc
-  disc.add(lineSegments([at(rIn - TRACK_INSET - 0.15, seamTheta, 0.003), at(rOut + 0.25, seamTheta, 0.003)], SEAM_ALPHA));
   disc.add(fatLine([at(rIn - 0.35, PEN, 0.006), at(rOut + 0.35, PEN, 0.006)], PEN_ALPHA, LINE_WIDTH));
-  const numerals = { price: label(formatPrice(day[day.length - 1].close), 0.2, COLOURS.numeral, 'left', 500), spans: [], names: [] };
-  numerals.price.position.set(...at(rOut + 0.42, PEN - 0.01, BAND + 0.62)); disc.add(numerals.price);
-  arcs.forEach((arc) => {
-    const span = label(barSpan(arc.spec.key, arc.rows[arc.n - 1]), 0.13, COLOURS.silver, 'left');
-    span.position.set(...at(arc.spec.radius + 0.05, PEN - 0.012, BAND + 0.26)); disc.add(span); numerals.spans.push(span);
-    const name = label(`${arc.spec.name} · ${arc.spec.unit}`, 0.11, COLOURS.dim, 'right');
-    name.position.set(...at(arc.spec.radius + 0.05, PEN + 0.012, BAND + 0.26)); disc.add(name); numerals.names.push(name);
-  });
 
   // The clock ---------------------------------------------------------------
   const state = { beat: day.length - 1, phase: 'rest', phaseAt: 0 };
@@ -230,11 +225,18 @@ function boot(canvas) {
     arc.bodies.instanceMatrix.needsUpdate = true; arc.wicks.instanceMatrix.needsUpdate = true;
     if (u >= 1) arc.printing = null;
   }
+  // The readout follows the replay: the price and the spans change with the
+  // beat, the names never do, but they cost nothing to check.
+  const setText = (el, value) => { if (el && el.textContent !== value) el.textContent = value; };
   function writeNumerals(beat) {
-    const s = replayState(beat, { day: day.length, month: month.length, year: year.length });
-    const pens = { day: s.day.pen, month: s.month.pen, year: s.year.pen };
-    numerals.price.redraw(formatPrice(day[s.day.pen].close));
-    arcs.forEach((arc, i) => numerals.spans[i].redraw(barSpan(arc.spec.key, arc.rows[pens[arc.spec.key]])));
+    if (!readout) return;
+    const text = readoutStrings(meta, WINDOWS, beat);
+    setText(readout.source, text.source);
+    setText(readout.price, text.price);
+    text.rows.forEach((row, i) => {
+      const cells = readout.rows[i];
+      if (cells) { setText(cells.name, row.name); setText(cells.span, row.span); }
+    });
   }
   function setBeat(beat, time, animate) {
     const previous = state.beat;
@@ -277,7 +279,33 @@ function boot(canvas) {
     updatePrint(time);
   }
 
-  // The camera ----------------------------------------------------------------
+  // The camera and the readout over it -----------------------------------------
+  // The readout's anchors are world points beside the pen: project them with the
+  // camera in force and write the result onto the HTML, so the text holds its
+  // place through the parallax lean and every resize.
+  const ANCHOR = new THREE.Vector3();
+  const placements = readout ? [
+    [readout.source, rOut + 0.42, PEN - 0.01, BAND + 0.62],   // the source line hangs off the price's own anchor
+    [readout.price, rOut + 0.42, PEN - 0.01, BAND + 0.62],
+    ...arcs.map((arc, i) => [readout.rows[i] && readout.rows[i].row, arc.spec.radius + 0.05, PEN, BAND + 0.26])
+  ].filter(([el]) => el) : [];
+  function placeReadout() {
+    // lookAt writes the camera's inverse matrix before it sets the new orientation,
+    // so project through a fresh one; otherwise the first placement, before any
+    // render, goes through the camera's default pose and lands below the box.
+    camera.updateMatrixWorld();
+    for (const [el, r, theta, y] of placements) {
+      ANCHOR.set(...at(r, theta, y));
+      ANCHOR.x += SHIFT_X;                                    // the anchors are the disc's; the projection is the scene's
+      ANCHOR.project(camera);
+      const x = (ANCHOR.x + 1) / 2 * canvas.clientWidth, top = (1 - ANCHOR.y) / 2 * canvas.clientHeight;
+      const transform = `translate(${x.toFixed(1)}px, ${top.toFixed(1)}px)`;
+      if (el.style.transform !== transform) el.style.transform = transform;
+    }
+  }
+  // A lost context puts the still back: drop the projected places with it, so
+  // the stylesheet parks the readout instead of holding it where the camera was.
+  function clearReadout() { for (const [el] of placements) el.style.transform = ''; }
   function placeCamera() {
     if (!framing) return;
     const el = (framing.elevation * Math.PI / 180) + view.el;
@@ -286,6 +314,7 @@ function boot(canvas) {
     const flat = framing.distance * Math.cos(el);
     camera.position.set(look.x + flat * Math.cos(az), look.y + framing.distance * Math.sin(el), look.z - flat * Math.sin(az));
     camera.lookAt(look);
+    placeReadout();
   }
   function resize() {
     const box = figure ? figure.getBoundingClientRect() : canvas.getBoundingClientRect();
@@ -371,7 +400,7 @@ function boot(canvas) {
   function requestFrame() { if (!clock.frameId && canDraw()) clock.frameId = window.requestAnimationFrame(frame); }
   function stopFrame() { if (clock.frameId) { window.cancelAnimationFrame(clock.frameId); clock.frameId = 0; } clock.lastStamp = 0; }
 
-  canvas.addEventListener('webglcontextlost', (event) => { event.preventDefault(); clock.contextLost = true; stopFrame(); if (figure) figure.classList.remove('market-ready'); });
+  canvas.addEventListener('webglcontextlost', (event) => { event.preventDefault(); clock.contextLost = true; stopFrame(); if (figure) figure.classList.remove('market-ready'); clearReadout(); });
   canvas.addEventListener('webglcontextrestored', () => { clock.contextLost = false; resize(); resume(); });
   document.addEventListener('visibilitychange', () => { clock.hidden = document.hidden; if (clock.hidden) stopFrame(); else resume(); });
   if ('IntersectionObserver' in window) {
@@ -391,7 +420,7 @@ function boot(canvas) {
   if (new URLSearchParams(location.search).has('debug')) {
     canvas.__market = {
       scene, camera, renderer, disc, arcs, state, view, clock, hover, meta, windows: WINDOWS,
-      frame, render, resize, showTerminal, resume, setBeat: (b) => setBeat(b, performance.now() / 1000, false), applyBeat, placeCamera, pick,
+      frame, render, resize, showTerminal, resume, setBeat: (b) => setBeat(b, performance.now() / 1000, false), applyBeat, placeCamera, placeReadout, pick,
       framing: () => framing, captionEl
     };
   }

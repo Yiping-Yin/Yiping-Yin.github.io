@@ -79,6 +79,18 @@ h1 > span { color: #8facd0; }
 #market-canvas { touch-action: pan-y; }
 .market-ready #market-canvas { cursor: crosshair; }
 .market-ready .market-fallback { display: none; }
+/* The pen's readout: HTML text over the canvas. The renderer projects each
+   anchor and writes the transform; these rules only hang the text off it — the
+   name to the left of the pen, the span and the price to its right. */
+.market-readout { position: absolute; left: 0; top: 0; margin: 0; pointer-events: none; font-variant-numeric: tabular-nums; white-space: nowrap; --readout-price: 22px; }
+.market-readout > *, .market-readout-row > span { position: absolute; left: 0; top: 0; margin: 0; }
+.market-readout-price { font-size: var(--readout-price); line-height: 1; font-weight: 500; letter-spacing: -.01em; color: #e6eef7; translate: 8px -50%; }
+.market-readout-source { font-size: 11px; letter-spacing: .04em; color: #7f97b5; translate: 8px calc(-100% - 6px - var(--readout-price) / 2); }
+.market-readout-span { font-size: 13px; color: #c9d6e6; translate: 8px -50%; }
+.market-readout-name { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: #7f97b5; translate: calc(-100% - 8px) -50%; }
+/* Until the canvas has painted — no JavaScript, no WebGL — the still is showing,
+   and the still carries the readout, so the HTML copy stays out of the way. */
+.hero-visual:not(.market-ready) .market-readout { display: none; }
 .content-shell { max-width: 1240px; margin: auto; padding: 0 50px; }
 .highlights-section { padding-top: 32px; }
 .recognition-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 64px; }
@@ -201,6 +213,10 @@ footer a { color: var(--muted); text-decoration: none; padding: 8px 0; }
   .hero-visual { margin-top: 18px; }
   #market-canvas { aspect-ratio: 375 / 232; }
   .market-fallback { object-fit: cover; }
+  .market-readout { --readout-price: 15px; }
+  .market-readout-span { font-size: 10px; }
+  .market-readout-name { font-size: 9px; }
+  .market-readout-source { display: none; }
   .hero-copy { max-width: none; }
   h1 { font-size: 61px; }
   .hero-focus { font-size: 24px; }
