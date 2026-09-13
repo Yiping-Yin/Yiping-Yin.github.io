@@ -1,0 +1,32 @@
+{
+  "publishedAt": "2026-09-13T23:08:15.606Z",
+  "sourceSHA256": "2c725aaefd23cc5f1cfafc0c45485df5ef17c42c361599deec2207309993bd35",
+  "instruments": [
+    {
+      "symbol": "^GSPC",
+      "checksum": "ea53e67bb8675cb38019ff7fc20752f4f3651ab7db25c5959106cdebb8d18110",
+      "barCount": 390
+    },
+    {
+      "symbol": "AAPL",
+      "checksum": "28b80afa6e359e2557bba4acaa7d6b6f39302ab22850074999e20452da6c984a",
+      "barCount": 390
+    },
+    {
+      "symbol": "MSFT",
+      "checksum": "940e2ea79f9e84550c53b3ed21e4c9ef1bbb1ff6a32e1da45349d66e8109875a",
+      "barCount": 390
+    },
+    {
+      "symbol": "NVDA",
+      "checksum": "0039318667b664a99f135b8302348af7f8769595882c7862a525e339ed644dd0",
+      "barCount": 390
+    }
+  ],
+  "capabilities": {
+    "manualTrading": true,
+    "strategyEditing": true,
+    "pythonExecution": false,
+    "privateLabNotes": false
+  }
+}
