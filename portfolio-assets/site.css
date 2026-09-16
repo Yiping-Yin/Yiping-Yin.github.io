@@ -61,7 +61,7 @@ p { margin-bottom: 16px; }
 #mobile-nav a.on { color: #fff; font-weight: 600; }
 .page-shell { width: 100%; }
 main { min-width: 0; }
-.hero { position: relative; overflow: hidden; background-color: #041624; background-image: radial-gradient(ellipse 56% 90% at 50% 66%, #103969b8 0%, #082a524d 49%, #04162400 79%), linear-gradient(90deg, #041624 0%, #051a2d 52%, #061c32 100%); color: #fff; }
+.hero { position: relative; overflow: hidden; background-color: #051a2d; background-image: radial-gradient(ellipse 56% 90% at 50% 66%, #103969b8 0%, #082a524d 49%, #04162400 79%); color: #fff; }
 .hero-inner { position: relative; display: block; max-width: 1240px; padding: 24px 50px 0; margin: auto; }
 .hero-inner::before { content: ""; position: absolute; inset: 0 50px; pointer-events: none; border-right: 1px solid #b8d3ed0a; background-image: linear-gradient(to right, #b8d3ed0c .7px, transparent .7px); background-size: 33.3333% 100%; }
 .market-inscription { position: absolute; z-index: 2; left: 50%; top: 67%; transform: translateX(-50%); width: max-content; max-width: calc(100% - 40px); text-align: center; pointer-events: none; }
@@ -198,7 +198,7 @@ footer a { color: var(--muted); text-decoration: none; padding: 8px 0; }
   .recognition { gap: 13px; }
 }
 @media (max-width: 850px) {
-  .hero { background-image: radial-gradient(ellipse 92% 76% at 64% 82%, #103969a8 0%, #082a523d 50%, #04162400 84%), linear-gradient(120deg, #041624 0%, #051a2d 65%, #061c32 100%); }
+  .hero { background-color: #051a2d; background-image: radial-gradient(ellipse 92% 76% at 64% 82%, #103969a8 0%, #082a523d 50%, #04162400 84%); }
   .hero-inner { padding: 20px 35px 0; }
   .hero-visual { margin-top: 0; }
   #market-canvas { aspect-ratio: 780 / 450; min-height: 0; }

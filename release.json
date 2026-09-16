@@ -1,25 +1,135 @@
 {
-  "publishedAt": "2026-09-13T23:08:15.606Z",
-  "sourceSHA256": "2c725aaefd23cc5f1cfafc0c45485df5ef17c42c361599deec2207309993bd35",
+  "publishedAt": "2026-09-16T06:59:17.038Z",
+  "sourceSHA256": "c326fc919f275e9809a96c1351cd20a82ffccc0ad513bac03674d27ed0841f2a",
   "instruments": [
     {
-      "symbol": "^GSPC",
-      "checksum": "ea53e67bb8675cb38019ff7fc20752f4f3651ab7db25c5959106cdebb8d18110",
-      "barCount": 390
-    },
-    {
       "symbol": "AAPL",
-      "checksum": "28b80afa6e359e2557bba4acaa7d6b6f39302ab22850074999e20452da6c984a",
+      "checksum": "bc12c25db9c021194c31cd83bcb73b71a649a832effc35de15dc555906ad1c66",
       "barCount": 390
     },
     {
-      "symbol": "MSFT",
-      "checksum": "940e2ea79f9e84550c53b3ed21e4c9ef1bbb1ff6a32e1da45349d66e8109875a",
+      "symbol": "ASML",
+      "checksum": "afb934e989aaffb4d47ba75c901aee2b7266ae2016ca1f5d15e05d530ec23cf5",
+      "barCount": 390
+    },
+    {
+      "symbol": "ASML_DUAL",
+      "checksum": "a467e273d1d3ea37af162ee4614926864988fd7a56761fda80a7e8cf5936f64b",
       "barCount": 390
     },
     {
       "symbol": "NVDA",
-      "checksum": "0039318667b664a99f135b8302348af7f8769595882c7862a525e339ed644dd0",
+      "checksum": "af0e3bdf5f61f7917720294d4d4636994811a54140fd50a2f65e9040da260088",
+      "barCount": 390
+    },
+    {
+      "symbol": "SAP",
+      "checksum": "23cd664273b4ac443a7a7788fbdc036b253b409458895ff403b55e5539e940d1",
+      "barCount": 390
+    },
+    {
+      "symbol": "SAP_DUAL",
+      "checksum": "25e7b8cc78d4375914744320c4dd16eb9032ecf0b5594c5e559f315496c513d4",
+      "barCount": 390
+    },
+    {
+      "symbol": "TSLA",
+      "checksum": "db98de13c79844bd4995b8c748b37a55ae6d290479eb063da13f2e39115691a5",
+      "barCount": 390
+    },
+    {
+      "symbol": "ASML_202612_F",
+      "checksum": "3450ed113c7fcb68208357ec955728a59c37b7fd7de05ddf2543425822ee69c7",
+      "barCount": 390
+    },
+    {
+      "symbol": "ASML_202703_F",
+      "checksum": "df0a35f593303062ea175f236ed8ae0c481c1e791dc3f2463e34a8d9e39cdbde",
+      "barCount": 390
+    },
+    {
+      "symbol": "ASML_202706_F",
+      "checksum": "25b5a87313383bd00a8e8644e39ca615c2ca6b5aca160c731a4af6e375f82df9",
+      "barCount": 390
+    },
+    {
+      "symbol": "ASML_202612_050C",
+      "checksum": "0b69c507e4fdeb7a53215410f91bf9f83763ff4bd85c2d00a76274180ead3a79",
+      "barCount": 390
+    },
+    {
+      "symbol": "ASML_202612_050P",
+      "checksum": "bf3a0a7591b3ac74665b9f95b957f2d37183216e06a02fc8d464d5ce3d6fa97a",
+      "barCount": 390
+    },
+    {
+      "symbol": "ASML_202612_075C",
+      "checksum": "4cdbb0758d9acf404e5d07fe16ad6b02689a4fecef686429ae625cee2745e429",
+      "barCount": 390
+    },
+    {
+      "symbol": "ASML_202612_075P",
+      "checksum": "a28fa8012de545edc8c7196aad518dfdc24a50e43bee369484a5aef31958c7f5",
+      "barCount": 390
+    },
+    {
+      "symbol": "ASML_202612_100C",
+      "checksum": "1ccdee214dc9bb0d59f7d39a102f0ab16b29e055431aa01356163d90f5941de4",
+      "barCount": 390
+    },
+    {
+      "symbol": "ASML_202612_100P",
+      "checksum": "75e7a53c5cbab82f1f03499646cdcfbeb41fdfc59b56a728a4a1a1bbd8449eb4",
+      "barCount": 390
+    },
+    {
+      "symbol": "OB5X_ETF",
+      "checksum": "6edd90065ba706acd17b1621200b4fb4b2b369e2491fcd9a1384d0494be07e29",
+      "barCount": 390
+    },
+    {
+      "symbol": "OB5X_202612_F",
+      "checksum": "1b0fd660bacbad163aa98f59349d69b1b9c6b33e64b101bdc26bd8aa60a9871b",
+      "barCount": 390
+    },
+    {
+      "symbol": "OB5X_202703_F",
+      "checksum": "145f6491de40a79dc90b30a895196b7e39fbf9f19ddc52a300229d7beae5d59c",
+      "barCount": 390
+    },
+    {
+      "symbol": "OB5X_202706_F",
+      "checksum": "a0b3121f6d22ae2845eae655114f7171980e15e2f64082957898fa084213b3ed",
+      "barCount": 390
+    },
+    {
+      "symbol": "OB5X_202612_080C",
+      "checksum": "df3d7c7c9d15fab83c8c31ed31355a5c7545aa895cebed22210805bf3fa27f72",
+      "barCount": 390
+    },
+    {
+      "symbol": "OB5X_202612_080P",
+      "checksum": "963328770b1ba82600ab323cf0514885e263bfa40f9b91ea6c4b0915f18fa4b5",
+      "barCount": 390
+    },
+    {
+      "symbol": "OB5X_202612_100C",
+      "checksum": "7c165981e9f4bf095e887d78dbd2d200920359abc6e4bea3ad95c413f17fa8a1",
+      "barCount": 390
+    },
+    {
+      "symbol": "OB5X_202612_100P",
+      "checksum": "20844a6b6959bf46c201f7127d499a20a90410fbb777c65da80df995d9386a3c",
+      "barCount": 390
+    },
+    {
+      "symbol": "OB5X_202612_120C",
+      "checksum": "b1aa3f666e5563e53148a515443de8331f99d0a82795c1edd19228aeb0b772ef",
+      "barCount": 390
+    },
+    {
+      "symbol": "OB5X_202612_120P",
+      "checksum": "d1a0c01b4824560b36f0595756f9a63ee21e6504801dced9b2981761e6f73e94",
       "barCount": 390
     }
   ],

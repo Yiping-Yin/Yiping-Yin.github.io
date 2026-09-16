@@ -1,8 +1,6 @@
 Asset: susquehanna-logo-white.svg
 
 Source: https://www.algothon.au/assets/ (official Algothon 2026 site, retrieved 2026-08-19)
-Byte-identical to the copy in the retained presentation asset set
-  /Users/yinyiping/dev/Algothon/.tmp-ppt-preview-a/assets/
 
   SHA-256  3ec7a4cb9db03c3a9cb5375f36c3e6796db7a2a109160ade1b41efbc3f37e21b
 

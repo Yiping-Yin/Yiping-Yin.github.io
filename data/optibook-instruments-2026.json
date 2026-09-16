@@ -1,0 +1,408 @@
+{
+  "schemaVersion": 1,
+  "sourceKind": "retained executed course output",
+  "source": {
+    "sha256": "fb034f91d09ff9b8cd5dc6e58891264b319aa807b60c36f2b602d52d4e9c8340",
+    "capturedDate": "2026-07-22",
+    "cellIndex": 29,
+    "cellIndexBase": 0,
+    "captureNote": "Date of the retained notebook execution; the instrument output has no per-cell capture timestamp. This is a historical course snapshot, not a live instrument listing."
+  },
+  "supportingSources": [
+    {
+      "file": "optibook_guide.pdf",
+      "sha256": "0aa5d364844697b89c739aa23ab0b51b221872af2e3f3e547635df2597464615",
+      "pages": [
+        7,
+        8,
+        9,
+        10
+      ],
+      "supports": [
+        "stock and dual-listing semantics",
+        "European option exercise",
+        "third Friday at 12:00 UTC expiry convention",
+        "OB5X constituents and divisor",
+        "OB5X_ETF multiplier and cash component"
+      ]
+    },
+    {
+      "cellIndices": [
+        5,
+        7,
+        11,
+        12,
+        18,
+        19
+      ],
+      "cellIndexBase": 0,
+      "supports": [
+        "OB5X constituents and divisor",
+        "OB5X_ETF multiplier and cash component",
+        "UTC expiry convention"
+      ]
+    }
+  ],
+  "conventions": {
+    "expiryTimezone": "UTC",
+    "expiryRule": "Third Friday of the contract month at 12:00 UTC.",
+    "optionExerciseStyle": "EUROPEAN",
+    "marketNote": "Optibook stocks are fictional instruments; their prices are unrelated to their real-world namesakes."
+  },
+  "indexes": {
+    "OB5X": {
+      "tradable": false,
+      "divisor": 1000,
+      "constituents": {
+        "ASML": 908.06,
+        "AAPL": 129.24,
+        "SAP": 124.78,
+        "TSLA": 2245.39,
+        "NVDA": 953.21
+      }
+    }
+  },
+  "instruments": [
+    {
+      "symbol": "AAPL",
+      "type": "STOCK",
+      "group": "AAPL",
+      "tickSize": 0.1,
+      "priceChangeLimit": {
+        "absolute": 5.0,
+        "relative": 0.1
+      }
+    },
+    {
+      "symbol": "ASML",
+      "type": "STOCK",
+      "group": "ASML",
+      "tickSize": 0.1,
+      "priceChangeLimit": {
+        "absolute": 5.0,
+        "relative": 0.1
+      }
+    },
+    {
+      "symbol": "ASML_DUAL",
+      "type": "STOCK",
+      "group": "ASML",
+      "tickSize": 0.1,
+      "priceChangeLimit": {
+        "absolute": 5.0,
+        "relative": 0.1
+      }
+    },
+    {
+      "symbol": "NVDA",
+      "type": "STOCK",
+      "group": "NVDA",
+      "tickSize": 0.1,
+      "priceChangeLimit": {
+        "absolute": 5.0,
+        "relative": 0.1
+      }
+    },
+    {
+      "symbol": "SAP",
+      "type": "STOCK",
+      "group": "SAP",
+      "tickSize": 0.1,
+      "priceChangeLimit": {
+        "absolute": 5.0,
+        "relative": 0.1
+      }
+    },
+    {
+      "symbol": "SAP_DUAL",
+      "type": "STOCK",
+      "group": "SAP",
+      "tickSize": 0.1,
+      "priceChangeLimit": {
+        "absolute": 5.0,
+        "relative": 0.1
+      }
+    },
+    {
+      "symbol": "TSLA",
+      "type": "STOCK",
+      "group": "TSLA",
+      "tickSize": 0.1,
+      "priceChangeLimit": {
+        "absolute": 5.0,
+        "relative": 0.1
+      }
+    },
+    {
+      "symbol": "ASML_202612_F",
+      "type": "STOCK_FUTURE",
+      "group": "ASML",
+      "tickSize": 0.1,
+      "baseInstrumentId": "ASML",
+      "expiry": "2026-12-18T12:00:00Z",
+      "interestRate": 0.03,
+      "priceChangeLimit": {
+        "absolute": 5.0,
+        "relative": 0.1
+      }
+    },
+    {
+      "symbol": "ASML_202703_F",
+      "type": "STOCK_FUTURE",
+      "group": "ASML",
+      "tickSize": 0.1,
+      "baseInstrumentId": "ASML",
+      "expiry": "2027-03-19T12:00:00Z",
+      "interestRate": 0.03,
+      "priceChangeLimit": {
+        "absolute": 5.0,
+        "relative": 0.1
+      }
+    },
+    {
+      "symbol": "ASML_202706_F",
+      "type": "STOCK_FUTURE",
+      "group": "ASML",
+      "tickSize": 0.1,
+      "baseInstrumentId": "ASML",
+      "expiry": "2027-06-18T12:00:00Z",
+      "interestRate": 0.03,
+      "priceChangeLimit": {
+        "absolute": 5.0,
+        "relative": 0.1
+      }
+    },
+    {
+      "symbol": "ASML_202612_050C",
+      "type": "STOCK_OPTION",
+      "group": "ASML",
+      "tickSize": 0.1,
+      "baseInstrumentId": "ASML",
+      "expiry": "2026-12-18T12:00:00Z",
+      "optionKind": "CALL",
+      "strike": 50.0,
+      "interestRate": 0.03,
+      "priceChangeLimit": {
+        "absolute": 5.0,
+        "relative": 0.1
+      }
+    },
+    {
+      "symbol": "ASML_202612_050P",
+      "type": "STOCK_OPTION",
+      "group": "ASML",
+      "tickSize": 0.1,
+      "baseInstrumentId": "ASML",
+      "expiry": "2026-12-18T12:00:00Z",
+      "optionKind": "PUT",
+      "strike": 50.0,
+      "interestRate": 0.03,
+      "priceChangeLimit": {
+        "absolute": 5.0,
+        "relative": 0.1
+      }
+    },
+    {
+      "symbol": "ASML_202612_075C",
+      "type": "STOCK_OPTION",
+      "group": "ASML",
+      "tickSize": 0.1,
+      "baseInstrumentId": "ASML",
+      "expiry": "2026-12-18T12:00:00Z",
+      "optionKind": "CALL",
+      "strike": 75.0,
+      "interestRate": 0.03,
+      "priceChangeLimit": {
+        "absolute": 5.0,
+        "relative": 0.1
+      }
+    },
+    {
+      "symbol": "ASML_202612_075P",
+      "type": "STOCK_OPTION",
+      "group": "ASML",
+      "tickSize": 0.1,
+      "baseInstrumentId": "ASML",
+      "expiry": "2026-12-18T12:00:00Z",
+      "optionKind": "PUT",
+      "strike": 75.0,
+      "interestRate": 0.03,
+      "priceChangeLimit": {
+        "absolute": 5.0,
+        "relative": 0.1
+      }
+    },
+    {
+      "symbol": "ASML_202612_100C",
+      "type": "STOCK_OPTION",
+      "group": "ASML",
+      "tickSize": 0.1,
+      "baseInstrumentId": "ASML",
+      "expiry": "2026-12-18T12:00:00Z",
+      "optionKind": "CALL",
+      "strike": 100.0,
+      "interestRate": 0.03,
+      "priceChangeLimit": {
+        "absolute": 5.0,
+        "relative": 0.1
+      }
+    },
+    {
+      "symbol": "ASML_202612_100P",
+      "type": "STOCK_OPTION",
+      "group": "ASML",
+      "tickSize": 0.1,
+      "baseInstrumentId": "ASML",
+      "expiry": "2026-12-18T12:00:00Z",
+      "optionKind": "PUT",
+      "strike": 100.0,
+      "interestRate": 0.03,
+      "priceChangeLimit": {
+        "absolute": 5.0,
+        "relative": 0.1
+      }
+    },
+    {
+      "symbol": "OB5X_ETF",
+      "type": "INDEX_TRACKING_ETF",
+      "group": "OB5X",
+      "tickSize": 0.1,
+      "indexId": "OB5X",
+      "priceChangeLimit": {
+        "absolute": 5.0,
+        "relative": 0.1
+      },
+      "etfMultiplier": 0.25,
+      "etfCashComponent": 2.5
+    },
+    {
+      "symbol": "OB5X_202612_F",
+      "type": "INDEX_FUTURE",
+      "group": "OB5X",
+      "tickSize": 0.1,
+      "indexId": "OB5X",
+      "expiry": "2026-12-18T12:00:00Z",
+      "interestRate": 0.03,
+      "priceChangeLimit": {
+        "absolute": 5.0,
+        "relative": 0.1
+      }
+    },
+    {
+      "symbol": "OB5X_202703_F",
+      "type": "INDEX_FUTURE",
+      "group": "OB5X",
+      "tickSize": 0.1,
+      "indexId": "OB5X",
+      "expiry": "2027-03-19T12:00:00Z",
+      "interestRate": 0.03,
+      "priceChangeLimit": {
+        "absolute": 5.0,
+        "relative": 0.1
+      }
+    },
+    {
+      "symbol": "OB5X_202706_F",
+      "type": "INDEX_FUTURE",
+      "group": "OB5X",
+      "tickSize": 0.1,
+      "indexId": "OB5X",
+      "expiry": "2027-06-18T12:00:00Z",
+      "interestRate": 0.03,
+      "priceChangeLimit": {
+        "absolute": 5.0,
+        "relative": 0.1
+      }
+    },
+    {
+      "symbol": "OB5X_202612_080C",
+      "type": "INDEX_OPTION",
+      "group": "OB5X",
+      "tickSize": 0.1,
+      "indexId": "OB5X",
+      "expiry": "2026-12-18T12:00:00Z",
+      "optionKind": "CALL",
+      "strike": 80.0,
+      "interestRate": 0.03,
+      "priceChangeLimit": {
+        "absolute": 5.0,
+        "relative": 0.1
+      }
+    },
+    {
+      "symbol": "OB5X_202612_080P",
+      "type": "INDEX_OPTION",
+      "group": "OB5X",
+      "tickSize": 0.1,
+      "indexId": "OB5X",
+      "expiry": "2026-12-18T12:00:00Z",
+      "optionKind": "PUT",
+      "strike": 80.0,
+      "interestRate": 0.03,
+      "priceChangeLimit": {
+        "absolute": 5.0,
+        "relative": 0.1
+      }
+    },
+    {
+      "symbol": "OB5X_202612_100C",
+      "type": "INDEX_OPTION",
+      "group": "OB5X",
+      "tickSize": 0.1,
+      "indexId": "OB5X",
+      "expiry": "2026-12-18T12:00:00Z",
+      "optionKind": "CALL",
+      "strike": 100.0,
+      "interestRate": 0.03,
+      "priceChangeLimit": {
+        "absolute": 5.0,
+        "relative": 0.1
+      }
+    },
+    {
+      "symbol": "OB5X_202612_100P",
+      "type": "INDEX_OPTION",
+      "group": "OB5X",
+      "tickSize": 0.1,
+      "indexId": "OB5X",
+      "expiry": "2026-12-18T12:00:00Z",
+      "optionKind": "PUT",
+      "strike": 100.0,
+      "interestRate": 0.03,
+      "priceChangeLimit": {
+        "absolute": 5.0,
+        "relative": 0.1
+      }
+    },
+    {
+      "symbol": "OB5X_202612_120C",
+      "type": "INDEX_OPTION",
+      "group": "OB5X",
+      "tickSize": 0.1,
+      "indexId": "OB5X",
+      "expiry": "2026-12-18T12:00:00Z",
+      "optionKind": "CALL",
+      "strike": 120.0,
+      "interestRate": 0.03,
+      "priceChangeLimit": {
+        "absolute": 5.0,
+        "relative": 0.1
+      }
+    },
+    {
+      "symbol": "OB5X_202612_120P",
+      "type": "INDEX_OPTION",
+      "group": "OB5X",
+      "tickSize": 0.1,
+      "indexId": "OB5X",
+      "expiry": "2026-12-18T12:00:00Z",
+      "optionKind": "PUT",
+      "strike": 120.0,
+      "interestRate": 0.03,
+      "priceChangeLimit": {
+        "absolute": 5.0,
+        "relative": 0.1
+      }
+    }
+  ]
+}
