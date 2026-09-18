@@ -1,6 +1,6 @@
 {
-  "publishedAt": "2026-09-16T07:06:07.306Z",
-  "sourceSHA256": "c326fc919f275e9809a96c1351cd20a82ffccc0ad513bac03674d27ed0841f2a",
+  "publishedAt": "2026-09-18T10:00:48.938Z",
+  "sourceSHA256": "fc79f04fa8cfed7a6c2b371e81a55bf763229498776e84430c4b505c7f1b8d3c",
   "instruments": [
     {
       "symbol": "AAPL",
@@ -133,10 +133,62 @@
       "barCount": 390
     }
   ],
+  "publishedRuns": {
+    "generatedAt": "2026-09-17T13:14:50.688Z",
+    "source": "training/data/published-runs.json",
+    "sourceSHA256": "bc2b47ba29f54a720e3cad484e9e49881599a05ac25bd9df8cf3572d2891b8c2",
+    "files": [
+      {
+        "marketKind": "synthetic",
+        "path": "data/published-runs-synthetic.json",
+        "sha256": "765ffdb06c93c922cf95538c06db95e9d4931b19afcee8deb14b294eeb02527b",
+        "bytes": 1768081,
+        "runs": 3,
+        "symbols": [
+          "ASML"
+        ],
+        "bookTrials": 1
+      },
+      {
+        "marketKind": "historical",
+        "path": "data/published-runs-historical.json",
+        "sha256": "1ae0faaefdceed34a03033646bb8cb692b0b2ee1ae242e1814b1786551673971",
+        "bytes": 1491960,
+        "runs": 12,
+        "symbols": [
+          "^GSPC",
+          "AAPL",
+          "MSFT",
+          "NVDA"
+        ],
+        "bookTrials": 0
+      }
+    ]
+  },
+  "hero": {
+    "payloadSha256": "7a70cc8312eb74bb45fe233dd2678c6c0622fe1f515872aad9f481c2436de7f0",
+    "jsSha256": "51762e3c46364bd4063d419cd5322e795361325149ac1431ed4b2580e73d63e3",
+    "cssSha256": "329d7d31f4c9d78638da84b719a2d0e28375114b78030c16668afcc17e0a498c",
+    "defaultSymbol": "AAPL",
+    "symbols": [
+      "^GSPC",
+      "AAPL",
+      "MSFT",
+      "NVDA"
+    ],
+    "runIds": [
+      "b23c5cd926a531278181ba54735ccb2e98705c16968ae18293a6beecf959063b",
+      "3df0ac0f357353bac0e991eed16d3f78458611ddf2f541cfdf44d7839529b1b2",
+      "f54899f14d4ee7093dd297aa60c64d3e4a80d3d7ea58ed91d6b40d267b274f84",
+      "98d944fa39cb4c8a034654335621c99f130565ab02f0aa87f95653f43b5debce"
+    ],
+    "payloadBytes": 114761
+  },
   "capabilities": {
     "manualTrading": true,
     "strategyEditing": true,
     "pythonExecution": false,
-    "privateLabNotes": false
+    "privateLabNotes": false,
+    "publishedRuns": true
   }
 }

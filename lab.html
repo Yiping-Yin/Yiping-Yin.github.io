@@ -16,14 +16,14 @@
 <meta property="og:url" content="https://yiping-yin.github.io/lab.html">
 <meta property="og:title" content="Yiping Yin — quantitative research and trading">
 <meta property="og:description" content="Market microstructure, asset pricing and multi-agent market simulation at UNSW Sydney. 1st of 253 in the General round and 3rd in the Final technical ranking of Algothon 2026.">
-<meta property="og:image" content="https://yiping-yin.github.io/portfolio-assets/og-image.png?v=20260911-arcs">
+<meta property="og:image" content="https://yiping-yin.github.io/portfolio-assets/og-image.png?v=20260918-terminal">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Yiping Yin — quantitative research and intelligent systems, above three arcs of S&amp;P 500 candlesticks: a year of days, a month of hours and a day of 5-minute bars under one pen">
+<meta property="og:image:alt" content="Yiping Yin — a trading terminal replaying P.Book&#39;s published run on Apple Inc.: one-minute candlesticks for 10 September 2026 with simulated fills, beside a simulated order-book ladder">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Yiping Yin — quantitative research and trading">
 <meta name="twitter:description" content="Market microstructure, asset pricing and multi-agent market simulation at UNSW Sydney. 1st of 253 in the General round and 3rd in the Final technical ranking of Algothon 2026.">
-<meta name="twitter:image" content="https://yiping-yin.github.io/portfolio-assets/og-image.png?v=20260911-arcs">
+<meta name="twitter:image" content="https://yiping-yin.github.io/portfolio-assets/og-image.png?v=20260918-terminal">
 
 <script type="application/ld+json">
 {
@@ -55,64 +55,14 @@
 </script>
 <script src="/portfolio-assets/site.js?v=pen-and-drum-1" defer></script>
 
-<style>/* A quiet market composition. The first fold ends at the awards. */
+<style>/* The first fold ends at the awards. The hero itself is generated at build time. */
 :root { --study-nav:76px; --study-awards:176px; }
-.semicircle-hero { height:max(360px, calc(100svh - var(--study-nav) - var(--study-awards))); background:radial-gradient(ellipse 55% 80% at 50% 83%,#103a675e,transparent 81%),#071b2d; }
-.semicircle-hero .hero-inner { height:100%; padding:0 50px; }
-.semicircle-hero .hero-inner::before { border:0; background:none; }
-.semicircle-figure { position:absolute; bottom:44px; left:50%; transform:translateX(-50%); width:calc(100% - 100px); max-width:1140px; height:min(calc(100% - 98px), 532px); margin:0; }
-.composition { width:100%; height:100%; }
-.composition[hidden] { display:none; }
-.market-art { display:block; width:100%; height:100%; overflow:visible; }
-.market-art { touch-action:pan-y pinch-zoom; }
-.market-art[data-pointer-near="true"], .market-bar { cursor:pointer; }
-.market-art text { pointer-events:none; }
-.market-bar { outline:none; }
-.market-bar[data-selected="true"], .market-bar[data-preview="true"], .market-bar:focus-visible { opacity:1; }
-.market-bar[data-preview="true"] .price-wick { stroke-opacity:1; }
-.market-art[data-trace="true"] .market-bar { opacity:calc(var(--bar-opacity, 1) * .5); }
-.market-art[data-trace="true"] .market-bar[data-in-period="true"] { opacity:1; }
-.selected-marker { opacity:0; fill:#d8eaf2; pointer-events:none; }
-.market-bar[data-selected="true"] .selected-marker { opacity:.9; }
-.focus-marker { opacity:0; fill:none; stroke:#d8eaf2; stroke-width:1; vector-effect:non-scaling-stroke; pointer-events:none; }
-.market-bar:focus-visible .focus-marker { opacity:1; }
-.market-art text { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; fill:#9ab3c7; }
-.market-art .micro { font-size:9px; letter-spacing:.7px; fill:#7893aa; }
-.market-art .date { fill:#a9c0d2; font-size:10px; letter-spacing:1px; }
-.market-art .focus-price { fill:#d4e7ef; font-family:Georgia,"Times New Roman",serif; font-size:33px; letter-spacing:-.5px; }
-.market-art .focus-time { fill:#b6cfe0; font-size:10px; letter-spacing:.4px; }
-.market-art .focus-note { fill:#7996af; font-size:9px; letter-spacing:.3px; }
-.mobile-reading { display:none; }
 .semicircle-study .highlights-section { min-height:var(--study-awards); padding-top:0; display:flex; align-items:center; }
 .semicircle-study .recognition-grid { width:100%; }
 .semicircle-study .research-overview { margin-top:48px; }
-@media (min-width:851px) and (max-height:780px) {
-  .semicircle-figure { height:calc(100% - 62px); }
-}
-@media (max-width:1100px) {
-  .semicircle-hero .hero-inner { padding-left:35px; padding-right:35px; }
-  .semicircle-figure { width:calc(100% - 70px); }
-}
-@media (max-width:850px) {
-  .semicircle-hero { height:max(360px, calc(100svh - var(--study-nav) - var(--study-awards))); }
-  .semicircle-figure { width:calc(100% - 44px); height:78%; bottom:24px; }
-  .market-art .micro { font-size:12px; }
-  .market-art .date { font-size:13px; }
-  .market-art .focus-price { font-size:34px; }
-  .market-art .focus-time { font-size:14px; }
-  .market-art .focus-note { font-size:12px; }
-}
 @media (max-width:700px) {
   :root { --study-nav:66px; --study-awards:222px; }
   .semicircle-study .highlights-section { padding:22px 0; }
-  .semicircle-hero { height:max(260px, calc(100svh - var(--study-nav) - var(--study-awards))); }
-  .semicircle-figure { height:auto; top:0; bottom:0; width:100%; }
-  .market-art { position:absolute; left:-9%; width:118%; height:300px; top:50%; transform:translateY(-50%); }
-  .market-art text { display:none; }
-  .market-art .price-wick { vector-effect:non-scaling-stroke; stroke-width:.5px; }
-  .mobile-reading { position:absolute; display:flex; flex-direction:column; align-items:center; left:0; right:0; top:calc(50% + 42px); gap:5px; color:#94b0c5; text-align:center; font:10px/1.3 -apple-system,BlinkMacSystemFont,sans-serif; }
-  .mobile-reading strong { font-family:Georgia,"Times New Roman",serif; font-size:27px; color:#d4e5ef; font-weight:400; letter-spacing:-.3px; }
-  .mobile-reading small { font-size:8px; color:#7794ac; }
 }
 
 /* Site areas: personal profile, training product, research lab. */
@@ -126,10 +76,6 @@
 #mobile-nav .profile-menu summary { padding:10px 0; font-size:14px; }
 #mobile-nav .profile-menu > div { position:static; border:0; border-left:1px solid #29445b; border-radius:0; margin:0 0 6px 4px; padding:0 0 0 15px; box-shadow:none; background:transparent; }
 .profile-menu summary:focus-visible { outline:2px solid #99b8ce; outline-offset:7px; }
-
-.relation-marker { opacity:0; fill:none; stroke:#b3cfdd; stroke-width:.75; vector-effect:non-scaling-stroke; pointer-events:none; }
-.market-bar[data-related="true"] .relation-marker { opacity:.72; }
-.market-art .micro[data-scale][data-active="true"] { fill:#c8dce6; }
 </style><style id="portfolio-training-integration">
 .portfolio-training-overview { margin-top: 30px; }
 .training-overview-heading { display:flex; align-items:center; justify-content:space-between; gap:24px; margin-bottom:23px; }
@@ -227,8 +173,6 @@
 @media(prefers-reduced-motion:reduce) { .portfolio-training-overview { scroll-behavior:auto; } }
 </style>
 <style id="portfolio-page-layout">
-.market-art .micro{font-size:11px;fill:#92adbf}
-.market-art .micro[data-active="true"]{fill:#edf6fc;font-weight:600}
 .profile-page .content-shell{padding-top:54px}
 .profile-layout{display:grid;grid-template-columns:220px minmax(0,1fr);gap:64px;align-items:start}
 .profile-body{min-width:0}
@@ -283,7 +227,6 @@ a.lab-map-open:focus-visible{outline:2px solid var(--map-accent);outline-offset:
  .profile-intro nav{flex-direction:row;flex-wrap:wrap;gap:0 18px;margin-top:18px;border-left:0}.profile-intro nav a{padding:7px 0;margin:0;border-left:0;border-bottom:2px solid transparent}.profile-intro nav a:hover,.profile-intro nav a.on{border-bottom-color:var(--accent)}
 }
 @media(max-width:700px){
- .market-art{top:50%;height:285px}.mobile-reading{top:calc(50% + 36px)}.mobile-reading small{font-size:10px;color:#a2bccf}.mobile-reading strong{font-size:29px}
  .profile-page .featured-project h3{font-size:24px}.profile-page .research-tabs{gap:8px 18px}.profile-page .background-section{margin-top:38px;padding-top:28px}.profile-page .contact-section{margin-top:34px;padding-top:28px}
  .home-footer{align-items:flex-start;flex-direction:column}
  .lab-map-cover{grid-template-columns:1fr;gap:14px}.lab-map-panel{padding:24px}.lab-map-panel h3{font-size:23px}.lab-domain-preview,.lab-workflow-preview{margin-bottom:20px}

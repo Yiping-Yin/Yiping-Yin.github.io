@@ -1,0 +1,245 @@
+/* P.Book terminal hero - the personal homepage's first fold.
+   Fixed navy in both site themes. Colour has exactly one job: candle bodies
+   and signed numerals. Two stroke weights only (1px hairline, 2px accent).
+   No opacity below 1 and no alpha colour anywhere in this file. */
+.terminal-hero {
+  --th-ground: #041624;
+  --th-panel: #071f33;
+  --th-line: #1c3448;
+  --th-ink: #dbe8f3;
+  --th-muted: #90a8bb;
+  --th-up: #32a67d;
+  --th-down: #e2662a;
+  --th-focus: #a8c9ef;
+  --th-thin: 1px;
+  --th-thick: 2px;
+  --th-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --th-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --th-gutter: 50px;
+  --th-head: 40px;
+  /* The floor under the chart panel (chart + strip + tape) once the book sits
+     below the chart rather than beside it. The runtime sheds ladder levels long
+     before this binds; it only stops the chart vanishing when the script is
+     unavailable and the ladder keeps its build-time depth. */
+  --th-chart-floor: 0px;
+  color-scheme: dark;
+  position: relative;
+  overflow: hidden;
+  height: max(360px, calc(100svh - var(--study-nav) - var(--study-awards)));
+  background: var(--th-ground);
+  color: var(--th-ink);
+  font-family: var(--th-sans);
+}
+.terminal-hero :focus-visible { outline: var(--th-thick) solid var(--th-focus); outline-offset: 2px; border-radius: 0; }
+.terminal-hero .th-frame { height: 100%; padding: 0 var(--th-gutter); }
+.terminal-hero .th-terminal {
+  height: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 10px 0 12px;
+  display: grid;
+  grid-template-rows: var(--th-head) minmax(0, 1fr) minmax(24px, auto);
+  row-gap: 8px;
+  min-height: 0;
+}
+
+/* Header: instrument tabs, session clock, transport. */
+.terminal-hero .th-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-width: 0; }
+.terminal-hero .th-transport { flex: 0 0 auto; }
+.terminal-hero .th-tabs { display: flex; align-items: stretch; gap: 2px; min-width: 0; }
+.terminal-hero .th-tab {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+  height: var(--th-head);
+  padding: 0 12px;
+  margin: 0;
+  border: 0;
+  border-bottom: var(--th-thick) solid var(--th-ground);
+  background: none;
+  color: var(--th-muted);
+  font-family: var(--th-sans);
+  font-size: 11px;
+  line-height: 1.25;
+  text-align: left;
+  white-space: nowrap;
+}
+/* The visible tab is the header's own height; the hit area is padded out to 44px. */
+.terminal-hero .th-tab::after { content: ""; position: absolute; left: 0; right: 0; top: calc((44px - var(--th-head)) / -2); bottom: calc((44px - var(--th-head)) / -2); }
+.terminal-hero .th-tab[aria-selected="true"] { color: var(--th-ink); border-bottom-color: var(--th-ink); }
+.terminal-hero .th-tab-name { font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; }
+.terminal-hero .th-tab-row { display: flex; align-items: baseline; gap: 8px; font-family: var(--th-mono); font-size: 11px; font-variant-numeric: tabular-nums; }
+.terminal-hero .th-transport { display: flex; align-items: center; gap: 12px; white-space: nowrap; }
+.terminal-hero .th-clock { font-family: var(--th-mono); font-size: 12px; font-variant-numeric: tabular-nums; color: var(--th-ink); white-space: nowrap; }
+.terminal-hero .th-play {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: var(--th-head);
+  padding: 0;
+  border: var(--th-thin) solid var(--th-line);
+  background: var(--th-panel);
+  color: var(--th-ink);
+  font-family: var(--th-sans);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+.terminal-hero .th-play::after { content: ""; position: absolute; left: 0; right: 0; top: calc((44px - var(--th-head)) / -2); bottom: calc((44px - var(--th-head)) / -2); }
+.terminal-hero .th-replay-tag { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--th-muted); border: var(--th-thin) solid var(--th-line); padding: 3px 7px; }
+
+/* Main: chart panel and order book. */
+.terminal-hero .th-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  border: var(--th-thin) solid var(--th-line);
+  min-height: 0;
+  overflow: hidden;
+}
+.terminal-hero .th-chart-panel {
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto auto;
+  margin: 0;
+  min-width: 0;
+  min-height: 0;
+  background: var(--th-panel);
+}
+.terminal-hero .th-chart { position: relative; min-height: 0; min-width: 0; }
+.terminal-hero .th-chart svg { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block; }
+.terminal-hero .th-chart text { font-family: var(--th-mono); font-size: 11px; fill: var(--th-muted); }
+.terminal-hero .th-chart .th-axis-line { stroke: var(--th-line); stroke-width: var(--th-thin); vector-effect: non-scaling-stroke; }
+.terminal-hero .th-chart .th-datum { stroke: var(--th-muted); stroke-width: var(--th-thin); stroke-dasharray: 1 3; vector-effect: non-scaling-stroke; }
+.terminal-hero .th-chart .th-wick { stroke: var(--th-muted); stroke-width: var(--th-thin); vector-effect: non-scaling-stroke; }
+.terminal-hero .th-chart .th-last { stroke: var(--th-ink); stroke-width: var(--th-thick); vector-effect: non-scaling-stroke; }
+.terminal-hero .th-chart .th-last-tag { fill: var(--th-ink); }
+.terminal-hero .th-chart .th-mark { fill: var(--th-ink); }
+.terminal-hero .th-chart .th-up { fill: none; stroke: var(--th-up); stroke-width: var(--th-thin); vector-effect: non-scaling-stroke; }
+.terminal-hero .th-chart .th-down { fill: var(--th-down); stroke: var(--th-down); stroke-width: var(--th-thin); vector-effect: non-scaling-stroke; }
+
+/* Fill tape and position strip. */
+.terminal-hero .th-tape { width: 100%; border-collapse: collapse; border-top: var(--th-thin) solid var(--th-line); table-layout: fixed; }
+.terminal-hero .th-tape th, .terminal-hero .th-tape td {
+  padding: 3px 10px;
+  text-align: left;
+  font-size: 11px;
+  line-height: 1.35;
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.terminal-hero .th-tape thead th { color: var(--th-muted); letter-spacing: 0.04em; text-transform: uppercase; }
+.terminal-hero .th-tape tbody th, .terminal-hero .th-tape tbody td { color: var(--th-ink); font-family: var(--th-mono); font-variant-numeric: tabular-nums; }
+.terminal-hero .th-tape .th-reason { font-family: var(--th-sans); color: var(--th-muted); }
+.terminal-hero .th-strip { margin: 0; display: flex; align-items: baseline; gap: 22px; padding: 6px 10px 8px; border-top: var(--th-thin) solid var(--th-line); min-width: 0; }
+.terminal-hero .th-strip > div { display: flex; align-items: baseline; gap: 7px; min-width: 0; }
+.terminal-hero .th-strip dt { font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--th-muted); }
+.terminal-hero .th-strip dd { margin: 0; font-family: var(--th-mono); font-size: 13px; font-variant-numeric: tabular-nums; color: var(--th-ink); }
+.terminal-hero .th-strip .th-figure { font-size: 20px; letter-spacing: -0.01em; }
+
+/* Order book. */
+.terminal-hero .th-book-panel { display: flex; flex-direction: column; min-height: 0; overflow: hidden; background: var(--th-panel); border-left: var(--th-thin) solid var(--th-line); }
+/* The head, the ladder and the Spread/Mid rows keep their own height: if a
+   viewport is ever too short for the depth the runtime chose, the panel clips
+   its last rungs rather than squeezing the head into an unreadable strip. */
+.terminal-hero .th-book-head, .terminal-hero .th-ladder, .terminal-hero .th-book-foot { flex: 0 0 auto; }
+.terminal-hero .th-book-head { padding: 7px 10px; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--th-muted); border-bottom: var(--th-thin) solid var(--th-line); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.terminal-hero .th-ladder { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.terminal-hero .th-ladder th, .terminal-hero .th-ladder td { padding: 2px 10px; font-size: 11px; line-height: 1.4; font-weight: 400; font-family: var(--th-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.terminal-hero .th-ladder thead th { color: var(--th-muted); font-family: var(--th-sans); letter-spacing: 0.04em; text-transform: uppercase; }
+.terminal-hero .th-ladder tbody th { color: var(--th-ink); text-align: center; }
+.terminal-hero .th-ladder .th-bid-col { text-align: right; width: 32%; }
+.terminal-hero .th-ladder .th-price-col { text-align: center; width: 36%; }
+.terminal-hero .th-ladder .th-ask-col { text-align: left; width: 32%; }
+.terminal-hero .th-book-foot { margin-top: auto; display: flex; flex-direction: column; border-top: var(--th-thin) solid var(--th-line); }
+.terminal-hero .th-book-foot > div { display: flex; justify-content: space-between; gap: 10px; padding: 3px 10px; font-size: 11px; color: var(--th-muted); }
+.terminal-hero .th-book-foot b { font-family: var(--th-mono); font-weight: 400; font-variant-numeric: tabular-nums; color: var(--th-ink); }
+/* Set by the runtime in the stacked bands when even the shallowest ladder plus
+   Spread/Mid would cost the chart its floor. Spread and mid are derivable from
+   the top of the ladder, which stays; the chart is not derivable from anything. */
+.terminal-hero.th-no-foot .th-book-foot { display: none; }
+
+/* The one colour job outside the candle bodies. */
+.terminal-hero .num-signed { font-family: var(--th-mono); font-variant-numeric: tabular-nums; }
+.terminal-hero .num-up { color: var(--th-up); }
+.terminal-hero .num-down { color: var(--th-down); }
+
+/* Footer disclosure. */
+.terminal-hero .th-footer { display: flex; align-items: center; justify-content: space-between; gap: 18px; font-size: 11px; line-height: 1.45; color: var(--th-muted); min-width: 0; }
+.terminal-hero .th-footer p { margin: 0; min-width: 0; }
+.terminal-hero .th-say-narrow { display: none; }
+.terminal-hero .th-footer a { position: relative; color: var(--th-ink); text-decoration: none; white-space: nowrap; padding: 4px 0; }
+.terminal-hero .th-footer a::after { content: ""; position: absolute; left: -8px; right: -8px; top: -11px; bottom: -11px; }
+.terminal-hero .th-footer a:hover { text-decoration: underline; text-underline-offset: 4px; }
+
+@media (max-width: 1100px) { .terminal-hero { --th-gutter: 35px; } }
+
+/* Tablet: the book moves under the chart. The book row is `auto`, so on its own
+   it would take its intrinsic height and leave the chart the remainder - which
+   at ordinary window heights is a sliver. The runtime therefore sizes the
+   ladder to the space (terminal-hero.js, refit), shedding levels until the
+   chart clears its floor, and this row floor is the no-script backstop. The
+   header drops the date (the footer states it in full) and the REPLAY tag, and
+   the fill tape goes: below this width the header would print the tabs over the
+   clock, and the tape would leave the chart a strip. */
+@media (max-width: 1000px) {
+  .terminal-hero { --th-chart-floor: 170px; }
+  .terminal-hero .th-main { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(var(--th-chart-floor), 1fr) auto; }
+  .terminal-hero .th-book-panel { border-left: 0; border-top: var(--th-thin) solid var(--th-line); }
+  .terminal-hero .th-book-foot { flex-direction: row; }
+  .terminal-hero .th-book-foot > div { flex: 1; }
+  .terminal-hero .th-ladder th, .terminal-hero .th-ladder td { padding: 1px 10px; line-height: 1.3; }
+  .terminal-hero .th-book-head { padding: 5px 10px; }
+  .terminal-hero .th-clock-date, .terminal-hero .th-clock-sep { display: none; }
+  .terminal-hero .th-replay-tag { display: none; }
+  .terminal-hero .th-tape { display: none; }
+}
+
+/* A tablet-width window that is not tall - a split view, a small laptop window -
+   is where the stacked layout is tightest: the same rule as the short phone,
+   scoped so tall tablets keep the roomier frame. */
+@media (min-width: 701px) and (max-width: 1000px) and (max-height: 800px) {
+  .terminal-hero .th-terminal { padding: 6px 0 7px; row-gap: 5px; }
+  .terminal-hero .th-strip { padding: 4px 10px 5px; }
+}
+
+/* Phone: a deliberately reduced composition, not a reflow. The tabs lose their
+   prices, the fill tape and the spread/mid rows go, the strip is Position and
+   P&L only, and the disclosure switches to its narrow wording. */
+@media (max-width: 700px) {
+  .terminal-hero { --th-gutter: 23px; --th-head: 34px; --th-chart-floor: 128px; height: max(260px, calc(100svh - var(--study-nav) - var(--study-awards))); }
+  .terminal-hero .th-terminal { padding: 8px 0 10px; row-gap: 6px; }
+  .terminal-hero .th-header { gap: 10px; }
+  .terminal-hero .th-tab { padding: 0 8px; font-size: 10px; }
+  .terminal-hero .th-tab-name { font-size: 11px; }
+  .terminal-hero .th-tab-row { display: none; }
+  .terminal-hero .th-transport { gap: 8px; }
+  .terminal-hero .th-clock { font-size: 11px; }
+  .terminal-hero .th-strip { gap: 16px; padding: 5px 9px 6px; }
+  .terminal-hero .th-strip > .th-strip-last, .terminal-hero .th-strip > .th-strip-cash { display: none; }
+  .terminal-hero .th-strip dt { font-size: 10px; }
+  .terminal-hero .th-strip dd { font-size: 11px; }
+  .terminal-hero .th-chart text { font-size: 10px; }
+  .terminal-hero .th-book-head { padding: 4px 9px; font-size: 10px; }
+  .terminal-hero .th-ladder th, .terminal-hero .th-ladder td { padding: 1px 9px; font-size: 10px; }
+  .terminal-hero .th-book-foot { display: none; }
+  .terminal-hero .th-footer { flex-wrap: wrap; align-items: flex-start; gap: 2px 10px; line-height: 1.4; }
+  .terminal-hero .th-footer p { flex: 1 1 100%; }
+  .terminal-hero .th-footer a { margin-left: auto; padding: 2px 0; }
+  .terminal-hero .th-say-wide { display: none; }
+  .terminal-hero .th-say-narrow { display: block; }
+}
+/* A short phone spends a punishing share of the hero on chrome that cannot be
+   dropped: the header, the two-line disclosure and the position strip are all
+   mandated. At 375x667 the hero is 379px, so every pixel the frame gives back
+   is a pixel of chart. Nothing here changes a font size or a tap target. */
+@media (max-width: 700px) and (max-height: 800px) {
+  .terminal-hero .th-terminal { padding: 5px 0 6px; row-gap: 4px; }
+  .terminal-hero .th-strip { padding: 3px 9px 4px; }
+}
+
+@media (max-width: 370px) { .terminal-hero { --th-gutter: 18px; } }
