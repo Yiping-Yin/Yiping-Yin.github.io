@@ -4,6 +4,10 @@ Static site for [yiping-yin.github.io](https://yiping-yin.github.io/), served by
 
 This checkpoint includes a compact homepage terminal, competition results, published P.Book runs and the Lab project/method library; the complete Profile; the Lab's public research structure; and P.Book's Overview, Trading, report/replay and IDE surfaces. The public IDE supports browser-local strategy edits. Python strategy execution requires the local P.Book runtime.
 
+## Upgrade plan
+
+See [个人网页升级安排 / Upgrade plan](UPGRADE_PLAN.md) for completed fixes, the next P1/P2 batches and acceptance criteria. Update the checklist and release references as each batch ships.
+
 ## Routes
 
 - `/` — terminal replay, competition results, published Training runs and Lab library/maps.
@@ -22,7 +26,7 @@ The homepage and historical desk use retained Yahoo Finance one-minute OHLC from
 
 Fifteen strategy runs produced by the local runtime are published as static records: twelve historical and three synthetic. `release.json` records tape checksums, published-run sources, the portfolio snapshot and the terminal payload. The exporter includes only verified public assets and data; it does not read the private research vault.
 
-Source checkpoint: `116788ebfcd563c44d963d4c9b8345b86f43ef68` in the private P.Book repository. Build with `npm run build:public`. The final artifact is copied byte-for-byte into this mirror apart from repository metadata and this README. Preparing a local commit does not deploy it; deployment follows a push to GitHub Pages.
+Source checkpoint: `3df5164f14f245ed63f45f5e9ff4dfa72714c624` in the private P.Book repository. Build with `npm run build:public`. The final artifact is copied byte-for-byte into this mirror alongside repository metadata and documentation. Preserve `README.md` and `UPGRADE_PLAN.md` when refreshing exported assets. Preparing a local commit does not deploy it; deployment follows a push to GitHub Pages.
 
 For a local preview, run `python3 -m http.server 4173 --bind 127.0.0.1` and open [localhost:4173](http://127.0.0.1:4173/). No backend is needed for manual paper trading.
 
