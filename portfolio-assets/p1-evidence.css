@@ -1,0 +1,17 @@
+/* Public evidence links and source export reuse the site's existing theme. */
+.p1-evidence-links{display:flex;flex-wrap:wrap;align-items:center;gap:0 16px;margin:8px 0 0}
+.p1-evidence-links a,.p1-project-link{display:inline-flex;align-items:center;min-height:44px;color:inherit;text-underline-offset:3px;font-size:var(--t-12,12px);line-height:1.5}
+.p1-evidence-links a:focus-visible,.p1-project-link:focus-visible,.p1-source-export button:focus-visible{outline:2px solid currentColor;outline-offset:3px}
+.s1-lib li.p1-public-archive{display:block}
+.p1-public-archive .p1-evidence-links{margin-top:2px}
+.p1-project-link{margin:4px 0 8px}
+[id^="project-"],#published-runs,#archive-algothon,#lab-archive-algothon{scroll-margin-top:16px}
+.p1-source-export{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;margin:12px 0 18px;padding:12px 0;border-top:1px solid var(--line,currentColor);border-bottom:1px solid var(--line,currentColor);color:inherit}
+.p1-source-export button{flex:0 0 auto;min-height:44px;padding:8px 14px;border:1px solid currentColor;background:transparent;color:inherit;font:inherit;font-size:13px;cursor:pointer}
+.p1-source-export button:hover{text-decoration:underline;text-underline-offset:3px}
+.p1-export-hint,.p1-export-status{margin:0;font-size:12px;line-height:1.6;overflow-wrap:anywhere}
+.p1-export-hint{flex:1 1 220px}
+.p1-export-status{flex:1 1 100%}
+.p1-export-status:empty{display:none}
+.p1-export-status[data-error]{font-weight:600}
+@media(max-width:600px){.p1-evidence-links{gap:0 12px}.p1-source-export{gap:8px}.p1-source-export button{width:100%}.p1-export-hint{flex-basis:100%}}
