@@ -298,7 +298,9 @@ hr, .rule { border: 0; border-top: var(--thin) solid var(--line); margin: 0; }
   .public-lab-page .home-footer { flex-direction:column; align-items:flex-start; gap:12px; }
 }
 @media (max-width:370px) { .public-lab-page .content-shell { padding:0 18px; } }
-</style></head>
+</style><!-- public-p1:v1 -->
+<link rel="stylesheet" href="/portfolio-assets/p1-evidence.css?v=p1-1">
+</head>
 <body class="public-lab-page">
 <a class="skip-link" href="#main">Skip to content</a>
 <div class="topbar" id="topbar" data-ground="navy">
@@ -398,7 +400,7 @@ hr, .rule { border: 0; border-top: var(--thin) solid var(--line); margin: 0; }
           <thead>
             <tr><th scope="col" class="idx c-idx">#</th><th scope="col" class="c-arch">Archive</th><th scope="col">Subject</th></tr>
           </thead>
-          <tbody><tr><td class="idx">01</td><th scope="row">IRE</th><td class="soft">Market microstructure pilot</td></tr><tr><td class="idx">02</td><th scope="row">PXA</th><td class="soft">Practice study</td></tr><tr><td class="idx">03</td><th scope="row">ETF pricing</th><td class="soft">Practice study</td></tr><tr><td class="idx">04</td><th scope="row">Algothon 2026</th><td class="soft">Sealed archive</td></tr>
+          <tbody><tr><td class="idx">01</td><th scope="row">IRE</th><td class="soft">Market microstructure pilot</td></tr><tr><td class="idx">02</td><th scope="row">PXA</th><td class="soft">Practice study</td></tr><tr><td class="idx">03</td><th scope="row">ETF pricing</th><td class="soft">Practice study</td></tr><tr id="archive-algothon"><td class="idx">04</td><th scope="row">Algothon 2026</th><td class="soft">Public report and code<span class="p1-evidence-links"><a href="https://github.com/Yiping-Yin/algothon-2026/blob/main/Algothon-Research-Report.pdf">Research report · PDF</a><a href="https://github.com/Yiping-Yin/algothon-2026">Code and materials</a></span></td></tr>
           </tbody>
         </table>
       <p class="lab-note">Decide is the Test output gate, not a seventh stage. Operate is entered only on an authorised handoff; execute alone grants no execution authority.</p>
@@ -422,7 +424,7 @@ hr, .rule { border: 0; border-top: var(--thin) solid var(--line); margin: 0; }
 
   <div class="lab-foot">
     <p>The method is demonstrated on this site: <span class="num">15</span> published runs — <span class="num">12</span> historical across <span class="num">4</span> instruments at <span class="num">390</span> one-minute bars each, 10 Sep 2026, and <span class="num">3</span> synthetic.</p>
-    <a href="/training.html#/market">Training <span aria-hidden="true">→</span></a>
+    <span class="p1-evidence-links"><a href="/training.html?market=historical#/market?view=review&amp;run=3df0ac0f357353bac0e991eed16d3f78458611ddf2f541cfdf44d7839529b1b2">AAPL trend report</a><a href="/training.html?market=historical#/market?view=replay&amp;run=3df0ac0f357353bac0e991eed16d3f78458611ddf2f541cfdf44d7839529b1b2">Replay AAPL trend</a><a href="/#published-runs">All 15 published runs</a><a href="/training.html?market=historical#/market">Historical desk</a></span>
   </div>
   <p class="lab-say">Counts describe a private research vault. The runs are simulated by P.Book on historical 1-min OHLC · 10 Sep 2026 · Yahoo Finance · Not live · Not advice</p>
 </div></main>

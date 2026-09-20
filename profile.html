@@ -115,6 +115,8 @@
 @media(max-width:700px){.profile-intro .avatar{width:96px;height:96px;margin-bottom:16px}.profile-intro nav{display:none}.profile-facts{grid-template-columns:1fr}.profile-facts dd{margin-bottom:12px}.event .mark{display:block}.event .susq{width:88px;height:10px}.plain-section,.profile-page .background-section,.profile-page .contact-section{margin-top:38px;padding-top:28px}.entry-line a{margin:0;padding:13px 0}.kit{grid-template-columns:1fr}.kit dt{padding:14px 0 0}.kit dd,.kit>dt:first-child+dd{padding-top:5px}.award-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}.award-table,.award-table tbody,.award-table tr,.award-table th,.award-table td{display:block;width:auto}.award-table tbody th{padding:16px 0 4px}.award-table tbody td{padding:0 0 4px}.award-table tbody tr+tr th{border-top:var(--thin) solid var(--line);padding-top:16px}.award-table tbody tr+tr td{border-top:0}}
 @media print{.profile-layout{display:block}.profile-intro{position:static;padding:0 0 20px;margin-bottom:20px}.profile-intro nav,.topbar{display:none!important}.profile-page .content-shell{padding:0}.background-entry{display:block}.background-entry .entry-description{margin-top:14px}.project-study>summary>.icon{display:none}.featured-project,.project-study,.background-entry,.award-table tr{break-inside:avoid}.contact-links a::after{content:" " attr(href);font-size:var(--t-12);margin-left:8px}.contact-links a{width:auto}}
 </style>
+<!-- public-p1:v1 -->
+<link rel="stylesheet" href="/portfolio-assets/p1-evidence.css?v=p1-1">
 </head>
 <body class="profile-page">
 <a class="skip-link" href="#main">Skip to content</a>
@@ -148,9 +150,11 @@
 
   <h3 class="work-group" id="work">Systematic trading</h3>
 
-  <article class="featured-project">
+  <article class="featured-project" id="project-algothon" tabindex="-1">
     <div class="feature-topline"><a class="event" href="https://www.algothon.au/" target="_blank" rel="noopener noreferrer" aria-label="Algothon 2026, hosted by Susquehanna — official competition site"><span class="mark susq" aria-hidden="true"></span><span>Algothon 2026 ↗</span></a></div>
     <h3><a href="https://github.com/Yiping-Yin/algothon-2026">Cross-sectional forecasting under a limited effective sample <span aria-hidden="true">↗</span></a></h3>
+    <span class="p1-evidence-links"><a href="https://github.com/Yiping-Yin/algothon-2026/blob/main/Algothon-Research-Report.pdf">Research report · PDF</a><a href="https://github.com/Yiping-Yin/algothon-2026">Code and materials</a></span>
+    <a class="p1-project-link" href="#project-algothon">Link to this project</a>
     <p class="project-meta">Competition · Quant strategy developer · Team abc123 · Jun – Aug 2026</p>
     <p class="evaluation-note"><strong>1st of 253 on the General-round leaderboard (984.62) · 3rd in the Final round (1,085.17).</strong></p>
     <p class="feature-description">Within a pair, one leg leads the other. The position trades the reversal of their spread rather than either leg’s direction, cancelling the panel’s common factor (21.6% of its correlation) inside the pair. Directional accuracy was 54.07%, distributed across about thirty of fifty-one names. The final technical result was 0.4 of one block’s standard error from the public-data replay mean, 3.7 points behind second place.</p>
@@ -158,77 +162,77 @@
     <details class="research-details"><summary>Method · evidence limits</summary><p>Leaderboard position recorded 3 Aug 2026. The public research record documents the method and its evidence limits.</p></details>
   </article>
 
-  <details class="project-study">
+  <details class="project-study" id="project-market-making">
     <summary><span class="study-head"><strong>Cross-asset market making &amp; execution</strong><span class="project-meta">Project · Optiver × UNSW, Data &amp; Algorithms in Trading · May – Aug 2026</span><span class="figure"><span class="figure-label">Simulation</span><span class="figure-value">+36.50 P&amp;L · 1,222 lots · 187 fills</span><span class="figure-basis">one-hour Optibook session</span></span></span></summary>
-    <div class="study-body"><p>A market-making system connecting an equity basket, futures, ETF and options through common index units, depth-matched execution and inventory-aware hedging.</p>
+    <div class="study-body"><a class="p1-project-link" href="#project-market-making">Link to this project</a><p>A market-making system connecting an equity basket, futures, ETF and options through common index units, depth-matched execution and inventory-aware hedging.</p>
     <div class="technical-note">
     <p>Analyzed 1,003 timestamp-matched OB5X futures–ETF order-book observations from a 20-minute Optibook session. Lead-lag was negligible within three seconds; return correlation rose from 0.032 at one second to 0.522 at 120 seconds, consistent with an Epps-effect pattern.</p>
     <p>Normalized the five-stock basket, three futures and ETF into common index units. The system executed depth-matched ETF–futures IOC pairs and quoted two Black-76 options with inventory-aware skew and threshold-based delta hedging.</p>
     <p>A one-hour Optibook simulation produced +36.50 P&amp;L change on 1,222 lots and 187 fills. Of the 187 fills, 39 arbitrage pairs matched 892 lots. All 6,972 quote cycles remained two-sided, maximum |delta| was 7.51, and cleanup ended flat with zero loop errors, reconnects or self-trades.</p></div></div>
   </details>
 
-  <details class="project-study">
+  <details class="project-study" id="project-etf-pricing">
     <summary><span class="study-head"><strong>Order-book analytics &amp; ETF pricing</strong><span class="project-meta">Project · Feb – May 2025</span><span class="figure"><span class="figure-label">Diagnostic</span><span class="figure-value">4.30 bps MAE · 0.999 correlation</span><span class="figure-basis">NDQ fair value / iNAV, 4,259 post-calibration rows</span></span></span></summary>
-    <div class="study-body"><p>Reconstructing limit-order books and modelling ETF fair value, with strict timestamp alignment and explicit assumptions in historical market-making diagnostics.</p>
+    <div class="study-body"><a class="p1-project-link" href="#project-etf-pricing">Link to this project</a><p>Reconstructing limit-order books and modelling ETF fair value, with strict timestamp alignment and explicit assumptions in historical market-making diagnostics.</p>
     <div class="technical-note">
     <p>Reconciled 4,406 PXA trades to 24,303 eligible L1–L8 order-book states using same-venue, strict-prior matching. Benchmarked four mid-price estimators and produced 34,044 rolling-100 diagnostics with zero look-ahead rows.</p>
     <p>The five-second NDQ fair-value/iNAV model used 4,319 synchronized ETF, NQ futures and AUD/USD observations; the beta-1 specification recorded its 4.30 bps MAE and 0.999 correlation on 4,259 post-calibration rows.</p>
     <p>A 64-session chronological minute-bar-proxy market-making study included a 12-session historical diagnostic partition. Under identical proxy assumptions, inventory and imbalance controls reduced fills from 1,863 to 1,014 and maximum inventory from 500 to 336; diagnostic net P&amp;L rose from 56.53 to 147.21.</p></div></div>
   </details>
 
-  <details class="project-study">
+  <details class="project-study" id="project-pbook">
     <summary><span class="study-head"><strong>P.Book — training desk &amp; strategy engine</strong><span class="project-meta">Independent project · 2026</span><span class="figure"><span class="figure-label">Published</span><span class="figure-value">15 runs · 390 one-minute bars</span><span class="figure-basis">four verified historical tapes, 10 Sep 2026</span></span></span></summary>
-    <div class="study-body"><p>A browser trading desk that replays retained one-minute tapes against a simulated order book, with a Python strategy engine that runs locally and publishes its runs.</p>
+    <div class="study-body"><a class="p1-project-link" href="#project-pbook">Link to this project</a><p>A browser trading desk that replays retained one-minute tapes against a simulated order book, with a Python strategy engine that runs locally and publishes its runs.</p>
     <div class="technical-note">
     <p>Historical 1-min OHLC · 10 Sep 2026 · Yahoo Finance, and synthetic Optibook tapes — depth, cash, orders, fills and P&amp;L simulated by P.Book’s local runtime · Not live · Not advice.</p>
     <p>Twelve of the 15 published runs use four historical tapes of 390 one-minute bars each; the remaining three use synthetic tapes. Python does not execute on the public site — runs are published from a local engine and replayed here.</p>
-    <p><a class="text-link" href="/training.html#/market">Open the desk <span aria-hidden="true">→</span></a></p></div></div>
+    <p><span class="p1-evidence-links"><a href="/training.html?market=historical#/market?view=review&amp;run=3df0ac0f357353bac0e991eed16d3f78458611ddf2f541cfdf44d7839529b1b2">AAPL trend report</a><a href="/training.html?market=historical#/market?view=replay&amp;run=3df0ac0f357353bac0e991eed16d3f78458611ddf2f541cfdf44d7839529b1b2">Replay AAPL trend</a><a href="/#published-runs">All 15 published runs</a><a href="/training.html?market=historical#/market">Historical desk</a></span></p></div></div>
   </details>
 
   <h3 class="work-group" id="ai">AI quantitative research</h3>
 
-  <details class="project-study">
+  <details class="project-study" id="project-explaining-markets">
     <summary><span class="study-head"><strong>Explaining Markets — earnings-reaction forecasting</strong><span class="project-meta">Research competition · Chicago Booth × Optiver · Aug 2026 – present</span><span class="figure"><span class="figure-label">Model</span><span class="figure-value">50,000 features · 6,147 examples</span><span class="figure-basis">frozen TF-IDF/Ridge residual model, Q4 2025 – Q2 2026</span></span></span></summary>
-    <div class="study-body"><p>A frozen text-based residual model and a signed submission path for earnings-event forecasts, with a separate three-agent challenger designed for shadow evaluation.</p>
+    <div class="study-body"><a class="p1-project-link" href="#project-explaining-markets">Link to this project</a><p>A frozen text-based residual model and a signed submission path for earnings-event forecasts, with a separate three-agent challenger designed for shadow evaluation.</p>
     <div class="technical-note">
     <p>Built and froze a 50,000-feature TF-IDF/Ridge residual model on 6,147 asset-event examples from Q4 2025 to Q2 2026. Used cutoff-bounded official disclosures, quarter-wise earnings-surprise residualization and a fixed forward scheme, with 2,000 source-event block bootstraps under the pinned official delta R-squared scorer.</p>
     <p>Engineered a five-minute signed ACK-first submission path with atomic deduplication, asynchronous inference after acknowledgement and exact-neutral fallbacks.</p>
     <p>Designed an E1-anchored three-agent challenger with direction counterfactuals and effective-sample, out-of-distribution and evidence gates for selection-adjusted E2–E5 shadow evaluation.</p></div></div>
   </details>
 
-  <details class="project-study">
+  <details class="project-study" id="project-signal-mosaic">
     <summary><span class="study-head"><strong>Signal Mosaic — market &amp; news analytics</strong><span class="project-meta">Independent project · Jul 2026 – present</span><span class="figure"><span class="figure-label">Data</span><span class="figure-value">50 equities · 10 cryptocurrencies · 149,683 headlines</span><span class="figure-basis">2020–2023, native trading calendars</span></span></span></summary>
-    <div class="study-body"><p>A reproducible foundation for studying equities, cryptocurrencies and news on their native trading calendars, with explicit data-cleaning and publication-time controls.</p>
+    <div class="study-body"><a class="p1-project-link" href="#project-signal-mosaic">Link to this project</a><p>A reproducible foundation for studying equities, cryptocurrencies and news on their native trading calendars, with explicit data-cleaning and publication-time controls.</p>
     <div class="technical-note">
     <p>The 2020–2023 foundation spans 50 US equities, 10 cryptocurrencies and 149,683 raw headlines. Native-calendar returns and news alignment to the same or next equity trading day preserve market-specific timing.</p>
     <p>Removed 2,847 exact duplicates and excluded 10 post-sample crypto rows. Built breadth and regime diagnostics with point-in-time availability and lagged-sentiment controls.</p></div></div>
   </details>
 
-  <details class="project-study">
+  <details class="project-study" id="project-financial-agents">
     <summary><span class="study-head"><strong>Evidence-grounded financial agents</strong><span class="project-meta">Hackathon · AI Mockathon, UNSW FAIC AI-engineering training · Jul 2026</span><span class="figure"><span class="figure-label">Sources</span><span class="figure-value txt">RBA · ASX · AFR</span><span class="figure-basis">fixed queries, evidence-constrained synthesis</span></span></span></summary>
-    <div class="study-body"><p>A bounded financial agent connecting conclusions to source material and tool traces, with outputs treated as hypotheses to audit.</p>
+    <div class="study-body"><a class="p1-project-link" href="#project-financial-agents">Link to this project</a><p>A bounded financial agent connecting conclusions to source material and tool traces, with outputs treated as hypotheses to audit.</p>
     <div class="technical-note"><p>Structured traces connect sources, parameters and intermediate outputs to conclusions.</p></div></div>
   </details>
 
   <h3 class="work-group" id="agents">Multi-agent systems</h3>
 
-  <details class="project-study">
+  <details class="project-study" id="project-agent-society">
     <summary><span class="study-head"><strong>Agent society &amp; strategic simulation</strong><span class="project-meta">Research assistant · UNSW Sydney · Jun 2026 – present</span><span class="figure"><span class="figure-label">Supervisor</span><span class="figure-value txt">Dr Xianghua Wu</span><span class="figure-basis">AI-Agent Society &amp; Strategic Simulation</span></span></span></summary>
-    <div class="study-body"><p>Analyzing how shared-model bias, memory, information, incentives and network position shape collective outcomes in agent societies.</p>
+    <div class="study-body"><a class="p1-project-link" href="#project-agent-society">Link to this project</a><p>Analyzing how shared-model bias, memory, information, incentives and network position shape collective outcomes in agent societies.</p>
     <div class="technical-note">
     <p>Analyzing a large-scale agent-society dataset. Drafted probe-agent, controlled-intervention and external-model counterfactual protocols.</p>
     <p>Defined evaluation measures for diffusion speed, network concentration, knowledge correction and governance response.</p></div></div>
   </details>
 
-  <details class="project-study">
+  <details class="project-study" id="project-latent-agent">
     <summary><span class="study-head"><strong>Latent-Agent Market Simulation</strong><span class="project-meta">Competition · BigAlpha 2026, BigQuant × Ingram Micro</span><span class="figure"><span class="figure-label">Score</span><span class="figure-value">87</span><span class="figure-basis">AI Open Innovation category</span></span></span></summary>
-    <div class="study-body"><p>A multi-agent market simulation project in the AI Open Innovation category received a score of 87.</p>
+    <div class="study-body"><a class="p1-project-link" href="#project-latent-agent">Link to this project</a><p>A multi-agent market simulation project in the AI Open Innovation category received a score of 87.</p>
     <div class="technical-note"><p><a class="text-link" href="https://bigquant.com/wiki/doc/lEUypayaG4">Project page · BigQuant <span aria-hidden="true">↗</span></a></p></div></div>
   </details>
 
-  <details class="project-study">
+  <details class="project-study" id="project-pittsai">
     <summary><span class="study-head"><strong>PittsAI — customer simulation</strong><span class="project-meta">Founder &amp; research lead · Nov 2025 – Jul 2026</span><span class="figure"><span class="figure-label">Stage</span><span class="figure-value txt">Pre-seed prototype</span><span class="figure-basis">scenario outputs; validation against real markets still required</span></span></span></summary>
-    <div class="study-body"><p>A multi-agent prototype for comparing product, pricing, channel and service scenarios.</p>
+    <div class="study-body"><a class="p1-project-link" href="#project-pittsai">Link to this project</a><p>A multi-agent prototype for comparing product, pricing, channel and service scenarios.</p>
     <div class="technical-note"><p>Converts company materials and operating assumptions into comparable decision scenarios, varying behavioural rules under controlled conditions.</p></div></div>
   </details>
 </section>
