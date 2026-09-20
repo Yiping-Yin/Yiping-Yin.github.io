@@ -22,7 +22,7 @@ The homepage and historical desk use retained Yahoo Finance one-minute OHLC from
 
 Fifteen strategy runs produced by the local runtime are published as static records: twelve historical and three synthetic. `release.json` records tape checksums, published-run sources, the portfolio snapshot and the terminal payload. The exporter includes only verified public assets and data; it does not read the private research vault.
 
-Source checkpoint: `08c3ae260e5ff505a6d55290c9d2e87262f6a2f8` in the private P.Book repository. Build with `npm run build:public`. The final artifact is copied byte-for-byte into this mirror apart from repository metadata and this README. Preparing a local commit does not deploy it; deployment follows a push to GitHub Pages.
+Source checkpoint: `116788ebfcd563c44d963d4c9b8345b86f43ef68` in the private P.Book repository. Build with `npm run build:public`. The final artifact is copied byte-for-byte into this mirror apart from repository metadata and this README. Preparing a local commit does not deploy it; deployment follows a push to GitHub Pages.
 
 For a local preview, run `python3 -m http.server 4173 --bind 127.0.0.1` and open [localhost:4173](http://127.0.0.1:4173/). No backend is needed for manual paper trading.
 
