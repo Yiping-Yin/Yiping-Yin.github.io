@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Not found — Yiping Yin</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/portfolio-assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/portfolio-assets/apple-touch-icon.png">
+<meta name="theme-color" content="#f4f6f9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b1420" media="(prefers-color-scheme: dark)">
+<script>
+  // Honour a stored appearance before paint. No control on this page: it is a
+  // page you leave in one click. Storage failure is not an error.
+  (function(){var t='system';try{var s=localStorage.getItem('theme');if(s==='dark'||s==='light'||s==='system')t=s;}catch(e){}document.documentElement.dataset.theme=t;})();
+</script>
+<style>
+:root{--bg:#f4f6f9;--ink:#18283c;--muted:#647286;--line:#dfe5ed;--accent:#254e7b;--bar:76px;--gutter:50px}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1420;--ink:#e7edf5;--muted:#a3b2c5;--line:#2b3d53;--accent:#a8c9ef}}
+:root[data-theme="dark"]{--bg:#0b1420;--ink:#e7edf5;--muted:#a3b2c5;--line:#2b3d53;--accent:#a8c9ef}
+*{box-sizing:border-box}
+:root{font-variant-numeric:tabular-nums}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;font-size:16px;line-height:1.75;-webkit-font-smoothing:antialiased}
+.topbar{background:var(--bg);color:var(--ink)}
+.topbar-in{max-width:1300px;margin:auto;height:var(--bar);padding:0 var(--gutter);display:flex;align-items:center;justify-content:space-between;gap:24px;border-bottom:1px solid var(--line)}
+.brand{display:inline-flex;align-items:center;gap:9px;height:44px;color:var(--ink);text-decoration:none;font-size:16px;font-weight:600;letter-spacing:-0.01em}
+.brand img{width:28px;height:28px;border-radius:50%;object-fit:cover;outline:1px solid var(--line);outline-offset:-1px}
+.topnav{display:flex;align-items:center;gap:8px}
+.topnav a{display:inline-flex;align-items:center;justify-content:center;min-width:44px;height:var(--bar);padding:0 10px;font-size:13px;color:var(--muted);text-decoration:none;white-space:nowrap}
+.topnav a:hover{color:var(--ink)}
+main{max-width:1300px;margin:auto;padding:0 var(--gutter)}
+.sheet{max-width:62ch;padding:78px 0 0}
+h1{margin:0 0 18px;font-size:32px;line-height:1.15;font-weight:500;letter-spacing:-0.025em}
+.said{margin:0 0 34px;color:var(--muted);font-size:16px}
+.said code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:13px;color:var(--ink);word-break:break-all}
+.ways{border-top:1px solid var(--line)}
+.ways a{display:grid;grid-template-columns:150px minmax(0,1fr);gap:24px;align-items:baseline;min-height:44px;padding:17px 0;border-bottom:1px solid var(--line);text-decoration:none;color:var(--ink)}
+.ways .name{justify-self:start;font-size:20px;font-weight:500;border-bottom:1px solid var(--line);padding-bottom:1px}
+.ways a:hover .name{border-bottom-color:var(--accent)}
+.ways .what{color:var(--muted);font-size:13px;line-height:1.55}
+.ways a:focus-visible,.topnav a:focus-visible,.brand:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+footer{max-width:1300px;margin:56px auto 0;padding:26px var(--gutter) 40px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:20px;color:var(--muted);font-size:12px}
+footer a{display:inline-flex;align-items:center;min-height:44px;color:var(--muted);text-decoration:none}
+footer a:hover{color:var(--ink)}
+@media(max-width:1100px){:root{--gutter:35px}}
+@media(max-width:700px){:root{--bar:66px;--gutter:23px}.brand{font-size:13px}.topnav{gap:0}.topnav a{padding:0 9px}.sheet{padding-top:40px}h1{font-size:25px}.ways a{grid-template-columns:minmax(0,1fr);gap:3px;padding:14px 0}.ways .name{font-size:16px}footer{margin-top:36px;flex-direction:column;gap:0}}
+@media(max-width:370px){:root{--gutter:18px}.topnav a{padding:0 7px}}
+</style>
+</head>
+<body>
+<div class="topbar" id="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="/#top" aria-label="Yiping Yin — home"><img src="/portfolio-assets/avatar.jpg" alt="" width="28" height="28"><span>Yiping Yin</span></a>
+    <nav class="topnav" aria-label="Primary navigation">
+      <a href="/profile.html">Profile</a><a href="/training.html#/market">Training</a><a href="/lab.html">Lab</a>
+    </nav>
+  </div>
+</div>
+<main>
+  <div class="sheet">
+    <h1>Not found</h1>
+    <p class="said">No page is served at <code id="asked">this address</code>. Four pages are published.</p>
+    <nav class="ways" aria-label="Published pages">
+      <a href="/#top"><span class="name">Home</span><span class="what">A trading terminal replaying a published run on real one-minute prices, then the competition results.</span></a>
+      <a href="/profile.html"><span class="name">Profile</span><span class="what">Background, selected work, experience and education, awards, toolkit, contact.</span></a>
+      <a href="/training.html#/market"><span class="name">Training</span><span class="what">P.Book, the desk: 15 published runs, a simulated order book, a simulated account.</span></a>
+      <a href="/lab.html"><span class="name">Lab</span><span class="what">The public structure of AI Quant Lab: five theory domains and a six-stage research workflow.</span></a>
+    </nav>
+  </div>
+</main>
+<footer><span>© 2026 Yiping Yin</span><a href="mailto:yiping_yin0521@outlook.com">yiping_yin0521@outlook.com</a></footer>
+<script>
+// A static host serves this file for any missing path; the browser still knows
+// which one was asked for. Written as text, never as markup.
+(function(){var el=document.getElementById('asked');if(el&&location.pathname)el.textContent=location.pathname;})();
+</script>
+</body>
+</html>

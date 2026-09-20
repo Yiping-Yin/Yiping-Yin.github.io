@@ -1,6 +1,6 @@
 {
-  "publishedAt": "2026-09-18T10:00:48.938Z",
-  "sourceSHA256": "fc79f04fa8cfed7a6c2b371e81a55bf763229498776e84430c4b505c7f1b8d3c",
+  "publishedAt": "2026-09-20T16:50:04.015Z",
+  "sourceSHA256": "f80b3cdd41b0e7d9ec9add1820499b7fbb3b66bd2ddda5dc81c4994460d79db4",
   "instruments": [
     {
       "symbol": "AAPL",
@@ -136,13 +136,13 @@
   "publishedRuns": {
     "generatedAt": "2026-09-17T13:14:50.688Z",
     "source": "training/data/published-runs.json",
-    "sourceSHA256": "bc2b47ba29f54a720e3cad484e9e49881599a05ac25bd9df8cf3572d2891b8c2",
+    "sourceSHA256": "2ea9c0824fcb0ab1c1272d398c097f44693304b1fd192c82ae7e572db5158704",
     "files": [
       {
         "marketKind": "synthetic",
         "path": "data/published-runs-synthetic.json",
-        "sha256": "765ffdb06c93c922cf95538c06db95e9d4931b19afcee8deb14b294eeb02527b",
-        "bytes": 1768081,
+        "sha256": "a50de72fe02b8e5097a33db67b3f4622813c0fe254b2fc514cb2d61b2eee406f",
+        "bytes": 615741,
         "runs": 3,
         "symbols": [
           "ASML"
@@ -152,8 +152,8 @@
       {
         "marketKind": "historical",
         "path": "data/published-runs-historical.json",
-        "sha256": "1ae0faaefdceed34a03033646bb8cb692b0b2ee1ae242e1814b1786551673971",
-        "bytes": 1491960,
+        "sha256": "fa575194c7a9bfb9b7a11b9439b2d4c549f7ecc1cccbd28c48de9261287dc9d2",
+        "bytes": 438307,
         "runs": 12,
         "symbols": [
           "^GSPC",
@@ -167,8 +167,8 @@
   },
   "hero": {
     "payloadSha256": "7a70cc8312eb74bb45fe233dd2678c6c0622fe1f515872aad9f481c2436de7f0",
-    "jsSha256": "51762e3c46364bd4063d419cd5322e795361325149ac1431ed4b2580e73d63e3",
-    "cssSha256": "329d7d31f4c9d78638da84b719a2d0e28375114b78030c16668afcc17e0a498c",
+    "jsSha256": "f44759508b95bdbad1a8d936767eb6e2a1cc264b99cb451930b5aab34332a400",
+    "cssSha256": "329f3ee6d8feb924ca7820188f089b47a39176923b9b6f3ae55c35d99d8d2cf5",
     "defaultSymbol": "AAPL",
     "symbols": [
       "^GSPC",

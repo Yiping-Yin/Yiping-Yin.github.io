@@ -25,7 +25,11 @@
   color-scheme: dark;
   position: relative;
   overflow: hidden;
-  height: max(360px, calc(100svh - var(--study-nav) - var(--study-awards)));
+  /* This comparison variant keeps the terminal dominant without assigning it
+     every pixel left by the viewport. A bounded responsive height lets the
+     credential band and the beginning of Training establish the page rhythm
+     on ordinary desktop screens. */
+  height: clamp(520px, calc(100svh - var(--study-nav) - var(--study-awards)), 620px);
   background: var(--th-ground);
   color: var(--th-ink);
   font-family: var(--th-sans);
@@ -46,9 +50,33 @@
 /* Header: instrument tabs, session clock, transport. */
 .terminal-hero .th-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-width: 0; }
 .terminal-hero .th-transport { flex: 0 0 auto; }
-.terminal-hero .th-tabs { display: flex; align-items: stretch; gap: 2px; min-width: 0; }
+/* The strip is a scroll container, not an overflowing box: below about 353px
+   the four tabs are wider than the room the transport leaves them, and a
+   `visible` overflow painted the clock on top of the last tab (A11Y-01).
+   The scrollbar is suppressed - the tabs are also reachable by keyboard and by
+   the arrow keys the tablist already handles. A scroll container clips both
+   axes, so the strip carries the tabs' 44px hit area AND the 4px the
+   :focus-visible ring occupies outside a tab (outline-offset 2 + --th-thick 2)
+   as its own padding, then takes the lot straight back as margin. Without the
+   4px the scrollport cut the ring's top and bottom edge off every tab at
+   desktop widths and the outer edge off the first and last tab at every width
+   (hard rule 7); with it the header box, the first tab's x and the 44px hit
+   reach are all unchanged. `scroll-padding` keeps the same 4px in hand when the
+   strip does scroll a tab into view, so the ring arrives with the tab. */
+.terminal-hero .th-tabs { display: flex; align-items: center; gap: 2px; min-width: 0; overflow-x: auto; scrollbar-width: none;
+  padding: calc((44px - var(--th-head)) / 2 + 4px) 4px; margin: calc((44px - var(--th-head)) / -2 - 4px) -4px;
+  scroll-padding: 4px; }
+.terminal-hero .th-tabs::-webkit-scrollbar { display: none; }
 .terminal-hero .th-tab {
   position: relative;
+  /* The tab's 44px hit box reaches into the 9px the strip holds above and
+     below it. At 320x568 the hero is 280px tall (--study-awards: 222px, P3's
+     token), the grid rows compress, and .th-main's box starts 0.98px inside
+     that band, taking the last row of the tap target with it. The tabs are
+     lifted one layer so the target belongs to the tab; nothing is painted in
+     the band, so nothing moves. */
+  z-index: 1;
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -66,8 +94,14 @@
   text-align: left;
   white-space: nowrap;
 }
-/* The visible tab is the header's own height; the hit area is padded out to 44px. */
-.terminal-hero .th-tab::after { content: ""; position: absolute; left: 0; right: 0; top: calc((44px - var(--th-head)) / -2); bottom: calc((44px - var(--th-head)) / -2); }
+/* The visible tab is the header's own height; the hit area is padded out to
+   44px. An absolutely positioned box resolves `bottom` against its containing
+   block's PADDING box, and the tab carries a --th-thick bottom border, so the
+   plain `(44 - head) / -2` that works on the top edge landed exactly on the
+   border box below and the tap target reached 42px (40px box + 2 up + 0 down at
+   1440x900, 34 + 5 + 3 at 390x844) against hard rule 7's 44px floor. The border
+   is added back so the growth is symmetric and the reach is a real 44px. */
+.terminal-hero .th-tab::after { content: ""; position: absolute; left: 0; right: 0; top: calc((44px - var(--th-head)) / -2); bottom: calc((44px - var(--th-head)) / -2 - var(--th-thick)); }
 .terminal-hero .th-tab[aria-selected="true"] { color: var(--th-ink); border-bottom-color: var(--th-ink); }
 .terminal-hero .th-tab-name { font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; }
 .terminal-hero .th-tab-row { display: flex; align-items: baseline; gap: 8px; font-family: var(--th-mono); font-size: 11px; font-variant-numeric: tabular-nums; }
@@ -75,6 +109,10 @@
 .terminal-hero .th-clock { font-family: var(--th-mono); font-size: 12px; font-variant-numeric: tabular-nums; color: var(--th-ink); white-space: nowrap; }
 .terminal-hero .th-play {
   position: relative;
+  /* Lifted for the same reason as .th-tab: its 44px hit box reaches 2px above
+     and below a 40px button, into a band .th-main's box takes at 375x667 and
+     320x568. Nothing is painted there, so nothing moves. */
+  z-index: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -88,7 +126,11 @@
   font-size: 11px;
   letter-spacing: 0.04em;
 }
-.terminal-hero .th-play::after { content: ""; position: absolute; left: 0; right: 0; top: calc((44px - var(--th-head)) / -2); bottom: calc((44px - var(--th-head)) / -2); }
+/* Same correction as the tab's, on all four sides: the transport carries a
+   --th-thin border all round, so insets measured from its padding box stopped
+   1px short of its own border box on the horizontal axis (42px wide inside a
+   44px button) and 1px short of 44 above and below. */
+.terminal-hero .th-play::after { content: ""; position: absolute; left: calc(var(--th-thin) * -1); right: calc(var(--th-thin) * -1); top: calc((44px - var(--th-head)) / -2 - var(--th-thin)); bottom: calc((44px - var(--th-head)) / -2 - var(--th-thin)); }
 .terminal-hero .th-replay-tag { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--th-muted); border: var(--th-thin) solid var(--th-line); padding: 3px 7px; }
 
 /* Main: chart panel and order book. */
@@ -143,19 +185,19 @@
 
 /* Order book. */
 .terminal-hero .th-book-panel { display: flex; flex-direction: column; min-height: 0; overflow: hidden; background: var(--th-panel); border-left: var(--th-thin) solid var(--th-line); }
-/* The head, the ladder and the Spread/Mid rows keep their own height: if a
-   viewport is ever too short for the depth the runtime chose, the panel clips
-   its last rungs rather than squeezing the head into an unreadable strip. */
-.terminal-hero .th-book-head, .terminal-hero .th-ladder, .terminal-hero .th-book-foot { flex: 0 0 auto; }
+/* The head, ladder and Spread/Mid rows keep their intrinsic height. Stretching
+   the desktop table made eight real levels read as sixteen oversized bands;
+   the chart retains the remaining visual weight instead. */
+.terminal-hero .th-book-head, .terminal-hero .th-book-foot { flex: 0 0 auto; }
 .terminal-hero .th-book-head { padding: 7px 10px; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--th-muted); border-bottom: var(--th-thin) solid var(--th-line); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.terminal-hero .th-ladder { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.terminal-hero .th-ladder { flex: 1 1 auto; width: 100%; border-collapse: collapse; table-layout: fixed; }
 .terminal-hero .th-ladder th, .terminal-hero .th-ladder td { padding: 2px 10px; font-size: 11px; line-height: 1.4; font-weight: 400; font-family: var(--th-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .terminal-hero .th-ladder thead th { color: var(--th-muted); font-family: var(--th-sans); letter-spacing: 0.04em; text-transform: uppercase; }
 .terminal-hero .th-ladder tbody th { color: var(--th-ink); text-align: center; }
 .terminal-hero .th-ladder .th-bid-col { text-align: right; width: 32%; }
 .terminal-hero .th-ladder .th-price-col { text-align: center; width: 36%; }
 .terminal-hero .th-ladder .th-ask-col { text-align: left; width: 32%; }
-.terminal-hero .th-book-foot { margin-top: auto; display: flex; flex-direction: column; border-top: var(--th-thin) solid var(--th-line); }
+.terminal-hero .th-book-foot { display: flex; flex-direction: column; border-top: var(--th-thin) solid var(--th-line); }
 .terminal-hero .th-book-foot > div { display: flex; justify-content: space-between; gap: 10px; padding: 3px 10px; font-size: 11px; color: var(--th-muted); }
 .terminal-hero .th-book-foot b { font-family: var(--th-mono); font-weight: 400; font-variant-numeric: tabular-nums; color: var(--th-ink); }
 /* Set by the runtime in the stacked bands when even the shallowest ladder plus
@@ -172,11 +214,35 @@
 .terminal-hero .th-footer { display: flex; align-items: center; justify-content: space-between; gap: 18px; font-size: 11px; line-height: 1.45; color: var(--th-muted); min-width: 0; }
 .terminal-hero .th-footer p { margin: 0; min-width: 0; }
 .terminal-hero .th-say-narrow { display: none; }
-.terminal-hero .th-footer a { position: relative; color: var(--th-ink); text-decoration: none; white-space: nowrap; padding: 4px 0; }
-.terminal-hero .th-footer a::after { content: ""; position: absolute; left: -8px; right: -8px; top: -11px; bottom: -11px; }
+/* z-index for the same reason again: the link's hit box reaches 11px above a
+   19.39px line box (21px at <=700px), and between 900 and 1000 CSS px of width
+   .th-main's box ends inside that band and took 2.99px of the target with it
+   (42.95px measured against the 44px floor). */
+.terminal-hero .th-footer a { position: relative; z-index: 1; color: var(--th-ink); text-decoration: none; white-space: nowrap; padding: 4px 0; }
+/* The hit box is sized, not inset: the hero clips at its own edge
+   (overflow: hidden), and a symmetric -11px reached 3.97px past the bottom of
+   the hero at 999x720, 981x738 and 900x700, where the footer row sits 7px from
+   it - 42.95px of hit-testable height under the 44px floor, while the inset
+   arithmetic still read 45.94. A 44px box anchored 4px below the link is 44px
+   whatever the link's line box measures and whatever the hero's height is. */
+.terminal-hero .th-footer a::after { content: ""; position: absolute; left: -8px; right: -8px; bottom: -4px; height: 44px; }
 .terminal-hero .th-footer a:hover { text-decoration: underline; text-underline-offset: 4px; }
 
 @media (max-width: 1100px) { .terminal-hero { --th-gutter: 35px; } }
+
+@media (min-width: 1001px) {
+  .terminal-hero .th-book-panel { align-self: start; border-bottom: var(--th-thin) solid var(--th-line); }
+  .terminal-hero .th-ladder { flex: 0 0 auto; }
+  .terminal-hero .th-ladder tbody th, .terminal-hero .th-ladder tbody td { padding-block: 3px; line-height: 1.5; }
+  .terminal-hero .th-ladder .th-ask-edge > * { border-bottom: var(--th-thin) dashed var(--th-line); }
+}
+
+/* Short desktop windows still close the credential band inside the viewport.
+   Eight real levels remain present; their intrinsic row rhythm tightens only
+   enough to keep the book inside the shorter main track. */
+@media (min-width: 1001px) and (max-height: 743px) {
+  .terminal-hero .th-ladder tbody th, .terminal-hero .th-ladder tbody td { padding-block: 2px; line-height: 1.39; }
+}
 
 /* Tablet: the book moves under the chart. The book row is `auto`, so on its own
    it would take its intrinsic height and leave the chart the remainder - which
@@ -187,9 +253,10 @@
    the fill tape goes: below this width the header would print the tabs over the
    clock, and the tape would leave the chart a strip. */
 @media (max-width: 1000px) {
-  .terminal-hero { --th-chart-floor: 170px; }
+  .terminal-hero { --th-chart-floor: 170px; height: clamp(520px, 72svh, 620px); }
   .terminal-hero .th-main { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(var(--th-chart-floor), 1fr) auto; }
   .terminal-hero .th-book-panel { border-left: 0; border-top: var(--th-thin) solid var(--th-line); }
+  .terminal-hero .th-ladder { flex: 0 0 auto; }
   .terminal-hero .th-book-foot { flex-direction: row; }
   .terminal-hero .th-book-foot > div { flex: 1; }
   .terminal-hero .th-ladder th, .terminal-hero .th-ladder td { padding: 1px 10px; line-height: 1.3; }
@@ -230,6 +297,15 @@
   .terminal-hero .th-footer { flex-wrap: wrap; align-items: flex-start; gap: 2px 10px; line-height: 1.4; }
   .terminal-hero .th-footer p { flex: 1 1 100%; }
   .terminal-hero .th-footer a { margin-left: auto; padding: 2px 0; }
+  /* The visible link is one 11px line; the hit box is the base rule's 44px box
+     (CR-10), one pixel lower here because the link wraps to its own row and
+     sits further from the hero's bottom edge. The growth is not split evenly
+     around the link and cannot be: the hero clips its overflow, and below the
+     link there are only the terminal's 6-10px of bottom padding, so the
+     ruling's symmetric -13/-13 would put 4-8px of the target outside the clip
+     and out of reach. Measured at 390x844 and 375x667: reachable from 19.61px
+     above the box to 5px below it, 44.00px in total. */
+  .terminal-hero .th-footer a::after { bottom: -5px; }
   .terminal-hero .th-say-wide { display: none; }
   .terminal-hero .th-say-narrow { display: block; }
 }
@@ -241,5 +317,23 @@
   .terminal-hero .th-terminal { padding: 5px 0 6px; row-gap: 4px; }
   .terminal-hero .th-strip { padding: 3px 9px 4px; }
 }
+/* At 320x568 the chart's 128px floor leaves the two-row book 5px short.
+   Reclaim noninteractive heading padding so both quotes remain whole without
+   shrinking the chart, dropping another level or changing the phone fold. */
+@media (max-width: 370px) and (max-height: 600px) {
+  .terminal-hero .th-book-head { padding-block: 1px; }
+}
 
-@media (max-width: 370px) { .terminal-hero { --th-gutter: 18px; } }
+/* Below 371px only the gutter narrows. The tab padding stays at the >=8px the
+   <=700px block sets: halving it to 4px shrank three of the four tabs' tap
+   targets to 38.08 / 39.92 / 40.63 CSS px, under the 44px floor (hard rule 7),
+   across the whole 320-370 band - a floor the live site meets at 46.08 / 47.92
+   / 48.63. It bought nothing: the strip above is a scroll container, and that
+   is what stops a tab painting over the session clock (A11Y-01). Measured at
+   320x568 with the 8px restored: elementFromPoint at the clock's centre still
+   answers the clock, no painted tab box meets the clock or the transport, and
+   documentElement.scrollWidth is unchanged; the strip simply scrolls
+   (scrollWidth 222 against a 177px scrollport). See docs/qa/terminal-hero/. */
+@media (max-width: 370px) {
+  .terminal-hero { --th-gutter: 18px; }
+}

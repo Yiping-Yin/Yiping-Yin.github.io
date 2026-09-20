@@ -4,33 +4,44 @@
   var root = document.documentElement;
   var themeButton = document.getElementById('theme');
   var themeStatus = document.getElementById('theme-status');
-  var modes = ['light', 'dark', 'system'];
-  var icons = {
-    system: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>',
-    light: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.5 1.5M17.6 17.6l1.5 1.5M19.1 4.9l-1.5 1.5M6.4 17.6l-1.5 1.5"/></svg>',
-    dark: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20.5 14.6A8.6 8.6 0 1 1 9.4 3.5a6.8 6.8 0 0 0 11.1 11.1z"/></svg>'
+  // 'system' first: the ground follows the operating system until a visitor
+  // chooses otherwise. This list and the pre-paint script in source.html are
+  // the only two places a default is written, and they write the same word.
+  var modes = ['system', 'light', 'dark'];
+  var words = { system: 'Auto', light: 'Light', dark: 'Dark' };
+  var says = {
+    system: 'Appearance: Auto, following the system. Switch to Light.',
+    light: 'Appearance: Light. Switch to Dark.',
+    dark: 'Appearance: Dark. Switch to Auto, following the system.'
   };
-  var mode = modes.indexOf(root.dataset.theme) !== -1 ? root.dataset.theme : 'light';
-
+  // One 24x24 grid, two stroke weights, no fill: a circle half ruled (Auto),
+  // an open circle with rays (Light), a closed arc (Dark).
+  var icons = {
+    system: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17"/><path d="M12 5.5a6.5 6.5 0 0 1 0 13z" fill="currentColor" stroke="none"/></svg>',
+    light: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.6M12 19.4V22M2 12h2.6M19.4 12H22M4.9 4.9l1.9 1.9M17.2 17.2l1.9 1.9M19.1 4.9l-1.9 1.9M6.8 17.2l-1.9 1.9"/></svg>',
+    dark: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="miter" aria-hidden="true" focusable="false"><path d="M20.5 14.6A8.6 8.6 0 1 1 9.4 3.5a6.8 6.8 0 0 0 11.1 11.1z"/></svg>'
+  };
+  // The pre-paint script already resolved the mode; trust it, and only let
+  // storage speak when it holds one of the three modes. The second, silent
+  // fallback that used to live here overrode the pre-paint script entirely.
+  var mode = modes.indexOf(root.dataset.theme) !== -1 ? root.dataset.theme : 'system';
   try {
     var savedMode = window.localStorage.getItem('theme');
-    mode = modes.indexOf(savedMode) !== -1 ? savedMode : 'light';
+    if (modes.indexOf(savedMode) !== -1) mode = savedMode;
   } catch (error) {
     // Theme switching still works when browser storage is unavailable.
   }
 
   function applyTheme(announce) {
-    // 'system' is an explicit state: the stylesheet only follows the OS preference when it is set.
+    // 'system' is an explicit state: the stylesheet only follows the OS
+    // preference when it is set.
     root.dataset.theme = mode;
-
     if (themeButton) {
-      var nextMode = modes[(modes.indexOf(mode) + 1) % modes.length];
-      var label = 'Theme: ' + mode + '. Switch to ' + nextMode + ' theme.';
       themeButton.innerHTML = icons[mode];
-      themeButton.setAttribute('aria-label', label);
-      themeButton.title = label;
+      themeButton.setAttribute('aria-label', says[mode]);
+      themeButton.title = says[mode];
     }
-    if (announce && themeStatus) themeStatus.textContent = 'Theme changed to ' + mode + '.';
+    if (announce && themeStatus) themeStatus.textContent = 'Appearance: ' + words[mode] + '.';
   }
 
   applyTheme(false);
@@ -61,7 +72,7 @@
   }
 
   var navItems = Array.prototype.map.call(
-    document.querySelectorAll('.sectionnav a[href^="#"], #mobile-nav a[href^="#"]'),
+    document.querySelectorAll('.sectionnav a[href^="#"]'),
     function (link) { return { link: link, target: fragmentTarget(link) }; }
   ).filter(function (item) { return item.target; });
   var sections = [];
@@ -104,7 +115,7 @@
   function updateScrollState() {
     framePending = false;
     var scrollTop = window.scrollY;
-    if (topbar) topbar.classList.toggle('scrolled', scrollTop > 8);
+    if (topbar) topbar.toggleAttribute('data-scrolled', scrollTop > 8);
     if (!sections.length) return;
 
     var current = sections[0];
@@ -146,57 +157,9 @@
     window.requestAnimationFrame(updateScrollState);
   }
 
-  var researchTabs = document.querySelector('.research-tabs');
-  var researchItems = [];
-  var researchHeading = document.getElementById('research');
-  var researchHeadings = { trading: 'work', ai: 'ai', agents: 'agents' };
-
-  if (researchTabs) {
-    var tabButtons = Array.prototype.slice.call(researchTabs.querySelectorAll('[data-research-tab]'));
-    var candidates = tabButtons.map(function (button) {
-      var panel = document.getElementById(button.getAttribute('aria-controls'));
-      var heading = document.getElementById(researchHeadings[button.dataset.researchTab]);
-      return panel && heading && panel.contains(heading)
-        ? { button: button, panel: panel, heading: heading } : null;
-    });
-    // Incomplete markup keeps the fully readable, unenhanced layout.
-    if (candidates.length === 3 && candidates.every(function (item) { return item; })) {
-      researchItems = candidates;
-    }
-  }
-
-  function activateResearch(item, updateUrl) {
-    var changed = item.panel.hidden;
-    var focusWouldBeHidden = researchItems.some(function (other) {
-      return other !== item && other.panel.contains(document.activeElement);
-    });
-    researchItems.forEach(function (other) {
-      var selected = other === item;
-      other.button.setAttribute('aria-selected', String(selected));
-      other.button.tabIndex = selected ? 0 : -1;
-      other.panel.hidden = !selected;
-    });
-    if (focusWouldBeHidden) item.button.focus({ preventScroll: true });
-    if (updateUrl) {
-      try {
-        window.history.replaceState(window.history.state, '', '#' + item.heading.id);
-      } catch (error) {
-        // Tab selection still works when history updates are unavailable.
-      }
-      interactionSection = researchHeading;
-      interactionScrollTop = window.scrollY;
-      interactionScrolling = false;
-    }
-    scheduleScrollUpdate();
-    return changed;
-  }
-
   function revealTarget(target) {
     if (!target) return false;
-    var item = researchItems.find(function (candidate) {
-      return candidate.panel === target || candidate.panel.contains(target);
-    });
-    var changed = item ? activateResearch(item, false) : false;
+    var changed = false;
     var ancestor = target;
     while (ancestor) {
       if (ancestor.tagName === 'DETAILS' && !ancestor.open) {
@@ -221,35 +184,6 @@
     scheduleScrollUpdate();
   }
 
-  if (researchItems.length) {
-    researchTabs.setAttribute('role', 'tablist');
-    researchItems.forEach(function (item, index) {
-      item.button.setAttribute('role', 'tab');
-      item.panel.setAttribute('role', 'tabpanel');
-      item.panel.setAttribute('aria-labelledby', item.button.id);
-      item.panel.tabIndex = 0;
-      item.button.addEventListener('click', function () { activateResearch(item, true); });
-      item.button.addEventListener('keydown', function (event) {
-        var next = index;
-        if (event.key === 'ArrowRight') next = (index + 1) % researchItems.length;
-        else if (event.key === 'ArrowLeft') next = (index + researchItems.length - 1) % researchItems.length;
-        else if (event.key === 'Home') next = 0;
-        else if (event.key === 'End') next = researchItems.length - 1;
-        else return;
-        event.preventDefault();
-        researchItems[next].button.focus({ preventScroll: true });
-        activateResearch(researchItems[next], true);
-      });
-    });
-    var initialTarget = targetForFragment(window.location.hash);
-    var initialItem = researchItems.find(function (item) {
-      return initialTarget && (item.panel === initialTarget || item.panel.contains(initialTarget));
-    }) || researchItems[0];
-    activateResearch(initialItem, false);
-    revealTarget(initialTarget);
-    researchTabs.hidden = false;
-  }
-
   // Reveal same-page targets before the browser performs native anchor scrolling.
   document.addEventListener('click', function (event) {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
@@ -272,64 +206,6 @@
     if (event.target.tagName === 'DETAILS') scheduleScrollUpdate();
   }, true);
 
-  var menuButton = document.getElementById('menu-toggle');
-  var mobileNav = document.getElementById('mobile-nav');
-  var mobileViewport = window.matchMedia('(max-width: 700px)');
-
-  function closeMenu(restoreFocus) {
-    if (!menuButton || !mobileNav) return;
-    if (restoreFocus && mobileNav.contains(document.activeElement)) menuButton.focus();
-    mobileNav.hidden = true;
-    menuButton.setAttribute('aria-expanded', 'false');
-  }
-
-  function syncMobileMenu() {
-    if (!menuButton || !mobileNav) return;
-    var moveFocus = !mobileViewport.matches &&
-      (document.activeElement === menuButton || mobileNav.contains(document.activeElement));
-    if (!mobileViewport.matches) closeMenu(false);
-    menuButton.hidden = !mobileViewport.matches;
-    if (moveFocus) {
-      var desktopItem = navItems.find(function (item) {
-        return !mobileNav.contains(item.link) && item.target === activeSection;
-      });
-      if (desktopItem) desktopItem.link.focus();
-    }
-  }
-
-  if (menuButton && mobileNav) {
-    menuButton.setAttribute('aria-controls', mobileNav.id);
-    closeMenu(false);
-    menuButton.addEventListener('click', function () {
-      var opening = mobileNav.hidden;
-      mobileNav.hidden = !opening;
-      menuButton.setAttribute('aria-expanded', String(opening));
-      scheduleScrollUpdate();
-    });
-    document.addEventListener('keydown', function (event) {
-      if (event.key !== 'Escape' || mobileNav.hidden) return;
-      event.preventDefault();
-      closeMenu(false);
-      menuButton.focus();
-    });
-    mobileNav.addEventListener('click', function (event) {
-      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-      var link = event.target.closest('a[href^="#"]');
-      if (!link || !mobileNav.contains(link)) return;
-      var target = fragmentTarget(link);
-      if (!target) return;
-      revealTarget(target);
-      var heading = target.matches('h1, h2, h3, h4, h5, h6')
-        ? target : target.querySelector('h1, h2, h3, h4, h5, h6') || target;
-      heading.setAttribute('tabindex', '-1');
-      closeMenu(false);
-      heading.focus({ preventScroll: true });
-      // Preserve native hash navigation, then keep keyboard focus on the heading.
-      window.requestAnimationFrame(function () { heading.focus({ preventScroll: true }); });
-    });
-    syncMobileMenu();
-  }
-
   window.addEventListener('scroll', scheduleScrollUpdate, { passive: true });
   window.addEventListener('wheel', releaseScrollInteraction, { passive: true });
   window.addEventListener('touchmove', releaseScrollInteraction, { passive: true });
@@ -346,10 +222,21 @@
   window.addEventListener('hashchange', function () { restoreFragment(false); });
   window.addEventListener('resize', function () {
     readAnchorOffset();
-    syncMobileMenu();
     scheduleScrollUpdate();
   });
   window.addEventListener('load', scheduleScrollUpdate);
+  var printOpened = [];
+  window.addEventListener('beforeprint', function () {
+    printOpened = [];
+    Array.prototype.forEach.call(document.querySelectorAll('details:not([open])'), function (item) {
+      printOpened.push(item);
+      item.open = true;
+    });
+  });
+  window.addEventListener('afterprint', function () {
+    printOpened.forEach(function (item) { item.open = false; });
+    printOpened = [];
+  });
   root.classList.add('js');
   readAnchorOffset();
   updateScrollState();

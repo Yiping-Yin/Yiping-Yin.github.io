@@ -30,8 +30,8 @@
 
   var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   var pad2 = function (n) { return (n < 10 ? '0' : '') + n; };
-  // The tape carries a single NYSE session, so a fixed offset derived at build
-  // time from the source labels is exact and needs no timezone database.
+  // The tape carries a single US cash session, so a fixed offset derived at
+  // build time from the source labels is exact and needs no timezone database.
   var localDate = function (time, offsetMinutes) { return new Date(Number(time) + Number(offsetMinutes) * 60000); };
   var clockTime = function (time, offsetMinutes) {
     var d = localDate(time, offsetMinutes);
@@ -167,8 +167,12 @@
     var shown = summary ? bars.length : Math.min(cursor + 1, windowBars);
     return {
       title: instrument.name + ' one-minute candlesticks, ' + instrument.sessionLabel + ', replayed to ' + at + ' ' + instrument.tz,
+      // No venue is named: ^GSPC is an index and AAPL/MSFT/NVDA are NASDAQ
+      // listings, so the exchange this description used to claim was false
+      // wherever it appeared - in the visible disclosure (B7) and here, in what
+      // a screen reader reads for the one hero element with role="img".
       desc: 'Historical one-minute open, high, low and close from ' + instrument.source + ' for the ' + instrument.sessionLabel +
-        ' NYSE session. The window ends on the replay cursor at ' + at + ' ' + instrument.tz + ' and shows ' + shown +
+        ' session. The window ends on the replay cursor at ' + at + ' ' + instrument.tz + ' and shows ' + shown +
         ' completed bars. Triangles mark the simulated fills of the published run "' + instrument.run.title +
         '"; the dotted line is the session open. Depth, fills and profit and loss are simulated by P.Book, not observed.'
     };
@@ -179,7 +183,7 @@
     var book = bookAt(instrument, cursor);
     var rows = [];
     for (var a = levels - 1; a >= 0; a -= 1) {
-      rows.push('<tr><td class="th-bid-col"></td><th scope="row" class="th-price-col">' + fmt(book.asks[a].price, 2) +
+      rows.push('<tr' + (a === 0 ? ' class="th-ask-edge"' : '') + '><td class="th-bid-col"></td><th scope="row" class="th-price-col">' + fmt(book.asks[a].price, 2) +
         '</th><td class="th-ask-col num-signed num-down">' + book.asks[a].quantity + '</td></tr>');
     }
     for (var d = 0; d < levels; d += 1) {
@@ -225,6 +229,14 @@
       '<span data-th-ctime>' + esc(clockTime(time, offset)) + ' ' + esc(instrument.tz) + '</span>';
   };
 
+  /* ---- the replay handoff ----
+     The hero's single link hands the desk the run the hero is showing. The
+     build-time frame and every later tab switch compose it here, so the static
+     markup and the runtime can never disagree about which run is offered. */
+  var replayHref = function (instrument) {
+    return '/training.html?market=historical#/market?view=replay&run=' + instrument.run.runId;
+  };
+
   var tabValues = function (payload, cursor) {
     return payload.instruments.map(function (instrument) {
       var close = instrument.bars[cursor][4];
@@ -233,12 +245,31 @@
     });
   };
 
+  // The tab strip is a scroll container (A11Y-01), so below about 366 CSS px
+  // the last tab lies outside the scrollport. Keyboard navigation moved the
+  // selection and the focus ring there without moving the scrollport: at
+  // 320x568 the End key left the NVDA tab selected and focused with 7.91px of
+  // hit-testable width and its ring 44.72px outside the strip - hard rule 7 on
+  // both counts. Selecting a tab now brings it into view. Only the strip is
+  // scrolled, never the page or any other ancestor, and only when the strip
+  // actually overflows; `pad` matches the strip's own scroll-padding, which is
+  // the room the :focus-visible ring needs.
+  var REVEAL_PAD = 4;
+  var revealIn = function (strip, tab, pad) {
+    if (!strip || !tab) return;
+    var room = pad === undefined ? REVEAL_PAD : pad;
+    if (strip.scrollWidth <= strip.clientWidth + 1) return;
+    var t = tab.getBoundingClientRect(), s = strip.getBoundingClientRect();
+    if (t.left < s.left + room) strip.scrollLeft += t.left - s.left - room;
+    else if (t.right > s.right - room) strip.scrollLeft += t.right - s.right + room;
+  };
+
   var TH = {
     esc: esc, fmt: fmt, signed: signed, signClass: signClass,
     clockTime: clockTime, clockDate: clockDate,
     bookAt: bookAt, chartSVG: chartSVG, titleDesc: titleDesc,
     ladder: ladder, tapeRows: tapeRows, stripValues: stripValues, tabValues: tabValues,
-    clockMarkup: clockMarkup
+    clockMarkup: clockMarkup, replayHref: replayHref, revealIn: revealIn, REVEAL_PAD: REVEAL_PAD
   };
 
   if (typeof module === 'object' && module && module.exports) { module.exports = TH; return; }
@@ -262,7 +293,9 @@
     spread: pick('spread'), mid: pick('mid'), live: pick('live'),
     position: pick('position'), last: pick('last'), cash: pick('cash'), pnl: pick('pnl'),
     book: section.querySelector('.th-book-panel'), bookFoot: section.querySelector('.th-book-foot'),
-    strip: section.querySelector('.th-strip'), tapeTable: section.querySelector('.th-tape')
+    strip: section.querySelector('.th-strip'), tapeTable: section.querySelector('.th-tape'),
+    tabStrip: section.querySelector('.th-tabs'),
+    handoff: section.querySelector('.th-footer a')
   };
   if (!els.chart || !els.tabs.length) return;
 
@@ -272,7 +305,10 @@
   var reduced = function () { return !!(reduceQuery && reduceQuery.matches); };
   var phone = function () { return !!(phoneQuery && phoneQuery.matches); };
   var stacked = function () { return !!(tabletQuery && tabletQuery.matches); };
-  var maxLevels = function () { return phone() ? 4 : (stacked() ? 5 : 6); };
+  // Beside the chart the depth costs the chart nothing, and at desktop width the
+  // column had room for two more levels a side than it showed (CR-09). The
+  // stacked bands are unchanged: there every level is a level the chart loses.
+  var maxLevels = function () { return phone() ? 4 : (stacked() ? 5 : 8); };
   var windowBars = function () { return phone() ? payload.phoneWindowBars : payload.windowBars; };
 
   /* The ladder is sized to the room it has, not to the band it is in.
@@ -298,7 +334,19 @@
     if (!els.panel || !els.ladder || !els.book || !els.ladder.rows || !els.ladder.rows.length) return;
     section.classList.remove('th-no-foot');
     var mainHeight = els.panel.clientHeight;
+    // Desktop stretches the table through the book's available track. Feeding
+    // that stretched row height back into this depth solver would make the
+    // selected depth affect its own next input and could oscillate on relayout.
+    // Read the cell's intrinsic line and padding metrics there; stacked books
+    // remain content-sized and keep their established rendered measurement.
     var rowHeight = els.ladder.rows[0].getBoundingClientRect().height;
+    if (!stacked()) {
+      var sampleCell = els.ladder.rows[0].cells && els.ladder.rows[0].cells[0];
+      var sampleStyle = sampleCell ? root.getComputedStyle(sampleCell) : null;
+      var line = sampleStyle ? parseFloat(sampleStyle.lineHeight) : 0;
+      var padding = sampleStyle ? (parseFloat(sampleStyle.paddingTop) || 0) + (parseFloat(sampleStyle.paddingBottom) || 0) : 0;
+      if (line > 0) rowHeight = line + padding;
+    }
     if (!(mainHeight > 0) || !(rowHeight > 0)) { if (footDropped) section.classList.add('th-no-foot'); return; }
     // Everything in the book that is not a ladder level: the head, the column
     // header row, the Spread/Mid rows and the panel's own borders. Summing the
@@ -386,6 +434,7 @@
     });
     if (els.clockDate) els.clockDate.textContent = clockDate(instrument.bars[state.cursor][0], instrument.utcOffsetMinutes);
     if (els.clockTime) els.clockTime.textContent = clockTime(instrument.bars[state.cursor][0], instrument.utcOffsetMinutes) + ' ' + instrument.tz;
+    if (els.handoff) els.handoff.setAttribute('href', replayHref(instrument));
     section.setAttribute('data-th-cursor', String(state.cursor));
     section.setAttribute('data-th-symbol', instrument.symbol);
     section.setAttribute('data-th-levels', String(levels));
@@ -421,6 +470,9 @@
     if (!running && timer) { root.clearInterval(timer); timer = null; }
   };
 
+  // Keeps the selected tab inside the scrolling strip; see revealIn above.
+  var reveal = function (tab) { revealIn(els.tabStrip, tab); };
+
   var select = function (position, focus) {
     if (position === state.index) return;
     state.index = position;
@@ -432,6 +484,7 @@
     });
     if (els.panel) els.panel.setAttribute('aria-labelledby', els.tabs[position].id);
     if (focus) els.tabs[position].focus();
+    reveal(els.tabs[position]);
     render();
     announce(current().label + ' selected.');
   };
@@ -487,6 +540,8 @@
   updatePlay();
   render();
   refit();
+  // A reload at 320px must not open with the selected tab off the scrollport.
+  reveal(els.tabs[state.index]);
   sync();
   root.__terminalHero = { state: state, payload: payload, render: render };
 }(typeof window !== 'undefined' ? window : null));
