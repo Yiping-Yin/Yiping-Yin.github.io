@@ -43,7 +43,14 @@ class BrowserAcceptance(unittest.TestCase):
         self.assertEqual(self.errors,[], 'Browser JavaScript errors')
         self.assertEqual(self.posts,[], 'Public P1 must not execute strategies or submit API writes')
     def goto(self,path):
-        r=self.page.goto(self.base+path,wait_until='networkidle');self.assertEqual(r.status,200)
+        before = self.page.url
+        r = self.page.goto(self.base+path,wait_until='networkidle')
+        if r is None:
+            # Native fragment navigation has no HTTP response.
+            self.assertEqual(before.split('#')[0],(self.base+path).split('#')[0])
+        else:
+            self.assertEqual(r.status,200)
+        self.assertEqual(self.page.url,self.base+path)
     def studio(self):
         self.goto('/training.html#/studio')
         self.page.locator('[data-p1-source-export]').wait_for()
@@ -74,7 +81,9 @@ class BrowserAcceptance(unittest.TestCase):
             self.goto('/profile.html#project-'+slug)
             item=self.page.locator('#project-'+slug)
             self.assertTrue(item.is_visible())
-            if slug!='algothon':self.assertIsNotNone(item.get_attribute('open'))
+            if slug!='algothon':
+                self.page.wait_for_function('(id) => document.getElementById(id).open',arg='project-'+slug)
+                self.assertIsNotNone(item.get_attribute('open'))
             self.page.wait_for_timeout(80)
             top=item.bounding_box()['y'];self.assertGreaterEqual(top,-2);self.assertLess(top,260)
     def test_profile_report_back_forward_retains_historical_context(self):
@@ -97,21 +106,21 @@ class BrowserAcceptance(unittest.TestCase):
         for i in range(tabs.count()):
             tabs.nth(i).click();self.download()
     def test_download_edited_utf8_draft_and_after_reload(self):
-        self.studio();self.page.get_by_role('button',name='Edit',exact=True).click()
+        self.studio()  # This public editor is editable directly; there is no Edit button.
         source='# 中文 π\n\ndef on_bar(history, account, state):\n    return None\n'
         self.page.locator('textarea[aria-label="Edit Python strategy source"]').fill(source)
         self.assertEqual(self.download(),source)
         self.page.reload(wait_until='networkidle');self.page.locator('[data-p1-source-export]').wait_for()
         self.assertEqual(self.download(),source)
     def test_empty_draft_is_not_replaced_by_published_source(self):
-        self.studio();self.page.get_by_role('button',name='Edit',exact=True).click()
+        self.studio()  # This public editor is editable directly; there is no Edit button.
         self.page.locator('textarea[aria-label="Edit Python strategy source"]').fill('')
         self.assertEqual(self.download(),'')
     def test_keyboard_download(self):
         self.studio();self.download(keyboard=True)
     def test_failed_download_keeps_editor_content(self):
         self.studio();editor=self.page.locator('textarea[aria-label="Edit Python strategy source"]');before=editor.input_value()
-        self.page.evaluate("URL.createObjectURL=()=>{throw new Error('Download blocked in acceptance test')}")
+        self.page.evaluate("() => { URL.createObjectURL=()=>{throw new Error('Download blocked in acceptance test')}; }")
         self.page.get_by_role('button',name='Download .py',exact=True).click()
         status=self.page.locator('.p1-export-status');self.assertIn('Download could not start',status.inner_text())
         self.assertEqual(status.get_attribute('data-error'),'true');self.assertEqual(editor.input_value(),before)
