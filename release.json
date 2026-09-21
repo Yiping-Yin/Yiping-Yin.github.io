@@ -200,10 +200,10 @@
       "P1-03"
     ],
     "files": {
-      "index.html": "5ab7150f86151979147c3ed341a896f771ccf3a8d1c74620fa438964a0ee4ce4",
-      "profile.html": "dc347fb851d92766727655db8a4ba0ffd5ecd85a6b67bc2100df296d478494ee",
-      "lab.html": "6e03e075695f807770b26ce82a8050c9bb00c9b07cd179c0743d4fdedf7eca99",
-      "training.html": "8795ccd6f5c7b672715dd3538e053f432abbad530ec0c2cf9666e4a97f268b24",
+      "index.html": "ed2ec5bf889b883eb0a7b2d3c5e75e58c7510c514c9cc18b531a159da933ac2e",
+      "profile.html": "666335650c213512fe98cdbde848cefa007a3dacdaa4e3b6d2e08c980c21abdb",
+      "lab.html": "3f8b9947c10c03a772e9f799114dd0ef16f6eddeb99892f47cb50205d215e5d1",
+      "training.html": "482cfc769c07c35088e28c29372561c0238e7a56ad75b4f095a477a0ec1992f9",
       "portfolio-assets/source-export.mjs": "1d5f235933c088d83cc88a430ebd5c19dd49737387e576d58282a5a520f21655",
       "portfolio-assets/p1-evidence.css": "ac9549e86ce782a3f52b279e1a47ee514fe98ebc317e6efdc78bc0c394c93284"
     },
@@ -218,9 +218,9 @@
       "P2-03"
     ],
     "files": {
-      "index.html": "5ab7150f86151979147c3ed341a896f771ccf3a8d1c74620fa438964a0ee4ce4",
-      "profile.html": "dc347fb851d92766727655db8a4ba0ffd5ecd85a6b67bc2100df296d478494ee",
-      "lab.html": "6e03e075695f807770b26ce82a8050c9bb00c9b07cd179c0743d4fdedf7eca99",
+      "index.html": "ed2ec5bf889b883eb0a7b2d3c5e75e58c7510c514c9cc18b531a159da933ac2e",
+      "profile.html": "666335650c213512fe98cdbde848cefa007a3dacdaa4e3b6d2e08c980c21abdb",
+      "lab.html": "3f8b9947c10c03a772e9f799114dd0ef16f6eddeb99892f47cb50205d215e5d1",
       "compare.html": "1a7f994ddf95c11e72e4ea639ed0096e77e215d716bc548a2ddac86c1c9977d9",
       "research-algothon.html": "bb537e1ba329bf9c9ccdff45f817c67f2c95730c6060c051b1c6a3ed561d3891",
       "sitemap.xml": "1963637c4fd3855d1ec1c4ef7fb54648a6fd4353fbd2613e1bfb395c0ef38ff5",
@@ -231,5 +231,21 @@
       "portfolio-assets/chart-ticks.mjs": "206134cfa29aae956bd7d5c76950a6286875a122550a0dbea7a3454ba53ec2f8"
     },
     "note": "Read-only public evidence views. Engine, tapes, submitted sources and published runs are unchanged."
+  },
+  "publicCopy": {
+    "version": "copy-20260921-v1",
+    "baseCommit": "9325be3f3b0cef5e6aadc2a44d6e1e695c53151e",
+    "files": {
+      "index.html": "ed2ec5bf889b883eb0a7b2d3c5e75e58c7510c514c9cc18b531a159da933ac2e",
+      "profile.html": "666335650c213512fe98cdbde848cefa007a3dacdaa4e3b6d2e08c980c21abdb",
+      "lab.html": "3f8b9947c10c03a772e9f799114dd0ef16f6eddeb99892f47cb50205d215e5d1",
+      "training.html": "482cfc769c07c35088e28c29372561c0238e7a56ad75b4f095a477a0ec1992f9",
+      "portfolio-assets/training-copy-v1.js": "ee57ceacf9a523e3ae68debcf7aca68d1c2d7eee8296931f9df49bc6da79efe9",
+      "portfolio-assets/market-copy-v1.js": "6ba9e8109265993432804cbfdb2c3496c0238db161095802a11e13ca0cb91c87",
+      "portfolio-assets/review-copy-v1.js": "bb903e3c739ed9c38948817b9db154eb96f46e5a5fc598b0dd72b89aee3cc880",
+      "portfolio-assets/studio-copy-v1.js": "cf6c08e66a2d1f0aa4946a7939ab0a3daa3e47db261c06cfa68bf6d8a04396e4",
+      "portfolio-assets/presentation-copy.css": "7cae89e975a40966d4e5599f0ff0eacc616201d40b8c158b6522f4ae7cd6c0ff"
+    },
+    "note": "Reviewed presentation strings and UI import paths only. Original exported bundles, all data and published strategy sources are retained unchanged."
   }
 }
