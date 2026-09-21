@@ -33,7 +33,7 @@ Run `python scripts/apply_public_quality.py` after the existing public generator
 Pinned upstream presentation modules and all immutable runtime/data inputs are
 checked before any output is written. The additional derivatives resolve to a
 single React runtime through the import map. All prior generators retain their
-`--check` path; only superseded module-entry expectations are adapted.
+`--check` path; only superseded module-entry and navigation expectations are adapted.
 
 The quality workflow reproduces four browser failures on the exact accepted
 baseline, runs all static, JavaScript and browser regressions, and retains logs,

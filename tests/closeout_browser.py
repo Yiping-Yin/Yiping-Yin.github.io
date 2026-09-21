@@ -42,7 +42,7 @@ class Closeout(unittest.TestCase):
             self.assertFalse(self.page.evaluate('document.documentElement.scrollWidth>innerWidth+1'))
         (OUT/'chart-measurements.json').write_text(json.dumps(measurements,indent=2))
     def test_404_recovery_links_open_all_published_pages(self):
-        paths=['/#top','/profile.html','/training.html#/market','/lab.html','/compare.html','/research-algothon.html']
+        paths=['/#top','/profile.html','/training.html?market=historical#/market','/lab.html','/compare.html','/research-algothon.html']
         for path in paths:
             self.open('/404.html');link=self.page.locator(f'.ways a[href="{path}"]')
             expect(link).to_be_visible();link.focus();self.page.keyboard.press('Enter')
