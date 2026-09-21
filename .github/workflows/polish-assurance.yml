@@ -24,15 +24,23 @@ jobs:
         with:
           python-version: '3.12'
       - name: Generate reviewed presentation only
+        env:
+          EVENT_NAME: ${{ github.event_name }}
         run: |
+          set -euo pipefail
           mkdir -p qa/polish
-          python scripts/apply_public_polish.py
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            python scripts/apply_public_polish.py --check
+            git diff --exit-code
+          else
+            python scripts/apply_public_polish.py
+          fi
           node --check portfolio-assets/studio-details-v1.js
           git diff --check
       - name: All static and unit regressions
         run: |
           set -euo pipefail
-          for t in p1_acceptance p2_acceptance copy_acceptance four_fixes_acceptance four_fixes_generator_test release_verifier_test publication_integrity_test book_publication_test polish_acceptance polish_generator_test; do
+          for t in p1_acceptance p2_acceptance copy_acceptance four_fixes_acceptance four_fixes_generator_test release_verifier_test publication_integrity_test book_publication_test polish_acceptance polish_generator_test polish_review_test; do
             python "tests/$t.py" 2>&1 | tee "qa/polish/$t.txt"
           done
           node --test tests/*.test.mjs 2>&1 | tee qa/polish/node.txt

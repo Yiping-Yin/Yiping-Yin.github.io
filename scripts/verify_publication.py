@@ -84,6 +84,36 @@ def verify_book(book,tapes,strategies,kind):
     require(near(summary['fees'],fees) and summary['endCursor']==session['cursor']==strategy['lastCursor'],'Book ending context mismatch')
     return len(seen)
 
+def verify_decision_orders(result, reasons):
+    """Bind decision intent to the already reconciled execution ledger."""
+    by_decision = {}
+    last = len(result['decisions']) - 1
+    for order in result['orders']:
+        index = order.get('decisionBarIndex')
+        require(type(index) is int and 0 <= index <= last and index not in by_decision,
+                'Order has invalid or duplicate decision index')
+        require(type(order.get('target')) is int, 'Order target must be an integer')
+        by_decision[index] = order
+    for index, (target, reason_index, state) in enumerate(result['decisions']):
+        require(target <= result['config']['maxPosition'], 'Decision target exceeds position limit')
+        position = result['equity'][index][2]
+        order = by_decision.pop(index, None)
+        if state in ('HOLD', 'UNCHANGED'):
+            require(target == position and order is None, 'Hold decision contradicts inventory or order')
+            continue
+        require(order is not None and order['target'] == target and target != position,
+                'Decision target differs from its order or requires no position change')
+        if state == 'QUEUED':
+            require(index < last and order['executionBarIndex'] == index + 1
+                    and order['status'] in ('FILLED', 'REJECTED'), 'Queued decision has incompatible order')
+        else:
+            require(state == 'EXPIRED' and index == last and order['status'] == 'EXPIRED'
+                    and order['executionBarIndex'] is None, 'Expired decision has incompatible order')
+        # Rejection/expiry reasons describe execution, not strategy intent.
+        if order['status'] == 'FILLED':
+            require(order['reason'] == reasons[reason_index], 'Filled order reason differs from decision')
+    require(not by_decision, 'Order has no decision')
+
 def verify_market(pack,tape_pack,kind):
     require(pack.get('version')==1 and set(pack.get('markets',{}))=={kind},'Unexpected run envelope')
     market=pack['markets'][kind];tapes=verify_tapes(tape_pack,kind)
@@ -144,6 +174,7 @@ def verify_market(pack,tape_pack,kind):
             expected={'initialEquity':initial,'finalEquity':equity,'netPnl':equity-initial,'returnPct':(equity-initial)/initial*100,'maxDrawdownPct':maxdd,'fees':fees,'fillCount':len(r['fills']),'benchmarkPnl':benchmark-initial,'benchmarkReturnPct':(benchmark-initial)/initial*100,'benchmarkUnits':units}
             require(all(near(metrics.get(k),v) for k,v in expected.items()),tag+': metric mismatch')
             require(all(near(final.get(k),v) for k,v in {'cash':cash,'position':position,'equity':equity,'initialCash':initial}.items()),tag+': final account mismatch')
+            verify_decision_orders(r, market['reasonDict'])
             fill_count+=len(r['fills'])
     book_fills=verify_book(market['book'],tapes,strategies,kind) if market.get('book') else 0
     return {'market':kind,'tapes':len(tapes),'bars':sum(len(t['bars']) for t in tapes.values()),'runs':len(run_ids),'fillsReconciled':fill_count,'sources':len(strategies),'sourceDigests':{k:v['codeSha256'] for k,v in strategies.items()},'bookFillsReconciled':book_fills,'runtimeSha256':provenance['runtimeSha256']}
