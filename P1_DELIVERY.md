@@ -16,8 +16,12 @@ Scope: UPGRADE_PLAN.md P1-01, P1-02 and P1-03 only.
 
 The first run exposed four browser-harness setup errors; correcting the nonexistent desktop Edit-button assumption, same-document navigation response handling and failure-stub evaluation kept every behavioral assertion intact. Product code was not changed to hide those errors.
 
-Generated pages were committed by the successful acceptance job as c1d52155d89c292a59d3299938aa5f6e819e051e. This is a candidate record, not proof of production deployment. After merge, Pages must succeed; Verify published website independently requests the public application files and compares SHA-256 hashes against that exact deployed commit.
+Generated pages were committed by the successful acceptance job as c1d52155d89c292a59d3299938aa5f6e819e051e. That candidate record preceded production verification. The completed deployment and independent live checks are recorded below.
 
 ## Integration boundary
 
-The original public trading bundles, engine policy, price tapes, all 15 published runs and private-note boundaries are unchanged. The accessible PBook/main is older than this public export, so these changes are maintained as a reproducible public post-export enhancement. PUBLIC_P1.md explains how to preserve and reapply it; release.json labels its provenance separately. The local Python runtime was not modified or retested in this batch. P2 remains pending.
+The original public trading bundles, engine policy, price tapes, all 15 published runs and private-note boundaries are unchanged. The accessible PBook/main is older than this public export, so these changes are maintained as a reproducible public post-export enhancement. PUBLIC_P1.md explains how to preserve and reapply it; release.json labels its provenance separately. The local Python runtime was not modified or retested in this batch. P2 was subsequently released; see `P2_DELIVERY.md`.
+
+## Production status
+
+Merged as `e56b1d1` by PR #2 and deployed by Pages #27. P1 was subsequently rechecked within the P2 release `e772992`: [production audit 35549971632](https://github.com/Yiping-Yin/Yiping-Yin.github.io/actions/runs/35549971632) passed the P1 page, source-export and real-site browser regressions. This is the completed production verification; the earlier candidate record above is retained as development history.

@@ -6,7 +6,7 @@ This checkpoint includes a compact homepage terminal, competition results, publi
 
 ## Upgrade plan
 
-See [个人网页升级安排 / Upgrade plan](UPGRADE_PLAN.md) for completed fixes, the next P1/P2 batches and acceptance criteria. Update the checklist and release references as each batch ships.
+See [个人网页升级安排 / Upgrade plan](UPGRADE_PLAN.md) for completed P1/P2 releases, remaining research work and acceptance criteria. Update the checklist and release references as each batch ships.
 
 ## Routes
 
@@ -18,6 +18,8 @@ See [个人网页升级安排 / Upgrade plan](UPGRADE_PLAN.md) for completed fix
 - `/training.html?market=historical#/market` — Trading on retained ^GSPC, AAPL, MSFT and NVDA price tapes.
 - `/training.html?market=historical#/market?view=review&run=<runId>` — a published run's report; use `view=replay` for its replay. Synthetic runs use `market=synthetic`.
 - `/training.html#/studio` — strategy IDE with four published source files and their SHA-256 digests, editable browser-local drafts and the 15-run archive.
+- `/compare.html?a=<runId>&b=<runId>` — matched-condition comparison of two published runs.
+- `/research-algothon.html` — a source-pinned public research case.
 - `/404.html` — self-contained recovery page.
 
 `/semicircle-compositions.html` and `/cycle-study.html` are retired-address redirects to the homepage. The latter is a `noindex` stub, not an active study page. `robots.txt` and `sitemap.xml` list the public canonical pages.
@@ -26,8 +28,12 @@ The homepage and historical desk use retained Yahoo Finance one-minute OHLC from
 
 Fifteen strategy runs produced by the local runtime are published as static records: twelve historical and three synthetic. `release.json` records tape checksums, published-run sources, the portfolio snapshot and the terminal payload. The exporter includes only verified public assets and data; it does not read the private research vault.
 
-Source checkpoint: `3df5164f14f245ed63f45f5e9ff4dfa72714c624` in the private P.Book repository. Build with `npm run build:public`. The final artifact is copied byte-for-byte into this mirror alongside repository metadata and documentation. Preserve `README.md` and `UPGRADE_PLAN.md` when refreshing exported assets. Preparing a local commit does not deploy it; deployment follows a push to GitHub Pages.
+Source checkpoint: `3df5164f14f245ed63f45f5e9ff4dfa72714c624` in the private P.Book repository. Build with `npm run build:public`. The exported snapshot is enhanced by the reproducible public P1/P2 scripts. Preserve all public enhancement modules, scripts, tests, workflows and documentation when refreshing exported assets; follow `PUBLIC_P1.md` and `PUBLIC_P2.md`. Preparing a local commit does not deploy it; deployment follows a push to GitHub Pages.
 
 For a local preview, run `python3 -m http.server 4173 --bind 127.0.0.1` and open [localhost:4173](http://127.0.0.1:4173/). No backend is needed for manual paper trading.
 
 Section icons are Heroicons under the MIT license retained at `portfolio-assets/icons/LICENSE.txt`.
+
+## Release verification
+
+P1 and P2 were production-verified at `e772992`; their delivery records link the evidence. `RELEASE_MAINTENANCE.md` documents the replacement post-push verifier, manual recovery, failure handling and narrow-screen chart maintenance. New maintenance changes remain candidates until their own PR is merged and the new production verification succeeds.

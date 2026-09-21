@@ -1,3 +1,4 @@
+import {timeTickIndices} from './chart-ticks.mjs';
 import {readRuns,validateRun,compareRuns,runLinks,selectPair} from './comparison-model.mjs';
 const $=id=>document.getElementById(id);
 const make=(tag,text='',attrs={})=>{const n=document.createElement(tag);n.textContent=text;for(const [k,v] of Object.entries(attrs))n.setAttribute(k,String(v));return n;};
@@ -89,7 +90,7 @@ function drawChart(){
   const path=key=>comparison.rows.map((r,i)=>(i?'L':'M')+x(i).toFixed(2)+' '+y(r[key]).toFixed(2)).join(' ');
   let svg=`<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-labelledby="p2-chart-title p2-chart-desc"><title id="p2-chart-title">Recorded equity of A, B and the common benchmark</title><desc id="p2-chart-desc">Three un-smoothed paths in ${comparison.a.currency}, fitted vertical scale. Use the minute slider or complete data table to inspect exact values.</desc><text x="0" y="14">Equity · ${comparison.a.currency}</text>`;
   for(let i=0;i<5;i++){const v=low+(high-low)*i/4,yy=y(v);svg+=`<line class="p2-grid" x1="${margin.left}" y1="${yy}" x2="${w-margin.right}" y2="${yy}"/><text x="${margin.left-8}" y="${yy+4}" text-anchor="end">${money(v)}</text>`;}
-  for(const i of [0,Math.round((comparison.rows.length-1)/3),Math.round(2*(comparison.rows.length-1)/3),comparison.rows.length-1])svg+=`<text x="${x(i)}" y="${h-10}" text-anchor="${i===0?'start':i===comparison.rows.length-1?'end':'middle'}">${time(comparison.rows[i].time,comparison.a.meta.timezone)}</text>`;
+  for(const i of timeTickIndices(comparison.rows.length,pw))svg+=`<text x="${x(i)}" y="${h-10}" text-anchor="${i===0?'start':i===comparison.rows.length-1?'end':'middle'}">${time(comparison.rows[i].time,comparison.a.meta.timezone)}</text>`;
   svg+=`<path class="p2-line-ref" d="${path('benchmark')}"/><path class="p2-line-a" d="${path('a')}"/><path class="p2-line-b" d="${path('b')}"/><line class="p2-cursor" x1="${x(Number($('minute').value))}" x2="${x(Number($('minute').value))}" y1="${margin.top}" y2="${h-margin.bottom}"/></svg>`;
   box.innerHTML=svg;
 }

@@ -1,4 +1,4 @@
-# P2 delivery — candidate accepted, not yet released
+# P2 delivery — released and production-verified
 
 Scope: UPGRADE_PLAN.md P2-01, P2-02 and P2-03, on top of merged P1 commit `e56b1d175045a0d2bd6551fbc48056b1456f9651`.
 
@@ -34,4 +34,8 @@ The curated case summarizes existing public team records; it does not rerun the 
 
 ## Release status
 
-This is candidate acceptance, not a production deployment. Merge and Pages deployment require a separate confirmation. After publication, verify the exact deployed commit and `release.json.publicP2.files` against live HTTP content before marking P2 roadmap checkboxes as released. Regeneration and maintenance instructions are in `PUBLIC_P2.md`.
+Released by [PR #3](https://github.com/Yiping-Yin/Yiping-Yin.github.io/pull/3), merge commit `e772992872b3563b4c57e759427e14b7735a53fe`. [Pages deployment #28](https://github.com/Yiping-Yin/Yiping-Yin.github.io/actions/runs/35549536362) succeeded on 21 September 2026.
+
+[Production audit 35549971632](https://github.com/Yiping-Yin/Yiping-Yin.github.io/actions/runs/35549971632) verified all 52 public application files using both ordinary and version-query URLs (104 responses), with HTTP 200 and matching SHA-256. The 85 checks include 23 browser scenarios against the official HTTPS site, not only a local preview. The audit evidence archive digest is `51bbce85fb1e451bed6b0007da9d148a8cd81ba731613b476148c4d2f559e0ae`.
+
+These results identify release `e772992`; later maintenance changes require their own candidate and post-deployment checks. Chromium viewport tests do not constitute a physical iPhone/Safari or full screen-reader audit. See `PUBLIC_P2.md` and `RELEASE_MAINTENANCE.md` for maintenance instructions.

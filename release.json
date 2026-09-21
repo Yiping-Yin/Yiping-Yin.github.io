@@ -210,7 +210,7 @@
     "note": "Public post-export enhancement; original engine and published data are unchanged."
   },
   "publicP2": {
-    "version": "p2-20260921-v1",
+    "version": "p2-20260921-v2",
     "baseCommit": "e56b1d175045a0d2bd6551fbc48056b1456f9651",
     "scope": [
       "P2-01",
@@ -221,13 +221,14 @@
       "index.html": "5ab7150f86151979147c3ed341a896f771ccf3a8d1c74620fa438964a0ee4ce4",
       "profile.html": "dc347fb851d92766727655db8a4ba0ffd5ecd85a6b67bc2100df296d478494ee",
       "lab.html": "6e03e075695f807770b26ce82a8050c9bb00c9b07cd179c0743d4fdedf7eca99",
-      "compare.html": "851a36aca75a7080f81b75613ebe4f92e62c8b4e87afa77760984667256c3b2f",
+      "compare.html": "1a7f994ddf95c11e72e4ea639ed0096e77e215d716bc548a2ddac86c1c9977d9",
       "research-algothon.html": "bb537e1ba329bf9c9ccdff45f817c67f2c95730c6060c051b1c6a3ed561d3891",
       "sitemap.xml": "1963637c4fd3855d1ec1c4ef7fb54648a6fd4353fbd2613e1bfb395c0ef38ff5",
       "portfolio-assets/comparison-model.mjs": "b455565fe31ef6518021ade2ac8037cd4e027765a44d960ce4af361b011a5536",
-      "portfolio-assets/comparison-page.mjs": "7a353094c2ddadc23dcab38a93f1a8bfc98202410abee5beecf6b22a6b142d3b",
+      "portfolio-assets/comparison-page.mjs": "ee77de085a517a4b2aab0ce0695963c3cacd3517c63551fcfb6f920ea83844f5",
       "portfolio-assets/home-runs.mjs": "7100e89cda1da39e5ea90889d13df171376ae5213bad9e818120c76069b2c62c",
-      "portfolio-assets/p2.css": "0a8aa7a244dc46eaac43fba4917a8f75374dda90de633332caf9e602a806196e"
+      "portfolio-assets/p2.css": "0a8aa7a244dc46eaac43fba4917a8f75374dda90de633332caf9e602a806196e",
+      "portfolio-assets/chart-ticks.mjs": "206134cfa29aae956bd7d5c76950a6286875a122550a0dbea7a3454ba53ec2f8"
     },
     "note": "Read-only public evidence views. Engine, tapes, submitted sources and published runs are unchanged."
   }

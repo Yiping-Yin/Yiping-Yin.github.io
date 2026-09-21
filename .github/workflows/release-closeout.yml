@@ -1,0 +1,79 @@
+name: Release closeout acceptance
+on:
+  push:
+    branches: [upgrade/release-closeout-20260921]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: release-closeout-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    if: github.event_name == 'push' || github.head_ref == 'upgrade/release-closeout-20260921'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: e772992872b3563b4c57e759427e14b7735a53fe
+          path: .baseline
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check committed outputs, data invariants and offline regressions
+        run: |
+          set -euo pipefail
+          mkdir -p qa/closeout
+          python scripts/apply_public_p1.py --check
+          python scripts/apply_public_p2.py --check
+          python tests/p1_acceptance.py 2>&1 | tee qa/closeout/p1-static.txt
+          python tests/p2_acceptance.py 2>&1 | tee qa/closeout/p2-static.txt
+          python tests/release_verifier_test.py 2>&1 | tee qa/closeout/verifier-tests.txt
+          node --test tests/source-export.test.mjs tests/comparison.test.mjs tests/chart-ticks.test.mjs 2>&1 | tee qa/closeout/node.txt
+          diff -qr .baseline/assets assets
+          diff -qr .baseline/data data
+          git diff --exit-code
+      - name: Exercise the new verifier against the unchanged deployed release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        run: >-
+          python scripts/verify_public_release.py --root .baseline
+          --sha e772992872b3563b4c57e759427e14b7735a53fe
+          --repository "$REPOSITORY" --output qa/closeout/live-verifier-trial.json
+      - name: Install isolated browser dependency
+        run: |
+          python -m pip install playwright==1.57.0
+          python -m playwright install --with-deps chromium
+      - name: Reproduce crowded tick regression on the previous release
+        run: |
+          set -euo pipefail
+          cp tests/closeout_browser.py .baseline/tests/closeout_browser.py
+          set +e
+          CLOSEOUT_EVIDENCE="$PWD/qa/closeout/before" python .baseline/tests/closeout_browser.py Closeout.test_narrow_time_labels_have_readable_spacing > qa/closeout/before.txt 2>&1
+          code=$?
+          set -e
+          test "$code" -ne 0
+          grep -q 'ticks are crowded' qa/closeout/before.txt
+      - name: Verify corrected layout, recovery links and full P1/P2 browser regression
+        run: |
+          set -euo pipefail
+          python tests/closeout_browser.py 2>&1 | tee qa/closeout/browser.txt
+          python tests/p1_browser.py 2>&1 | tee qa/closeout/p1-browser.txt
+          python tests/p2_browser.py 2>&1 | tee qa/closeout/p2-browser.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: release-closeout-evidence
+          path: qa/
+          retention-days: 14
