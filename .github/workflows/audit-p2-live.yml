@@ -1,0 +1,156 @@
+name: Audit deployed P2 live
+on:
+  push:
+    branches: [audit/p2-live-verification-20260921]
+permissions:
+  contents: read
+jobs:
+  verify-production:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: e772992872b3563b4c57e759427e14b7735a53fe
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify actual public files against the exact deployed commit
+        run: |
+          mkdir -p qa/live
+          python - <<'PY'
+          import concurrent.futures, hashlib, json, subprocess, time, urllib.request, urllib.error
+          from pathlib import Path
+          from urllib.parse import quote, urljoin, urlparse
+          from html.parser import HTMLParser
+          from datetime import datetime, timezone
+          root=Path.cwd(); out=root/'qa/live'; base='https://yiping-yin.github.io/'
+          sha='e772992872b3563b4c57e759427e14b7735a53fe'
+          assert subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()==sha
+          release=json.loads((root/'release.json').read_text())
+          paths={p.name for p in root.glob('*.html')}
+          paths.update(['release.json','robots.txt','sitemap.xml','favicon.ico'])
+          for folder in ['assets','portfolio-assets','data']:
+              paths.update(str(p.relative_to(root)) for p in (root/folder).rglob('*') if p.is_file())
+          for group in ['publicEnhancements','publicP2']:
+              for path,digest in release[group]['files'].items():
+                  assert hashlib.sha256((root/path).read_bytes()).hexdigest()==digest,path
+                  paths.add(path)
+          def request(url):
+              req=urllib.request.Request(url,headers={'Cache-Control':'no-cache','Accept-Encoding':'identity','User-Agent':'PBook-readonly-release-audit'})
+              with urllib.request.urlopen(req,timeout=25) as r:return r.status,r.read(),r.geturl()
+          def verify(path):
+              expected=hashlib.sha256((root/path).read_bytes()).hexdigest()
+              result={'path':path,'expected':expected,'matches':False}
+              for attempt in range(3):
+                  try:
+                      status,data,url=request(base+quote(path)+'?release-audit='+sha)
+                      actual=hashlib.sha256(data).hexdigest()
+                      result.update(http=status,sha256=actual,bytes=len(data),matches=status==200 and actual==expected,url=url)
+                      if result['matches']:return result
+                  except Exception as e:result['error']=str(e)
+                  if attempt<2:time.sleep(3)
+              return result
+          with concurrent.futures.ThreadPoolExecutor(max_workers=6) as pool: results=list(pool.map(verify,sorted(paths)))
+          plain=[]
+          for path in ['', 'compare.html','research-algothon.html','release.json']:
+              try:
+                  status,data,url=request(base+path)
+                  expected=hashlib.sha256((root/(path or 'index.html')).read_bytes()).hexdigest()
+                  plain.append({'path':path or '/','http':status,'sha256':hashlib.sha256(data).hexdigest(),'matches':status==200 and hashlib.sha256(data).hexdigest()==expected})
+              except Exception as e:plain.append({'path':path,'matches':False,'error':str(e)})
+          class Links(HTMLParser):
+              def __init__(self):super().__init__();self.links=[]
+              def handle_starttag(self,tag,attrs):
+                  a=dict(attrs)
+                  if tag=='a' and a.get('href'):self.links.append(a['href'])
+          parser=Links();parser.feed((root/'research-algothon.html').read_text())
+          sourceurls=sorted({u for u in parser.links if u.startswith('https://github.com/Yiping-Yin/algothon-2026/')})
+          sources=[]
+          for url in sourceurls:
+              try:
+                  status,data,final=request(url);sources.append({'url':url,'http':status,'bytes':len(data),'ok':status==200})
+              except Exception as e:sources.append({'url':url,'ok':False,'error':str(e)})
+          report={'checkedAt':datetime.now(timezone.utc).isoformat(),'deployedCommit':sha,'base':base,'checked':len(results),'failed':sum(not r['matches'] for r in results),'files':results,'ordinaryURLs':plain,'publicResearchLinks':sources}
+          (out/'live-files.json').write_text(json.dumps(report,indent=2)+'\n')
+          print(json.dumps({k:v for k,v in report.items() if k!='files'},indent=2))
+          assert report['failed']==0, [r for r in results if not r['matches']]
+          assert all(r['matches'] for r in plain),plain
+          assert all(r['ok'] for r in sources),sources
+          PY
+      - name: Recheck the deployed P1 and P2 data contracts
+        if: success() || failure()
+        run: |
+          set -o pipefail
+          mkdir -p qa/live
+          python tests/p1_acceptance.py 2>&1 | tee qa/live/p1-static.txt
+          python tests/p2_acceptance.py 2>&1 | tee qa/live/p2-static.txt
+          node --test tests/source-export.test.mjs tests/comparison.test.mjs 2>&1 | tee qa/live/node.txt
+      - name: Install isolated browser dependency
+        if: success() || failure()
+        run: |
+          python -m pip install playwright==1.57.0
+          python -m playwright install --with-deps chromium
+      - name: Run the existing P1 and P2 journeys against the official HTTPS site
+        if: success() || failure()
+        run: |
+          set -o pipefail
+          python - <<'PY' 2>&1 | tee qa/live/browser.txt
+          import importlib.util,json,sys,unittest
+          from pathlib import Path
+          from playwright.sync_api import sync_playwright,expect
+          root=Path.cwd();out=root/'qa/live';out.mkdir(parents=True,exist_ok=True)
+          base='https://yiping-yin.github.io'
+          summary=[]
+          for name,class_name in [('p1_browser','BrowserAcceptance'),('p2_browser','Browser')]:
+              spec=importlib.util.spec_from_file_location(name,root/'tests'/f'{name}.py')
+              module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+              module.OUT=out/name;module.OUT.mkdir(exist_ok=True)
+              cls=getattr(module,class_name)
+              def setup(c):
+                  c.base=base;c.pw=sync_playwright().start();c.browser=c.pw.chromium.launch(headless=True)
+              def teardown(c):c.browser.close();c.pw.stop()
+              cls.setUpClass=classmethod(setup);cls.tearDownClass=classmethod(teardown)
+              result=unittest.TextTestRunner(verbosity=2).run(unittest.defaultTestLoader.loadTestsFromTestCase(cls))
+              summary.append({'suite':name,'target':base,'tests':result.testsRun,'failures':len(result.failures),'errors':len(result.errors),'skipped':len(result.skipped),'passed':result.wasSuccessful()})
+          (out/'browser-summary.json').write_text(json.dumps(summary,indent=2)+'\n')
+          with sync_playwright() as pw:
+              browser=pw.chromium.launch(headless=True)
+              findings=[]
+              for width,height in [(1440,900),(1440,600),(390,844),(320,740)]:
+                  context=browser.new_context(viewport={'width':width,'height':height},reduced_motion='reduce')
+                  page=context.new_page();errors=[];writes=[]
+                  page.on('pageerror',lambda e:errors.append(str(e)))
+                  page.on('request',lambda r:writes.append(r.url) if r.method!='GET' else None)
+                  for path in ['/compare.html','/research-algothon.html','/training.html?market=historical#/market']:
+                      response=page.goto(base+path,wait_until='networkidle',timeout=30000)
+                      if path=='/compare.html':expect(page.locator('#comparison-result')).to_be_visible(timeout=20000)
+                      page.wait_for_timeout(500)
+                      item={'path':path,'width':width,'height':height,'http':response.status if response else None,'horizontalOverflow':page.evaluate('document.documentElement.scrollWidth>innerWidth+1')}
+                      if path=='/compare.html':
+                          item['timeLabelBoxes']=page.locator('#comparison-chart svg text').evaluate_all('(nodes)=>nodes.filter(n=>/^\\d{2}:\\d{2}$/.test(n.textContent)).map(n=>{const b=n.getBoundingClientRect();return {text:n.textContent,left:b.left,right:b.right,top:b.top,bottom:b.bottom};})')
+                          boxes=item['timeLabelBoxes'];item['timeLabelsOverlap']=any(boxes[i]['right']>boxes[i+1]['left'] for i in range(len(boxes)-1))
+                      findings.append(item)
+                      page.screenshot(path=str(out/(f'live-{width}-{height}-'+path.split('?')[0].strip('/').replace('.html','')+'.png')),full_page=True)
+                  findings.append({'viewport':[width,height],'pageErrors':errors,'nonGETRequests':writes})
+                  context.close()
+              context=browser.new_context();page=context.new_page()
+              response=page.goto(base+'/audit-nonexistent-20260921.html',wait_until='networkidle')
+              findings.append({'missingPageHTTP':response.status,'hasRecoveryLink':page.locator('a[href="/"]').count()>0})
+              page.screenshot(path=str(out/'live-404.png'),full_page=True);context.close();browser.close()
+          (out/'layout-findings.json').write_text(json.dumps(findings,indent=2)+'\n')
+          print('LIVE_BROWSER_SUMMARY',json.dumps(summary))
+          print('LAYOUT_FINDINGS',json.dumps(findings))
+          if not all(s['passed'] for s in summary):sys.exit(1)
+          if any(item.get('pageErrors') or item.get('nonGETRequests') for item in findings):sys.exit(1)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: deployed-p2-live-verification
+          path: qa/live/
+          retention-days: 14
