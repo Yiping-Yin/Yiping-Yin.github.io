@@ -1,0 +1,116 @@
+name: Blue-white homepage acceptance
+on:
+  push:
+    branches: [design/blue-white-home-20260921, main]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: blue-white-home-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install browser checks
+        run: |
+          python -m pip install playwright==1.57.0
+          python -m playwright install --with-deps chromium
+      - name: Validate generator and capture the existing homepage
+        run: |
+          set -euo pipefail
+          mkdir -p qa/visual
+          python tests/visual_generator_test.py
+          if ! grep -q 'public-visual:v1' index.html; then
+            BLUE_WHITE_BASELINE=1 python tests/visual_browser.py
+          fi
+      - name: Generate candidate only, or check committed output
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" = push ] && [ "$REF_NAME" = refs/heads/design/blue-white-home-20260921 ]; then
+            python scripts/apply_public_visual.py
+          else
+            python scripts/apply_public_visual.py --check
+            git diff --exit-code
+          fi
+          python scripts/apply_public_demo.py --check
+          python scripts/apply_public_visual.py --check
+          git diff --check
+      - name: Static, unit and data-integrity regressions
+        run: |
+          set -euo pipefail
+          for t in p1_acceptance p2_acceptance copy_acceptance four_fixes_acceptance four_fixes_generator_test release_verifier_test publication_integrity_test book_publication_test polish_acceptance polish_generator_test polish_review_test demo_acceptance visual_acceptance; do
+            python "tests/$t.py" 2>&1 | tee "qa/visual/$t.txt"
+          done
+          node --test tests/*.test.mjs 2>&1 | tee qa/visual/node.txt
+          python scripts/verify_publication.py --output qa/visual/publication-audit.json
+      - name: Browser regressions and responsive visual captures
+        run: |
+          set -euo pipefail
+          for t in visual_browser demo_browser polish_browser p1_browser p2_browser copy_browser four_fixes_browser four_fixes_review_test closeout_browser; do
+            python "tests/$t.py" 2>&1 | tee "qa/visual/$t.txt"
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: blue-white-home-evidence
+          path: qa/visual/
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: blue-white-home-generated
+          path: |
+            index.html
+            release.json
+            scripts/verify_public_release.py
+          retention-days: 14
+  record-candidate:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/design/blue-white-home-20260921'
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: blue-white-home-generated
+          path: /tmp/blue-white-generated
+      - uses: actions/download-artifact@v4
+        with:
+          name: blue-white-home-evidence
+          path: /tmp/blue-white-evidence
+      - name: Record tested output on the candidate branch only
+        run: |
+          set -euo pipefail
+          for f in index.html release.json scripts/verify_public_release.py; do
+            cp "/tmp/blue-white-generated/$f" "$f"
+            git add "$f"
+          done
+          mkdir -p docs/previews/blue-white
+          cp /tmp/blue-white-evidence/after-*-fold.jpg docs/previews/blue-white/
+          cp /tmp/blue-white-evidence/after-*-thumb.b64 docs/previews/blue-white/
+          cp /tmp/blue-white-evidence/results.json docs/previews/blue-white/
+          git add docs/previews/blue-white
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m "Record tested blue-white homepage (run ${GITHUB_RUN_ID})"
+          git push origin HEAD:refs/heads/design/blue-white-home-20260921

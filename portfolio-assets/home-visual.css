@@ -1,0 +1,137 @@
+/* Homepage only: light editorial surfaces around the unchanged navy terminal.
+   No new assets, fonts, motion or runtime. Keep the existing theme preference. */
+.blue-white-home {
+  --home-bg: var(--surface);
+  --home-soft: var(--bg);
+  --home-ink: var(--ink);
+  --home-muted: var(--muted);
+  --home-line: var(--line);
+  --home-accent: #005ea8;
+  --home-button: #005ea8;
+  --home-button-ink: #ffffff;
+  --home-gutter: 50px;
+  background: var(--home-bg);
+}
+:root[data-theme="dark"] .blue-white-home { --home-accent: #a8c9ef; }
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="system"] .blue-white-home { --home-accent: #a8c9ef; }
+}
+/* Resolve the paper aliases on body, before any navy child overrides its roles. */
+.blue-white-home .topbar,
+.blue-white-home .s1-dark,
+.blue-white-home .s1-dark .ground-terminal {
+  --bg: var(--home-bg);
+  --surface: var(--home-bg);
+  --soft: var(--home-soft);
+  --ink: var(--home-ink);
+  --muted: var(--home-muted);
+  --line: var(--home-line);
+  --accent: var(--home-accent);
+  --focus: var(--home-accent);
+  color-scheme: inherit;
+  background: var(--home-bg);
+  color: var(--home-ink);
+}
+.blue-white-home .topbar { border-top: 3px solid var(--home-button); }
+.blue-white-home .topbar-in { height: calc(var(--study-nav) - 3px); }
+.blue-white-home .topnav a:hover { color: var(--home-accent); }
+.home-intro { background: var(--home-bg); color: var(--home-ink); }
+.home-intro-inner {
+  max-width: 1300px; margin: 0 auto; padding: 36px var(--home-gutter) 38px;
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 24px 48px;
+}
+.home-intro-copy { min-width: 0; }
+.home-eyebrow {
+  margin: 0 0 12px; color: var(--home-accent); font-size: 11px;
+  font-weight: 600; letter-spacing: .12em; line-height: 1.5; text-transform: uppercase;
+}
+.home-intro h1 {
+  margin: 0; font: 500 clamp(40px, 4.1vw, 58px)/1.08 var(--font-text);
+  letter-spacing: -.035em;
+}
+.home-role {
+  display: block; margin-top: 12px; font-size: clamp(18px, 2vw, 24px);
+  font-weight: 400; line-height: 1.4; letter-spacing: -.012em;
+}
+.home-actions { display: flex; align-items: center; gap: 10px; padding-bottom: 2px; flex-shrink: 0; }
+.home-actions a {
+  min-height: 46px; display: inline-flex; align-items: center; justify-content: space-between;
+  gap: 22px; padding: 11px 18px; font-size: 14px; line-height: 1.5;
+  text-decoration: none; border: 1px solid transparent;
+}
+.home-actions .home-primary { background: var(--home-button); color: var(--home-button-ink); }
+.home-actions .home-primary:hover { background: #004a85; }
+.home-actions .home-secondary { color: var(--home-accent); border-color: var(--home-line); }
+.home-actions .home-secondary:hover { border-color: var(--home-accent); }
+.home-actions a:focus-visible { outline: 2px solid var(--home-accent); outline-offset: 4px; }
+/* Keep the terminal's own tokens and interaction geometry. Only its outer
+   desktop height is adjusted to accommodate the identity without a second hero. */
+@media (min-width: 801px) {
+  .blue-white-home .terminal-hero { height: clamp(410px, 51svh, 500px); }
+}
+.blue-white-home .highlights-section { border-top: 0; }
+.blue-white-home .s1-credit { padding-top: 22px; padding-bottom: 22px; }
+.blue-white-home .s1-credit-figs em { font-size: 22px; }
+.blue-white-home .s1-credit-head strong { font-weight: 600; }
+.blue-white-home .s1-desk { padding: 46px 0 40px; }
+.blue-white-home .s1-head { gap: 16px; margin-bottom: 22px; padding-bottom: 16px; }
+.blue-white-home .s1-head h2 { font-size: 30px; font-weight: 500; letter-spacing: -.025em; }
+.blue-white-home .s1-head a,
+.blue-white-home .s1-head .s1-doors a { color: var(--home-accent); }
+.blue-white-home .demo-selection-note { max-width: 70ch; font-size: 14px; margin: 0 0 24px; }
+.blue-white-home .demo-featured-runs { gap: 0 28px; border-top: 0; }
+.blue-white-home .demo-featured-runs article,
+.blue-white-home .demo-featured-runs article:first-child {
+  display: flex; flex-direction: column; padding: 22px 0 20px;
+  border-right: 0; border-top: 2px solid var(--home-accent);
+}
+.blue-white-home .demo-featured-runs h3 { font-size: 21px; line-height: 1.35; font-weight: 500; margin: 14px 0 12px; }
+.blue-white-home .demo-run-description { font-size: 15px; line-height: 1.7; min-height: 3.4em; margin-bottom: 20px; }
+.blue-white-home .demo-run-outcome { margin-top: auto; font-size: 12px; }
+/* Signed values retain +/- semantics without low-contrast green on white. */
+.blue-white-home .s1-dark .num-signed { color: var(--home-ink); }
+.blue-white-home .demo-featured-runs nav { margin-top: 14px; }
+.blue-white-home .demo-featured-runs nav a { color: var(--home-accent); font-size: 14px; }
+.blue-white-home .demo-featured-runs nav a:first-child { font-weight: 600; }
+.blue-white-home .demo-featured-runs nav a:hover { text-decoration: underline; }
+.blue-white-home .demo-archive { margin-top: 20px; }
+.blue-white-home .demo-archive > summary,
+.blue-white-home .demo-run-rules > summary { font-size: 14px; }
+.blue-white-home .colophon { margin-top: 48px; }
+@media (max-width: 1100px) {
+  .blue-white-home { --home-gutter: 35px; }
+  .home-intro-inner { gap: 24px; }
+  .home-actions { flex-direction: column; align-items: stretch; }
+}
+@media (max-width: 800px) {
+  .home-intro-inner { padding-top: 28px; padding-bottom: 28px; align-items: flex-start; flex-direction: column; gap: 22px; }
+  .home-actions { flex-direction: row; flex-wrap: wrap; }
+  .home-intro h1 { font-size: 42px; }
+  .home-role { font-size: 20px; }
+  .blue-white-home .s1-head { flex-wrap: wrap; }
+  .blue-white-home .s1-head h2 { font-size: 27px; }
+}
+@media (max-width: 700px) {
+  .blue-white-home { --home-gutter: 23px; }
+  .home-eyebrow { margin-bottom: 10px; font-size: 10px; }
+  .home-intro h1 { font-size: 38px; }
+  .home-role { font-size: 18px; max-width: 28ch; }
+  .home-actions { width: 100%; gap: 10px; }
+  .home-actions a { font-size: 13px; padding: 10px 14px; gap: 14px; }
+  .blue-white-home .s1-desk { padding-top: 32px; padding-bottom: 28px; }
+  .blue-white-home .s1-credit { padding-top: 18px; padding-bottom: 18px; }
+  .blue-white-home .s1-credit-figs em { font-size: 20px; }
+  .blue-white-home .demo-featured-runs { gap: 20px; border-bottom: 0; }
+  .blue-white-home .demo-featured-runs article,
+  .blue-white-home .demo-featured-runs article:first-child { padding: 20px 0 8px; border-bottom: 0; }
+  .blue-white-home .demo-run-description { min-height: 0; }
+}
+@media (max-width: 370px) {
+  .blue-white-home { --home-gutter: 18px; }
+  .home-actions a { gap: 10px; padding-inline: 11px; }
+}
+@media print {
+  .home-intro-inner { padding: 0 0 22px; }
+  .home-actions { display: none; }
+  .blue-white-home .s1-desk { padding-top: 24px; }
+}
