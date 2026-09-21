@@ -33,7 +33,8 @@ def expected_drawdown(run):
             loss=high-value;denominator=high;best=(peak,i)
     return best
 def clock(run,index):
-    return datetime.fromtimestamp((run['result']['barStart']+index*60000)/1000,ZoneInfo(TIMEZONES[run['marketKind']])).strftime('%H:%M')
+    # Transport time is bar availability; existing report labels use interval start.
+    return datetime.fromtimestamp((run['result']['barStart']+(index-1)*60000)/1000,ZoneInfo(TIMEZONES[run['marketKind']])).strftime('%H:%M')
 class Handler(http.server.SimpleHTTPRequestHandler):
     def log_message(self,*args):pass
 class QualityBrowser(unittest.TestCase):
@@ -90,6 +91,8 @@ class QualityBrowser(unittest.TestCase):
         audit=[]
         for run in RUNS:
             self.open(route(run,'review'));bounds=expected_drawdown(run)
+            card=self.page.locator('.rr-figures article').filter(has_text='Deepest drawdown')
+            expect(card.locator('strong')).to_have_text(f"{run['result']['metrics']['maxDrawdownPct']:.3f}%")
             marker=self.page.locator('[data-dd-peak]')
             if bounds:
                 peak,trough=bounds
@@ -140,6 +143,15 @@ class QualityBrowser(unittest.TestCase):
         self.page.get_by_role('button',name='Share this moment',exact=True).click()
         self.assertIn('minute=390',self.page.get_by_role('textbox',name='Public replay link',exact=True).input_value())
         self.open(route(pick('ASML','trend'),minute=66));expect(self.page.locator('input.tm-scrubber')).to_have_value('65')
+    def test_sharing_a_playing_replay_pauses_at_the_linked_minute(self):
+        self.open(route(pick(),minute=148))
+        self.page.get_by_role('button',name='Play replay',exact=True).click()
+        self.page.wait_for_function("Number(document.querySelector('input.tm-scrubber').value)>147")
+        self.page.get_by_role('button',name='Share this moment',exact=True).click()
+        expect(self.page.get_by_role('button',name='Play replay',exact=True)).to_be_visible()
+        link=self.page.get_by_role('textbox',name='Public replay link',exact=True).input_value()
+        minute=int(parse_qs(urlsplit(link).fragment.split('?')[1])['minute'][0])
+        expect(self.page.locator('input.tm-scrubber')).to_have_value(str(minute-1))
     def test_bad_bookmarks_explain_failure_without_fabricating_a_moment(self):
         run=pick()
         for path in (route(run,minute=999),route(run,minute=2).replace(run['result']['datasetChecksum'],'0'*64),route(run,minute=3)+'&minute=4'):
@@ -151,8 +163,10 @@ class QualityBrowser(unittest.TestCase):
             for path,name in [('/lab.html','lab'),(route(pick(),'review'),'report'),('/training.html?market=historical#/studio?source=trend','strategies')]:
                 self.open(path);self.no_page_overflow()
                 if name=='report':
-                    region=self.page.locator('.rr-trips');region.focus();self.page.keyboard.press('End')
-                    self.assertGreaterEqual(region.evaluate('e=>e.scrollWidth'),region.evaluate('e=>e.clientWidth'))
+                    region=self.page.locator('.rr-trips');region.focus()
+                    if region.evaluate('e=>e.scrollWidth>e.clientWidth+1'):
+                        self.page.keyboard.press('ArrowRight')
+                        self.page.wait_for_function("document.querySelector('.rr-trips').scrollLeft>0")
                 if name=='strategies':
                     self.assertGreaterEqual(self.page.locator('.ev-code').evaluate('e=>parseFloat(getComputedStyle(e).fontSize)'),14)
                 self.capture(f'{name}-{width}.png')

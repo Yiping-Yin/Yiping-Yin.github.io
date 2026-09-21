@@ -29,7 +29,7 @@ export function drawdownRange(rows, initialEquity) {
 
 function publicIdentity(entry) {
   const r = entry?.result;
-  const market = entry?.marketKind || entry?.market?.marketKind;
+  const market = r?.marketKind || entry?.marketKind || entry?.market?.marketKind;
   if (entry?.published !== true || !['historical','synthetic'].includes(market) || !HASH.test(r?.runId || '') || !HASH.test(r?.datasetChecksum || '') || !Array.isArray(r?.equity) || !r.equity.length) throw new TypeError('Only an available published run can be shared');
   return {r, market};
 }
