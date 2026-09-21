@@ -62,7 +62,7 @@ class CopyBrowser(unittest.TestCase):
     def test_training_details_open_by_keyboard_and_keep_full_boundaries(self):
         self.goto('/training.html#/market')
         expect(self.page.locator('.d-say')).to_contain_text('Synthetic prices')
-        self.assertEqual(self.page.locator('.copy-site-notes').evaluate('(n)=>getComputedStyle(n).backgroundColor'),self.page.locator('main.pt-desk').evaluate('(n)=>getComputedStyle(n).backgroundColor'))
+        self.assertEqual(self.page.locator('.copy-site-notes').evaluate('(n)=>getComputedStyle(n).backgroundColor'),self.page.locator('#root section.pt-desk').evaluate('(n)=>getComputedStyle(n).backgroundColor'))
         notes=self.page.locator('#simulation-details');summary=notes.locator('summary')
         summary.focus();self.page.keyboard.press('Enter')
         expect(notes).to_have_attribute('open','')
