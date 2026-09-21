@@ -23,6 +23,10 @@
 
 ## 第一批 · P1 · 已有内容的可达性与编辑成果导出
 
+状态补记：P1 已经通过 [PR #2](https://github.com/Yiping-Yin/Yiping-Yin.github.io/pull/2)
+合并为 `e56b1d1`，[第 27 次 Pages 部署成功](https://github.com/Yiping-Yin/Yiping-Yin.github.io/actions/runs/35546714850)。
+正式域名的逐文件独立校验尚未补齐，以下发布验收勾选暂保留；实现与测试记录见 `P1_DELIVERY.md`。
+
 ### P1-01 · Lab 公开材料就近直达
 
 - [ ] 在 Algothon 档案行提供现有公开报告和代码入口。
@@ -49,6 +53,11 @@
 导出当前内容。草稿保存和恢复已完成，`.py` 下载是本项剩余交付。
 
 ## 第二批 · P2 · 研究表达与策略比较
+
+候选状态：P2-01、P2-02、P2-03 已在 `upgrade/p2-research-compare-20260921` 实现，
+[验收运行 35548697008](https://github.com/Yiping-Yin/Yiping-Yin.github.io/actions/runs/35548697008)
+的 85 项检查全部通过，含 P1 回归和实际 Chromium 流程。已验证页面提交为 `dee602c`。
+尚未合并或发布；以下勾选在合并、Pages 部署及线上产物校验后更新。交付记录见 `P2_DELIVERY.md`，维护说明见 `PUBLIC_P2.md`。
 
 ### P2-01 · 一个精选公开研究案例
 

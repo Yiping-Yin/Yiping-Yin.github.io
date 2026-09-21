@@ -1,0 +1,93 @@
+name: Public P2 acceptance
+on:
+  push:
+    branches: [upgrade/p2-research-compare-20260921]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: public-p2-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Generate candidate without altering trading data
+        run: |
+          mkdir -p qa/p2
+          python scripts/apply_public_p1.py
+          python scripts/apply_public_p2.py
+          python scripts/apply_public_p1.py --check
+          python scripts/apply_public_p2.py --check
+          git diff --check
+      - name: P1 regression and P2 evidence contracts
+        run: |
+          set -o pipefail
+          python tests/p1_acceptance.py 2>&1 | tee qa/p1-static.txt
+          python tests/p2_acceptance.py 2>&1 | tee qa/p2/static.txt
+          node --test tests/source-export.test.mjs tests/comparison.test.mjs 2>&1 | tee qa/p2/node.txt
+      - name: Install isolated browser test dependency
+        run: |
+          python -m pip install playwright==1.57.0
+          python -m playwright install --with-deps chromium
+      - name: Real browser regression and P2 user journeys
+        run: |
+          set -o pipefail
+          python tests/p1_browser.py 2>&1 | tee qa/p1-browser.txt
+          python tests/p2_browser.py 2>&1 | tee qa/p2/browser.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p2-acceptance-evidence
+          path: qa/
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p2-generated-pages
+          path: |
+            index.html
+            profile.html
+            lab.html
+            compare.html
+            research-algothon.html
+            sitemap.xml
+            release.json
+          retention-days: 14
+  record-candidate:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/upgrade/p2-research-compare-20260921'
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: p2-generated-pages
+          path: /tmp/p2-generated-pages
+      - name: Record verified pages on the candidate branch only
+        run: |
+          set -euo pipefail
+          for file in index.html profile.html lab.html compare.html research-algothon.html sitemap.xml release.json; do
+            cp "/tmp/p2-generated-pages/$file" "$file"
+            git add "$file"
+          done
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m "Record verified public P2 pages (acceptance run ${GITHUB_RUN_ID})"
+          git push origin HEAD:refs/heads/upgrade/p2-research-compare-20260921

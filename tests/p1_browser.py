@@ -6,7 +6,7 @@ import os
 import threading
 import unittest
 from pathlib import Path
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, expect
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'qa'
@@ -90,12 +90,14 @@ class BrowserAcceptance(unittest.TestCase):
         self.goto('/profile.html#project-pbook')
         self.page.get_by_role('link',name='AAPL trend report',exact=True).click();self.page.wait_for_load_state('networkidle')
         self.assertIn('market=historical#/market?view=review&run='+RUN,self.page.url)
-        self.assertIn('AAPL',self.page.locator('body').inner_text())
+        # Network idle can precede the selected report's React render.
+        expect(self.page.locator('body')).to_contain_text('AAPL',timeout=10000)
         self.page.go_back(wait_until='networkidle')
         self.assertIn('#project-pbook',self.page.url)
         self.assertIsNotNone(self.page.locator('#project-pbook').get_attribute('open'))
         self.page.go_forward(wait_until='networkidle')
         self.assertIn('view=review&run='+RUN,self.page.url)
+        expect(self.page.locator('body')).to_contain_text('AAPL',timeout=10000)
     def test_published_runs_anchor(self):
         self.goto('/lab.html')
         self.page.get_by_role('link',name='All 15 published runs',exact=True).click();self.page.wait_for_load_state('networkidle')
