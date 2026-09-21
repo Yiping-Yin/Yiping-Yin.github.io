@@ -15,13 +15,15 @@ class PolishBrowser(unittest.TestCase):
   self.context=self.browser.new_context(viewport={'width':390,'height':844});self.page=self.context.new_page();self.errors=[];self.posts=[]
   self.page.on('pageerror',lambda e:self.errors.append(str(e)));self.page.on('request',lambda r:self.posts.append(r.url) if r.method!='GET' else None)
  def tearDown(self):self.context.close();self.assertEqual(self.errors,[]);self.assertEqual(self.posts,[])
- def open(self,path):self.page.goto(self.base+path,wait_until='networkidle')
+ def open(self,path):
+  # Repeating an identical hash URL is same-document navigation and retains
+  # native details state. Default-state assertions require a new document.
+  self.page.goto('about:blank');self.page.goto(self.base+path,wait_until='networkidle')
  def no_overflow(self):self.assertFalse(self.page.evaluate('document.documentElement.scrollWidth>innerWidth+1'))
  def expand(self,locator):
   self.assertIsNone(locator.get_attribute('open'));locator.locator('summary').focus();self.page.keyboard.press('Enter');expect(locator).to_have_attribute('open','')
  def begin_edit(self):
   editor=self.page.locator('textarea[aria-label="Edit Python strategy source"]');expect(editor).to_be_attached()
-  # The retained IDE intentionally presents a read view plus Edit on phones.
   if not editor.is_visible():self.page.get_by_role('button',name='Edit',exact=True).click()
   expect(editor).to_be_visible();return editor
  def test_home_strip_matches_terminal_and_preserves_exact_handoffs(self):
@@ -29,7 +31,7 @@ class PolishBrowser(unittest.TestCase):
    self.page.set_viewport_size({'width':width,'height':900});self.open('/');run=self.page.locator('#current-run');run.scroll_into_view_if_needed()
    self.assertEqual(run.evaluate('e=>getComputedStyle(e).backgroundColor'),self.page.locator('#about').evaluate('e=>getComputedStyle(e).backgroundColor'))
    expect(self.page.locator('#p2-replay-at')).to_contain_text('Replay position:');expect(self.page.locator('#p2-completed-outcome')).to_have_text('Full-run outcome: +4.02 USD · 27 fills')
-   self.assertNotIn('3df0ac0f',self.page.locator('#p2-current-label').inner_text());self.expand(self.page.locator('.polish-run-details'))
+   self.assertNotIn('3df0ac0f',self.page.locator('#p2-current-label').inner_text());run.screenshot(path=str(OUT/f'home-strip-folded-{width}.png'));self.expand(self.page.locator('.polish-run-details'))
    ident=self.page.locator('#p2-current-id').inner_text();self.assertTrue(self.page.locator('#p2-current-replay').get_attribute('href').endswith(ident));self.no_overflow();run.screenshot(path=str(OUT/f'home-strip-{width}.png'))
  def test_home_minute_and_symbol_remain_distinct_from_full_outcome(self):
   self.open('/');self.page.get_by_role('tab',name='MSFT',exact=True).click();expect(self.page.locator('#p2-current-label')).to_contain_text('MSFT');expect(self.page.locator('#p2-completed-outcome')).to_have_text('Full-run outcome: -2.12 USD · 23 fills')
