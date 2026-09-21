@@ -1,0 +1,22 @@
+/* Retain existing terminal/site tokens and native details keyboard behavior. */
+#current-run.ground-terminal { background:var(--bg); color:var(--ink); border-top:1px solid var(--line); align-items:flex-start; }
+#current-run>div { min-width:0; flex:1 1 300px; }
+#p2-replay-at { color:var(--muted); margin-top:6px; }
+#p2-completed-outcome { margin-top:4px; }
+.polish-run-details { margin-top:6px; }
+.polish-run-details summary, .polish-scope>summary, .polish-source-digest>summary, .polish-engine-details>summary { box-sizing:border-box; min-height:44px; padding:12px 0; cursor:pointer; font-size:13px; line-height:20px; }
+.polish-run-details code { display:block; overflow-wrap:anywhere; font-size:11px; max-width:64ch; padding-bottom:10px; }
+.polish-featured { padding:22px 0; border-bottom:1px solid var(--line); }
+.polish-featured h2 { margin:6px 0 12px; font-size:clamp(23px,3vw,32px); }
+.polish-featured>p:not(.p2-kicker) { max-width:65ch; font-size:15px; line-height:1.7; }
+.polish-featured .p2-actions { margin-bottom:0; }
+.polish-scope { margin:24px 0; border-block:1px solid var(--line); }
+.polish-scope>summary { font-size:15px; padding:14px 0; }
+.ev-main:has(.polish-engine-details) { display:block; }
+.ev-engine.polish-engine-details { width:100%; margin-top:18px; border-top:1px solid var(--line); }
+.polish-engine-details>summary { padding:12px; font-weight:600; }
+.polish-engine-details table { width:100%; }
+.ev-digest:has(.polish-source-digest) { display:block; }
+.ev-digest .ev-verdict { display:flex; align-items:center; gap:8px; }
+.polish-source-digest>code { display:flex; flex-wrap:wrap; gap:0 6px; padding:0 0 12px; }
+.polish-scope>summary:focus-visible,.polish-source-digest>summary:focus-visible,.polish-engine-details>summary:focus-visible { outline:2px solid currentColor; outline-offset:3px; }
