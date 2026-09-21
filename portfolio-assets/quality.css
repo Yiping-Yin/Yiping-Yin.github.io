@@ -19,6 +19,7 @@ body[data-quality] :is(.quality-replay-share button,.quality-replay-share a,.qua
   body[data-quality] .lab-lane { min-height:0; }
   body[data-quality] .rr-report { font-size:14px; line-height:1.65; }
   body[data-quality] .rr-report :is(p,dt,dd,.rr-figures small) { font-size:14px; line-height:1.65; }
+  body[data-quality] .rr-report .rr-truth p { overflow-wrap:anywhere; }
   body[data-quality] .rr-report .rr-lead { font-size:20px; }
   body[data-quality] .rr-report .rr-figures article { min-width:0; overflow-wrap:anywhere; }
   body[data-quality] .rr-samples { grid-template-columns:repeat(auto-fit,minmax(min(100%,9rem),1fr)); }
