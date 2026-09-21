@@ -75,9 +75,11 @@ def home_cases(cases):
         extra = ' id="lab-archive-algothon" class="p1-public-archive"' if 'case' in c else ''
         body = escape(c['title']) + ' <small>' + escape(c['subject']) + '</small>'
         if 'case' in c:
-            body += evidence(c) + case_link(c)
+            body += evidence(c)
         items.append(f'<li{extra} data-case-id="{c["id"]}">{body}</li>')
-    return f'<div><h3>Case archives <span>{len(cases)}</span></h3><ul>' + ''.join(items) + '</ul></div>'
+    # Preserve the existing two-link evidence row; the case entry is not a fifth archive.
+    entries = ''.join(case_link(c) for c in cases if 'case' in c)
+    return f'<div><h3>Case archives <span>{len(cases)}</span></h3><ul>' + ''.join(items) + '</ul>' + entries + '</div>'
 
 
 def lab_cases(cases):
@@ -95,7 +97,7 @@ def transform(name, text, cases):
     if '<!-- public-copy:v1 -->' not in text:
         raise ValueError('Apply the reviewed presentation-copy generator first')
     if name == 'index.html':
-        text = subonce(r'<div><h3>Case archives <span>\d+</span></h3><ul>.*?</ul></div>', home_cases(cases), text)
+        text = subonce(r'<div><h3>Case archives <span>\d+</span></h3><ul>.*?</ul>(?:<a class="p2-case-entry"[^>]*>.*?</a>)*</div>', home_cases(cases), text)
         text = subonce(r'(<div><dt>Library</dt><dd>Theory · \d+ methods · )\d+( cases</dd></div>)', lambda m: m[1] + str(len(cases)) + m[2], text)
         c = next(c for c in cases if c['id'] == 'algothon')
         card = '<!-- four-fixes:mobile-case:start -->\n<article class="lab-phone-featured" id="home-featured-case" aria-labelledby="home-featured-case-title"><h3 id="home-featured-case-title">' + escape(c['title']) + '</h3>' + case_link(c) + evidence(c) + '</article>\n<!-- four-fixes:mobile-case:end -->'
