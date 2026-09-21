@@ -1,0 +1,38 @@
+/* A small finishing layer; retained terminal tokens and layout stay in charge. */
+.quality-replay-share { display:flex; align-items:center; flex-wrap:wrap; gap:8px 16px; padding:8px 0; color:var(--ink); }
+.quality-replay-share button,.quality-replay-share a { display:inline-flex; align-items:center; min-height:44px; padding:8px 12px; border:1px solid var(--line); background:var(--surface); color:inherit; font:14px/1.5 var(--font-text); cursor:pointer; }
+.quality-link-context { font-size:12px; color:var(--muted); }
+.quality-replay-share p { margin:0; font-size:14px; line-height:1.65; }
+.quality-link-error,.quality-share-result { flex-basis:100%; min-width:0; }
+.quality-share-result label { display:block; font-size:13px; line-height:1.65; }
+.quality-share-result textarea { display:block; width:100%; box-sizing:border-box; margin:8px 0; padding:8px; resize:vertical; background:var(--surface); color:var(--ink); border:1px solid var(--line); font:14px/1.5 var(--font-figure); overflow-wrap:anywhere; }
+.quality-dd-labels { display:flex; flex-wrap:wrap; gap:6px 20px; margin-top:12px; font:12px/1.6 var(--font-figure); color:var(--muted); }
+.quality-drawdown-chart circle { fill:var(--ink); }
+body[data-quality] .rr-trips,body[data-quality] #rr-matrix { max-width:100%; overflow-x:auto; }
+body[data-quality] :is(.quality-replay-share button,.quality-replay-share a,.quality-replay-share textarea,.rr-trips,#rr-matrix):focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
+@media (max-width:760px) {
+  body[data-quality] .lab-ledger :is(th,td),body[data-quality] .lab-bounds dd { font-size:14px; line-height:1.65; }
+  body[data-quality] .lab-ledger thead th { font-size:12px; }
+  body[data-quality] :is(.lab-note,.lab-edges,.lab-foot,.lab-say) { font-size:14px; line-height:1.7; }
+  body[data-quality] .lab-lane h3 { height:auto; min-height:36px; font-size:12px; line-height:1.6; padding-block:8px; }
+  body[data-quality] .lab-panel-head h2 { white-space:normal; line-height:1.6; }
+  body[data-quality] .lab-lane { min-height:0; }
+  body[data-quality] .rr-report { font-size:14px; line-height:1.65; }
+  body[data-quality] .rr-report :is(p,dt,dd,.rr-figures small) { font-size:14px; line-height:1.65; }
+  body[data-quality] .rr-report .rr-truth p { overflow-wrap:anywhere; }
+  body[data-quality] .rr-report .rr-lead { font-size:20px; }
+  body[data-quality] .rr-report .rr-figures article { min-width:0; overflow-wrap:anywhere; }
+  body[data-quality] .rr-samples { grid-template-columns:repeat(auto-fit,minmax(min(100%,9rem),1fr)); }
+  body[data-quality] .rr-samples>span { min-width:0; overflow-wrap:anywhere; }
+  body[data-quality] .rr-report table { font-size:14px; }
+  body[data-quality] .rr-trips table,body[data-quality] #rr-matrix table { min-width:600px; }
+  body[data-quality] .rr-trips :is(th,td):nth-child(1),body[data-quality] .rr-trips :is(th,td):nth-child(6),body[data-quality] .rr-matrix .rr-benchmark { display:table-cell; }
+  body[data-quality] .rr-report :is(.rr-trips,#rr-matrix) :is(th,td) { padding-inline:8px; }
+  body[data-quality] .rr-code pre { font-size:14px; line-height:1.65; white-space:pre; overflow-x:auto; overflow-wrap:normal; }
+  body[data-quality] .rr-code>div { min-width:0; }
+  body[data-quality] .ev-page :is(.demo-strategy-intro p,.demo-local-details p,.ev-caption) { font-size:14px; line-height:1.7; }
+  body[data-quality] .ev-page .ev-code { font-size:14px; line-height:22px; }
+  body[data-quality] .ev-page .ev-source textarea { font-size:16px; line-height:24px; }
+  body[data-quality] .ev-page .ev-pane-head { height:auto; min-height:44px; flex-wrap:wrap; }
+  body[data-quality] .quality-dd-labels { flex-direction:column; font-size:13px; }
+}
