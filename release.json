@@ -200,10 +200,10 @@
       "P1-03"
     ],
     "files": {
-      "index.html": "76ca2c288a05d3092c68cfd69f00bb604a600246fe305272f9930389068e47bc",
-      "profile.html": "06fcbb772487a7deaa0ab7ff25882bdc52629c820858daa639c613bb8318bd9a",
-      "lab.html": "f3d727d36fded82a147654ea4091e661b31ca7ba0fd08249e907b8a350aeee49",
-      "training.html": "5179954846e46a0dc8383aee837938b19847814e2f708ef950fe09ab8a84eb16",
+      "index.html": "f55b127d0626800b7861122f456dbeaf653a8000ec47aa2740e248e2cc106d2e",
+      "profile.html": "723312647fe403dd2f0f432210f58d83ab5fcea4f2968dfed108308d1cac4687",
+      "lab.html": "812d96985c718a54bbf3e4a1565c134044e5a56067aabdcc86ee980eba78c0b4",
+      "training.html": "c49920872174c92782d92d981a82db7748f3a02e9791410c3b3c10c432014c69",
       "portfolio-assets/source-export.mjs": "1d5f235933c088d83cc88a430ebd5c19dd49737387e576d58282a5a520f21655",
       "portfolio-assets/p1-evidence.css": "ac9549e86ce782a3f52b279e1a47ee514fe98ebc317e6efdc78bc0c394c93284"
     },
@@ -218,11 +218,11 @@
       "P2-03"
     ],
     "files": {
-      "index.html": "76ca2c288a05d3092c68cfd69f00bb604a600246fe305272f9930389068e47bc",
-      "profile.html": "06fcbb772487a7deaa0ab7ff25882bdc52629c820858daa639c613bb8318bd9a",
-      "lab.html": "f3d727d36fded82a147654ea4091e661b31ca7ba0fd08249e907b8a350aeee49",
-      "compare.html": "1a7f994ddf95c11e72e4ea639ed0096e77e215d716bc548a2ddac86c1c9977d9",
-      "research-algothon.html": "bb537e1ba329bf9c9ccdff45f817c67f2c95730c6060c051b1c6a3ed561d3891",
+      "index.html": "f55b127d0626800b7861122f456dbeaf653a8000ec47aa2740e248e2cc106d2e",
+      "profile.html": "723312647fe403dd2f0f432210f58d83ab5fcea4f2968dfed108308d1cac4687",
+      "lab.html": "812d96985c718a54bbf3e4a1565c134044e5a56067aabdcc86ee980eba78c0b4",
+      "compare.html": "a88aed1748326be400cf54f38180d014142409eee15411cc835bbdcd05054124",
+      "research-algothon.html": "5e7f294b5fc5b260faa5ecc919d9735dd7f56b2a81c783b010b8f8274d744754",
       "sitemap.xml": "1963637c4fd3855d1ec1c4ef7fb54648a6fd4353fbd2613e1bfb395c0ef38ff5",
       "portfolio-assets/comparison-model.mjs": "b455565fe31ef6518021ade2ac8037cd4e027765a44d960ce4af361b011a5536",
       "portfolio-assets/comparison-page.mjs": "ee77de085a517a4b2aab0ce0695963c3cacd3517c63551fcfb6f920ea83844f5",
@@ -236,10 +236,10 @@
     "version": "copy-20260921-v1",
     "baseCommit": "9325be3f3b0cef5e6aadc2a44d6e1e695c53151e",
     "files": {
-      "index.html": "76ca2c288a05d3092c68cfd69f00bb604a600246fe305272f9930389068e47bc",
-      "profile.html": "06fcbb772487a7deaa0ab7ff25882bdc52629c820858daa639c613bb8318bd9a",
-      "lab.html": "f3d727d36fded82a147654ea4091e661b31ca7ba0fd08249e907b8a350aeee49",
-      "training.html": "5179954846e46a0dc8383aee837938b19847814e2f708ef950fe09ab8a84eb16",
+      "index.html": "f55b127d0626800b7861122f456dbeaf653a8000ec47aa2740e248e2cc106d2e",
+      "profile.html": "723312647fe403dd2f0f432210f58d83ab5fcea4f2968dfed108308d1cac4687",
+      "lab.html": "812d96985c718a54bbf3e4a1565c134044e5a56067aabdcc86ee980eba78c0b4",
+      "training.html": "c49920872174c92782d92d981a82db7748f3a02e9791410c3b3c10c432014c69",
       "portfolio-assets/training-copy-v1.js": "ee57ceacf9a523e3ae68debcf7aca68d1c2d7eee8296931f9df49bc6da79efe9",
       "portfolio-assets/market-copy-v1.js": "6ba9e8109265993432804cbfdb2c3496c0238db161095802a11e13ca0cb91c87",
       "portfolio-assets/review-copy-v1.js": "bb903e3c739ed9c38948817b9db154eb96f46e5a5fc598b0dd72b89aee3cc880",
@@ -258,10 +258,10 @@
       "Explicit statistical comparators"
     ],
     "files": {
-      "index.html": "76ca2c288a05d3092c68cfd69f00bb604a600246fe305272f9930389068e47bc",
-      "profile.html": "06fcbb772487a7deaa0ab7ff25882bdc52629c820858daa639c613bb8318bd9a",
-      "lab.html": "f3d727d36fded82a147654ea4091e661b31ca7ba0fd08249e907b8a350aeee49",
-      "training.html": "5179954846e46a0dc8383aee837938b19847814e2f708ef950fe09ab8a84eb16",
+      "index.html": "f55b127d0626800b7861122f456dbeaf653a8000ec47aa2740e248e2cc106d2e",
+      "profile.html": "723312647fe403dd2f0f432210f58d83ab5fcea4f2968dfed108308d1cac4687",
+      "lab.html": "812d96985c718a54bbf3e4a1565c134044e5a56067aabdcc86ee980eba78c0b4",
+      "training.html": "c49920872174c92782d92d981a82db7748f3a02e9791410c3b3c10c432014c69",
       "portfolio-assets/four-fixes.css": "817e17e92a92b2b1626296cc26e76554088af04f5bd0a310dd0d926e759e90f5"
     },
     "catalogueSHA256": "1e87a5c5b705d806b92c6ab9e62a374b22833ab9f7105d095b4c4dad186bd3fc",
@@ -283,5 +283,17 @@
       "portfolio-assets/demo.css": "55f36a7168d2ae599a9f0d06a4c1325cd0745c6d1ca7d8dc98ffc8032e8035ce"
     },
     "note": "Four approved presentation changes. Original runtime bundles, strategy sources, tapes and all published results are retained."
+  },
+  "publicQuality": {
+    "version": "quality-20260921-v1",
+    "files": {
+      "portfolio-assets/training-quality-v1.js": "0f564022f62d28ce6a22edc117834654657175e60b33df15d584ce0a063a0353",
+      "portfolio-assets/review-quality-v1.js": "7eab1956bdf494bcea8970ddee72cadbc4141170897a3a7f6ac810fb44e1119d",
+      "portfolio-assets/market-quality-v1.js": "e26747b0b998e306969f2bd7bfb7edc50f55b7c3c7e1225027e8512ce525584d",
+      "portfolio-assets/quality-model.mjs": "1d136cdf202174637037dda4bfe3535c6f7f4e561f7c1edc8dcedf18b6bb7f9e",
+      "portfolio-assets/quality-ui.mjs": "0ff0bad79c1dc253a75cae521fbc51bd2e4486c97c71022b0b88e75fbc21c4f1",
+      "portfolio-assets/quality.css": "8269207bd10d05bbc4e245925b9ac097ff51846be09bf40129ddb487acf8b89c"
+    },
+    "note": "Presentation-only: consistent entrances, chronological drawdown labels, public replay bookmarks and narrow-screen reading. Original inputs and results are unchanged."
   }
 }

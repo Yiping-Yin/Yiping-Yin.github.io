@@ -40,8 +40,9 @@ class DemoAcceptance(unittest.TestCase):
             subprocess.run(['node', '--check', str(ROOT / 'portfolio-assets' / new)], check=True, capture_output=True)
         page = (ROOT / 'training.html').read_text()
         imports = json.loads(re.search(r'<script type="importmap">(.*?)</script>', page)[1])['imports']
-        self.assertEqual(imports['/portfolio-assets/training-copy-v1.js'], '/portfolio-assets/training-demo-v1.js')
-        self.assertIn('crossorigin src="/portfolio-assets/training-demo-v1.js"', page)
+        entry = '/portfolio-assets/training-quality-v1.js' if 'public-quality:v1' in page else '/portfolio-assets/training-demo-v1.js'
+        self.assertEqual(imports['/portfolio-assets/training-copy-v1.js'], entry)
+        self.assertIn('crossorigin src="' + entry + '"', page)
 
     def test_generators_and_final_manifest_are_reproducible(self):
         for name in ('public_p1','public_p2','public_copy','public_four_fixes','public_polish','public_demo'):

@@ -178,7 +178,7 @@ def apply(root=ROOT, check=False):
             text = once(text, old, new, 2 if name == 'tests/p1_browser.py' else 1)
         updates[name] = text
     verifier = 'scripts/verify_public_release.py'
-    updates[verifier] = once((root / verifier).read_text(), "'publicFourFixes', 'publicPolish']", "'publicFourFixes', 'publicPolish', 'publicDemo']")
+    updates[verifier] = (root / verifier).read_text() if "'publicQuality'" in (root / verifier).read_text() else once((root / verifier).read_text(), "'publicFourFixes', 'publicPolish']", "'publicFourFixes', 'publicPolish', 'publicDemo']")
     release = json.loads((root / 'release.json').read_text())
     hashes = {name: hashlib.sha256(text.encode()).hexdigest() for name, text in updates.items()}
     for group in ('publicEnhancements', 'publicP2', 'publicCopy', 'publicFourFixes', 'publicPolish'):
