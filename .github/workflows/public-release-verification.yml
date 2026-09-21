@@ -1,0 +1,102 @@
+name: Verify published website
+on:
+  workflow_run:
+    workflows: ['pages build and deployment']
+    types: [completed]
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  verify-live:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check the deployed public bytes against the deployed commit
+        env:
+          DEPLOYED_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          mkdir -p qa
+          python - <<'PY'
+          import concurrent.futures
+          import hashlib
+          import json
+          import os
+          import time
+          import urllib.request
+          from pathlib import Path
+          from urllib.parse import quote
+
+          root = Path.cwd()
+          base = 'https://yiping-yin.github.io/'
+          sha = os.environ['DEPLOYED_SHA']
+          release = json.loads((root / 'release.json').read_text())
+          if not release.get('publicEnhancements'):
+              raise SystemExit('The deployed commit does not include the P1 public enhancement manifest.')
+          paths = ['index.html', 'profile.html', 'lab.html', 'training.html', 'release.json',
+                   '404.html', 'cycle-study.html', 'semicircle-compositions.html',
+                   'robots.txt', 'sitemap.xml', 'favicon.ico']
+          for folder in ['assets', 'portfolio-assets', 'data']:
+              paths.extend(str(p.relative_to(root)) for p in (root / folder).rglob('*') if p.is_file())
+          paths = sorted(set(paths))
+
+          def fetch(path):
+              target = base + quote(path) + '?release-check=' + sha
+              request = urllib.request.Request(target, headers={'Cache-Control': 'no-cache', 'Accept-Encoding': 'identity'})
+              with urllib.request.urlopen(request, timeout=20) as response:
+                  if response.status != 200:
+                      raise ValueError(f'{path}: HTTP {response.status}')
+                  return response.read()
+
+          # Pages and its edge caches can converge shortly after the deployment job.
+          expected_release = (root / 'release.json').read_bytes()
+          for attempt in range(18):
+              try:
+                  if fetch('release.json') == expected_release:
+                      break
+                  error = 'Published manifest differs from the deployed commit.'
+              except Exception as exc:
+                  error = str(exc)
+              if attempt == 17:
+                  raise SystemExit(error)
+              time.sleep(5)
+
+          def verify(path):
+              expected = hashlib.sha256((root / path).read_bytes()).hexdigest()
+              for attempt in range(3):
+                  try:
+                      data = fetch(path)
+                      actual = hashlib.sha256(data).hexdigest()
+                      result = {'path': path, 'http': 200, 'sha256': actual, 'expected': expected,
+                                'bytes': len(data), 'matches': actual == expected}
+                      if result['matches']:
+                          return result
+                  except Exception as exc:
+                      result = {'path': path, 'matches': False, 'error': str(exc)}
+                  if attempt < 2:
+                      time.sleep(3)
+              return result
+
+          with concurrent.futures.ThreadPoolExecutor(max_workers=6) as pool:
+              results = list(pool.map(verify, paths))
+          failed = [r for r in results if not r['matches']]
+          summary = {'deployedCommit': sha, 'base': base, 'checked': len(results),
+                     'failed': len(failed), 'files': results}
+          (root / 'qa' / 'live-release-verification.json').write_text(json.dumps(summary, indent=2) + '\n')
+          print(json.dumps({'deployedCommit': sha, 'checked': len(results), 'failed': failed}, indent=2))
+          if failed:
+              raise SystemExit('Live release verification failed.')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: live-release-verification
+          path: qa/
+          retention-days: 14
