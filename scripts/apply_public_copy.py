@@ -43,7 +43,7 @@ def derive_module(path,spec,config,root):
 
 
 def transform(name,text):
-    if MARK in text:return text
+    if MARK in text:return text.replace('<footer class="copy-site-notes"', '<footer class="pt-desk copy-site-notes"')
     if name=='index.html':
         for cls,old in [
           ('wide','Historical 1-min OHLC · 10 Sep 2026 · Yahoo Finance — depth, cash, fills and P&amp;L are simulated by P.Book’s local runtime · Not live · Not advice'),
@@ -70,7 +70,7 @@ def transform(name,text):
         old='P.Book — a training desk that replays saved one-minute tapes with a simulated order book, a Python strategy runtime, and published runs ranked under identical conditions.'
         text=replace(text,old,'P.Book — an interactive trading simulator with replayable sessions and editable Python strategies. Python execution runs locally.',2)
         text=replace(text,'P.Book is a training desk that replays saved one-minute tapes with a simulated order book and a\n        simulated account. The desk itself needs JavaScript. These pages do not:','P.Book is an interactive trading simulator. The desk needs JavaScript; project pages and simulation details remain available below:')
-        text=replace(text,'</body>', '<footer class="copy-site-notes" aria-label="Simulation information">'+details('<p>For learning and research, not investment advice.</p>', 'simulation-details')+'</footer>\n</body>')
+        text=replace(text,'</body>', '<footer class="pt-desk copy-site-notes" aria-label="Simulation information">'+details('<p>For learning and research, not investment advice.</p>', 'simulation-details')+'</footer>\n</body>')
     else:raise ValueError('Unreviewed page: '+name)
     return replace(text,'</head>',MARK+'\n'+CSS+'\n</head>')
 

@@ -42,6 +42,9 @@ class CopyAcceptance(unittest.TestCase):
         page=(ROOT/'profile.html').read_text()
         self.assertIn('one-hour Optibook simulation',page)
         self.assertIn('1,222 lots',page)
+    def test_training_notes_use_desk_theme(self):
+        page=(ROOT/'training.html').read_text()
+        self.assertIn('<footer class="pt-desk copy-site-notes"',page)
     def test_original_inputs_and_data_have_not_changed(self):
         manifest=ROOT/'scripts/presentation_copy.json'
         self.assertTrue(manifest.exists(),'Reviewed copy map is missing')

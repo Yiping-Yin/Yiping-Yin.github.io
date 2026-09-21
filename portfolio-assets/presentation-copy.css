@@ -5,7 +5,7 @@
 .copy-details>summary:focus-visible{outline:2px solid currentColor;outline-offset:3px}
 .copy-details-body{padding:0 4px 10px;overflow-wrap:anywhere}
 .copy-details-body p{margin:0 0 10px!important;color:inherit!important;font-size:13px!important;line-height:1.6!important}
-.copy-site-notes{padding:0 24px 12px;background:var(--bg,#f4f6f9);color:var(--ink,#18283c);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.copy-site-notes{padding:0 24px 12px;background:var(--g,#041624);color:var(--ink,#dbe8f3);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 .copy-site-notes .copy-details{margin:0;max-width:80ch}
 .s1-foot .copy-details,.lab-say+.copy-details{grid-column:1/-1;text-align:left}
 @media(max-width:700px){.copy-site-notes{padding-inline:14px}.copy-details{max-width:100%}}
