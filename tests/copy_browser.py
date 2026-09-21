@@ -84,11 +84,11 @@ class CopyBrowser(unittest.TestCase):
             if route=='#/studio':
                 expect(self.page.get_by_role('button',name='Download .py',exact=True)).to_be_visible()
                 expect(self.page.locator('.ev-disclosure')).to_contain_text('Historical and synthetic prices · Simulated trading')
-                expect(self.page.locator('body')).to_contain_text('Execute strategies with the local P.Book runtime.')
+                expect(self.page.locator('.demo-source-note')).to_contain_text('this site does not execute Python.')
             else:expect(self.page.locator('body')).to_contain_text('AAPL')
             self.closed_notes()
         loaded={url.split('/')[-1] for url,status in self.js if status==200}
-        self.assertTrue({'training-copy-v1.js','review-copy-v1.js','market-copy-v1.js','studio-details-v1.js'}<=loaded,loaded)
+        self.assertTrue({'training-demo-v1.js','review-copy-v1.js','market-copy-v1.js','studio-demo-v1.js'}<=loaded,loaded)
         self.assertFalse(any(n in loaded for n in ['training-CI29yBEs.js','ReviewPage-DYeWlPpm.js','MarketPage-3-BVK_gJ.js','studioRoute.static-Dtkr_XUq.js']))
     def test_notes_work_with_javascript_disabled(self):
         self.context.close();self.context=self.browser.new_context(java_script_enabled=False);self.page=self.context.new_page()

@@ -93,7 +93,7 @@ class FourFixesBrowser(unittest.TestCase):
                         self.assertGreaterEqual(modes['y'], views['y'] + views['height'])
                     elif width == 1440:
                         self.assertAlmostEqual(modes['y'], views['y'], delta=2)
-                    expect(rail.locator('nav a[aria-current="page"]')).to_have_text({'training':'Overview','market':'Trading','studio':'IDE'}[view])
+                    expect(rail.locator('nav a[aria-current="page"]')).to_have_text({'training':'Overview','market':'Trading','studio':'Strategies'}[view])
                     expect(rail.locator('.deskrail-market a[aria-current="true"]')).to_have_text(market.title())
                     self.assertFalse(self.page.evaluate('document.documentElement.scrollWidth > innerWidth + 1'))
                     measurements.append({'width': width, 'market': market, 'view': view, 'views': views, 'modes': modes})
@@ -130,7 +130,7 @@ class FourFixesBrowser(unittest.TestCase):
             self.page.keyboard.press('Enter')
             self.page.wait_for_url(self.base + '/training.html?market=historical#/market')
             expect(market.locator('[aria-current="true"]')).to_have_text('Historical')
-            self.page.get_by_role('navigation', name='Desk views').get_by_role('link', name='IDE', exact=True).click()
+            self.page.get_by_role('navigation', name='Desk views').get_by_role('link', name='Strategies', exact=True).click()
             expect(self.page.get_by_role('button', name='Download .py', exact=True)).to_be_visible()
             self.assertIn('market=historical#/studio', self.page.url)
             market.get_by_role('link', name='Synthetic', exact=True).click()
