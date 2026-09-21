@@ -157,6 +157,18 @@ class QualityBrowser(unittest.TestCase):
         for path in (route(run,minute=999),route(run,minute=2).replace(run['result']['datasetChecksum'],'0'*64),route(run,minute=3)+'&minute=4'):
             self.open(path);expect(self.page.locator('.quality-link-error')).to_be_visible()
             expect(self.page.locator('input.tm-scrubber')).to_have_value(str(run['result']['fills'][0]['barIndex']))
+    def test_extra_query_separator_is_rejected_in_shared_links(self):
+        run=pick()
+        for suffix in ('?minute=2', '?', '??minute=2'):
+            self.open(route(run,minute=148)+suffix)
+            expect(self.page.locator('.quality-link-error')).to_be_visible()
+            expect(self.page.locator('input.tm-scrubber')).to_have_value(str(run['result']['fills'][0]['barIndex']))
+            expect(self.page.get_by_role('button',name='Play replay',exact=True)).to_be_visible()
+        # A canonical share still restores in this same browser after a rejection.
+        self.open(route(run,minute=148))
+        expect(self.page.locator('input.tm-scrubber')).to_have_value('147')
+        expect(self.page.locator('.quality-link-error')).to_have_count(0)
+        expect(self.page.get_by_role('button',name='Play replay',exact=True)).to_be_visible()
     def test_mobile_reading_reflow_and_keyboard_table_scroll(self):
         for width in (320,390,760):
             self.page.set_viewport_size({'width':width,'height':844})

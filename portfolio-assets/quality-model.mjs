@@ -49,7 +49,10 @@ export function readReplayMoment(href, entry) {
   const invalid = {status:'invalid'};
   try {
     const url = new URL(href);
-    const [path, query = ''] = url.hash.replace(/^#/, '').split('?');
+    const parts = url.hash.replace(/^#/, '').split('?');
+    // Do not silently discard a contradictory suffix after a second separator.
+    if (parts.length > 2) return invalid;
+    const [path, query = ''] = parts;
     const params = new URLSearchParams(query);
     if (!params.has('minute') && !params.has('tape')) return {status:'absent'};
     if (path !== '/market' || params.get('view') !== 'replay') return {status:'absent'};
