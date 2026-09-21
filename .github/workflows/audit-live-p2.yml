@@ -1,0 +1,142 @@
+name: Audit deployed P2 (read-only)
+on:
+  push:
+    branches: [verify/p2-live-e772992-20260921]
+permissions:
+  contents: read
+concurrency:
+  group: audit-deployed-p2-e772992
+  cancel-in-progress: false
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: e772992872b3563b4c57e759427e14b7735a53fe
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify unchanged deployed artifact contracts
+        run: |
+          set -euo pipefail
+          mkdir -p qa/live
+          test "$(git rev-parse HEAD)" = e772992872b3563b4c57e759427e14b7735a53fe
+          python scripts/apply_public_p1.py --check
+          python scripts/apply_public_p2.py --check
+          python tests/p1_acceptance.py 2>&1 | tee qa/live/p1-static.txt
+          python tests/p2_acceptance.py 2>&1 | tee qa/live/p2-static.txt
+          node --test tests/source-export.test.mjs tests/comparison.test.mjs 2>&1 | tee qa/live/node.txt
+      - name: Compare normal and cache-busted production bytes
+        run: |
+          python - <<'PY'
+          import concurrent.futures, datetime, hashlib, json, time, urllib.request
+          from pathlib import Path
+          from html.parser import HTMLParser
+          from urllib.parse import quote
+          root = Path.cwd()
+          base = 'https://yiping-yin.github.io/'
+          sha = 'e772992872b3563b4c57e759427e14b7735a53fe'
+          release = json.loads((root/'release.json').read_text())
+          paths = {p.name for p in root.glob('*.html')} | {'release.json','robots.txt','sitemap.xml','favicon.ico'}
+          for folder in ['assets','portfolio-assets','data']:
+              paths.update(p.relative_to(root).as_posix() for p in (root/folder).rglob('*') if p.is_file())
+          for section in ['publicEnhancements','publicP2']:
+              for name, digest in release[section]['files'].items():
+                  assert hashlib.sha256((root/name).read_bytes()).hexdigest() == digest, name
+                  paths.add(name)
+          assert {'compare.html','research-algothon.html'} <= paths
+          def check(item):
+              path, cache_bust = item
+              target = base + quote(path) + ('?audit=' + sha if cache_bust else '')
+              expected = hashlib.sha256((root/path).read_bytes()).hexdigest()
+              for attempt in range(3):
+                  result = {'path':path,'cacheBusted':cache_bust,'expected':expected,'url':target,'attempts':attempt+1}
+                  try:
+                      request = urllib.request.Request(target,headers={'Accept-Encoding':'identity','Cache-Control':'no-cache','User-Agent':'PBook-release-audit'})
+                      with urllib.request.urlopen(request,timeout=20) as response:
+                          data = response.read()
+                          actual = hashlib.sha256(data).hexdigest()
+                          result.update(http=response.status,bytes=len(data),sha256=actual,matches=response.status==200 and actual==expected)
+                      if result['matches']: return result
+                  except Exception as error: result.update(matches=False,error=str(error))
+                  if attempt < 2: time.sleep(2)
+              return result
+          with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+              results = list(pool.map(check,[(p,b) for p in sorted(paths) for b in [False,True]]))
+          summary = {'checkedAt':datetime.datetime.now(datetime.timezone.utc).isoformat(),'deployedCommit':sha,'base':base,'applicationFiles':len(paths),'requests':len(results),'failed':sum(not r['matches'] for r in results),'files':results}
+          (root/'qa/live/http-checks.json').write_text(json.dumps(summary,indent=2)+'\n')
+          class Links(HTMLParser):
+              def __init__(self): super().__init__(); self.links=set()
+              def handle_starttag(self,tag,attrs):
+                  href=dict(attrs).get('href','')
+                  if tag=='a' and href.startswith('https://github.com/Yiping-Yin/algothon-2026/blob/'): self.links.add(href)
+          parser=Links(); parser.feed((root/'research-algothon.html').read_text())
+          external=[]
+          for url in sorted(parser.links):
+              item={'url':url}
+              try:
+                  request=urllib.request.Request(url,headers={'User-Agent':'PBook-release-audit'})
+                  with urllib.request.urlopen(request,timeout=20) as response: item.update(http=response.status,finalUrl=response.geturl())
+              except Exception as error: item.update(error=str(error))
+              external.append(item)
+          (root/'qa/live/external-links.json').write_text(json.dumps(external,indent=2)+'\n')
+          print(json.dumps({k:v for k,v in summary.items() if k!='files'},indent=2))
+          print('External research links:',json.dumps(external,indent=2))
+          if summary['failed']: raise SystemExit('Production bytes differ or are unavailable; inspect http-checks.json.')
+          PY
+      - name: Install browser test dependency
+        if: always()
+        run: |
+          python -m pip install playwright==1.57.0
+          python -m playwright install --with-deps chromium
+      - name: Run existing P1 and P2 journeys against the real HTTPS site
+        if: always()
+        run: |
+          set -o pipefail
+          python - <<'PY' 2>&1 | tee qa/live/browser.txt
+          import importlib.util,json,unittest
+          from pathlib import Path
+          from playwright.sync_api import sync_playwright,expect
+          root=Path.cwd(); suite=unittest.TestSuite()
+          def start(cls):
+              cls.base='https://yiping-yin.github.io'
+              cls.pw=sync_playwright().start(); cls.browser=cls.pw.chromium.launch(headless=True)
+          def stop(cls): cls.browser.close(); cls.pw.stop()
+          for name,class_name in [('p1_browser','BrowserAcceptance'),('p2_browser','Browser')]:
+              spec=importlib.util.spec_from_file_location(name,root/'tests'/f'{name}.py')
+              module=importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+              module.OUT=root/'qa'/'live'/name; module.OUT.mkdir(parents=True,exist_ok=True)
+              cls=getattr(module,class_name)
+              cls.setUpClass=classmethod(start); cls.tearDownClass=classmethod(stop)
+              suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(cls))
+          result=unittest.TextTestRunner(verbosity=2).run(suite)
+          summary={'base':'https://yiping-yin.github.io','tests':result.testsRun,'failures':len(result.failures),'errors':len(result.errors),'skipped':len(result.skipped)}
+          (root/'qa/live/browser-summary.json').write_text(json.dumps(summary,indent=2)+'\n')
+          # Extra layout measurements do not weaken the original acceptance suite.
+          with sync_playwright() as pw:
+              browser=pw.chromium.launch(headless=True); context=browser.new_context(); page=context.new_page(); measurements=[]
+              for width in [320,390,1440]:
+                  page.set_viewport_size({'width':width,'height':844 if width<600 else 900})
+                  page.goto('https://yiping-yin.github.io/compare.html',wait_until='networkidle')
+                  expect(page.locator('#comparison-result')).to_be_visible(timeout=15000)
+                  labels=page.locator('#comparison-chart svg > text').evaluate_all('(nodes)=>nodes.slice(-4).map(n=>{const r=n.getBoundingClientRect();return {text:n.textContent,left:r.left,right:r.right,top:r.top,bottom:r.bottom};})')
+                  overlap=[{'left':a['text'],'right':b['text'],'overlapPx':round(a['right']-b['left'],2)} for a,b in zip(labels,labels[1:]) if a['right']>b['left']]
+                  measurements.append({'viewportWidth':width,'timeLabels':labels,'overlaps':overlap})
+                  page.locator('.p2-chart').screenshot(path=str(root/f'qa/live/chart-{width}.png'))
+              (root/'qa/live/chart-layout.json').write_text(json.dumps(measurements,indent=2)+'\n')
+              context.close();browser.close()
+          if not result.wasSuccessful(): raise SystemExit(1)
+          PY
+      - name: Upload read-only verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-p2-e772992-verification
+          path: qa/live/
+          retention-days: 14
