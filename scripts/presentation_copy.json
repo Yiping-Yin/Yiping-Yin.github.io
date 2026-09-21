@@ -1,0 +1,63 @@
+{
+  "baseCommit": "9325be3f3b0cef5e6aadc2a44d6e1e695c53151e",
+  "version": "copy-20260921-v1",
+  "immutableInputs": {
+    "assets/training-CI29yBEs.js": "1882b451258cf24312ed82633447bad43dc53610350728dfb319b14de5512a3e",
+    "assets/MarketPage-3-BVK_gJ.js": "d55e793b351ece697291d33cc44bc92665232753b1f10454c1efe5764fc02358",
+    "assets/ReviewPage-91KqoBJa.css": "1c06d694c06af3ed092905b92e6dc23c095a491ce9705cca940604b066090265",
+    "assets/studioRoute.static-Dtkr_XUq.js": "8c348122e4db375331efc76d23938ef21e19379ef13d2e4c9984f0bb4d19fc6a",
+    "assets/ReviewPage-DYeWlPpm.js": "d3866c49f268d417ab62045473bdeead8c0aefed3ce88e6198e7ba5818e9c046",
+    "assets/training-CCmEeXWG.css": "57177027f4bcbf3dc6aa233d688fe437c9d9eedb262f4fe98a399b0be9860313",
+    "assets/studioRoute-_jQaMBVV.css": "7bcad8c9d7dc0e5c74b0fe249a2aeb41200a9da016a35678d34135805cfdf893",
+    "assets/MarketPage-BVjb8Lhe.css": "b9fcc7fc4cdbe95ecb7fd7eb9b0a6889524795b7538a5fee2ac007a8a447b23a",
+    "data/historical-instruments.json": "4fb7297089d530befa56961fb812e624f373ac6841dd1de8901a42af1debdf64",
+    "data/optibook-instruments-2026.json": "127071d42df01c6c1058a725e0a8850f14c92d5265572127859b32da0cc4eeef",
+    "data/published-runs-synthetic.json": "a50de72fe02b8e5097a33db67b3f4622813c0fe254b2fc514cb2d61b2eee406f",
+    "data/instruments.json": "ffc9b0cc99792cccdf7521960862bd519a36e351c4b01aead4582d3c0c7af38e",
+    "data/published-runs-historical.json": "fa575194c7a9bfb9b7a11b9439b2d4c549f7ecc1cccbd28c48de9261287dc9d2"
+  },
+  "modules": {
+    "assets/training-CI29yBEs.js": {
+      "output": "portfolio-assets/training-copy-v1.js",
+      "replacements": [
+        {"old":"`Synthetic Optibook tapes · ${o??390} simulated ${o===1?\"minute\":\"minutes\"} — prices are synthetic; depth, cash, orders, fills and P&L are simulated by P.Book’s local runtime · Not live · Not advice`","new":"`Synthetic prices · Simulated trading`","count":1},
+        {"old":"`Historical 1-min OHLC · ${r} · ${c} — depth, cash, orders, fills and P&L are simulated by P.Book’s local runtime · Not live · Not advice`","new":"`Historical prices · Simulated trading`","count":1},
+        {"old":"`Synthetic Optibook tapes · ${o??390} simulated ${o===1?\"minute\":\"minutes\"}.`","new":"`Synthetic prices · Simulated trading`","count":1},
+        {"old":"\"Prices are synthetic; depth, cash, orders, fills and P&L are simulated by P.Book’s local runtime. Not live. Not advice.\"","new":"`${o??390}-minute session`","count":1},
+        {"old":"`Historical 1-min OHLC · ${r} · ${c}.`","new":"`Historical prices · Simulated trading`","count":1},
+        {"old":"\"Depth, cash, orders, fills and P&L are simulated by P.Book’s local runtime. Not live. Not advice.\"","new":"`${r} · ${c} · ${o??390}-minute session`","count":1},
+        {"old":"`Runs produced by P.Book’s local runtime${o?` on ${o}`:\"\"} against saved one-minute tapes. Depth, cash, orders, fills and P&L are simulated: no broker, no live orders, no real money. Not live · Not advice.`","new":"`Published simulation${o?` · ${o}`:\"\"}. Python runs locally.`","count":1},
+        {"old":"Synthetic prices · simulated execution","new":"Synthetic prices · Simulated trading","count":1},
+        {"old":"Historical prices · simulated execution","new":"Historical prices · Simulated trading","count":1}
+      ]
+    },
+    "assets/MarketPage-3-BVK_gJ.js": {"output":"portfolio-assets/market-copy-v1.js","replacements":[]},
+    "assets/ReviewPage-DYeWlPpm.js": {
+      "output":"portfolio-assets/review-copy-v1.js",
+      "replacements":[
+        {"old":"Market data & simulation rules ","new":"Data & simulation details ","count":1},
+        {"old":" prices · depth, cash, orders, fills and P&L are simulated by P.Book’s local runtime · Not live · Not advice","new":" prices · Simulated trading. The order book, trading activity and account results are simulated. No live market connection or real orders.","count":1},
+        {"old":"What is real here and what is not","new":"Data & simulation details","count":1}
+      ]
+    },
+    "assets/studioRoute.static-Dtkr_XUq.js": {
+      "output":"portfolio-assets/studio-copy-v1.js",
+      "replacements":[
+        {"old":"Historical 1-min OHLC · 10 Sep 2026 · Yahoo Finance, and synthetic Optibook tapes — depth, cash, orders, fills and P&L simulated by P.Book’s local runtime · Not live · Not advice","new":"Historical and synthetic prices · Simulated trading","count":1},
+        {"old":"Strategies run in the local P.Book runtime. Here the strategy is editable and the market steps by hand in Trading.","new":"Edit and export Python here. Execute strategies with the local P.Book runtime.","count":1},
+        {"old":"Python runs on the local P.Book runtime, not on this page. The figures below are this source’s own evidence.","new":"Published results for this source. Python execution requires the local P.Book runtime.","count":1},
+        {"old":"LOCAL RUNTIME","new":"RUN PYTHON LOCALLY","count":1}
+      ]
+    }
+  },
+  "imports": {
+    "\"./training-CI29yBEs.js\"":"\"./training-copy-v1.js\"",
+    "\"./MarketPage-3-BVK_gJ.js\"":"\"./market-copy-v1.js\"",
+    "\"./ReviewPage-DYeWlPpm.js\"":"\"./review-copy-v1.js\"",
+    "\"./studioRoute.static-Dtkr_XUq.js\"":"\"./studio-copy-v1.js\"",
+    "\"./ReviewPage-91KqoBJa.css\"":"\"../assets/ReviewPage-91KqoBJa.css\"",
+    "\"./training-CCmEeXWG.css\"":"\"../assets/training-CCmEeXWG.css\"",
+    "\"./studioRoute-_jQaMBVV.css\"":"\"../assets/studioRoute-_jQaMBVV.css\"",
+    "\"./MarketPage-BVjb8Lhe.css\"":"\"../assets/MarketPage-BVjb8Lhe.css\""
+  }
+}
