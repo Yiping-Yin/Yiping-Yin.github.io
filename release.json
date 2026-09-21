@@ -200,7 +200,7 @@
       "P1-03"
     ],
     "files": {
-      "index.html": "76ca2c288a05d3092c68cfd69f00bb604a600246fe305272f9930389068e47bc",
+      "index.html": "580414042d64ed5de1c4ae2708f28dd6724b179231f08473fd062d4daa556598",
       "profile.html": "06fcbb772487a7deaa0ab7ff25882bdc52629c820858daa639c613bb8318bd9a",
       "lab.html": "f3d727d36fded82a147654ea4091e661b31ca7ba0fd08249e907b8a350aeee49",
       "training.html": "5179954846e46a0dc8383aee837938b19847814e2f708ef950fe09ab8a84eb16",
@@ -218,7 +218,7 @@
       "P2-03"
     ],
     "files": {
-      "index.html": "76ca2c288a05d3092c68cfd69f00bb604a600246fe305272f9930389068e47bc",
+      "index.html": "580414042d64ed5de1c4ae2708f28dd6724b179231f08473fd062d4daa556598",
       "profile.html": "06fcbb772487a7deaa0ab7ff25882bdc52629c820858daa639c613bb8318bd9a",
       "lab.html": "f3d727d36fded82a147654ea4091e661b31ca7ba0fd08249e907b8a350aeee49",
       "compare.html": "1a7f994ddf95c11e72e4ea639ed0096e77e215d716bc548a2ddac86c1c9977d9",
@@ -236,7 +236,7 @@
     "version": "copy-20260921-v1",
     "baseCommit": "9325be3f3b0cef5e6aadc2a44d6e1e695c53151e",
     "files": {
-      "index.html": "76ca2c288a05d3092c68cfd69f00bb604a600246fe305272f9930389068e47bc",
+      "index.html": "580414042d64ed5de1c4ae2708f28dd6724b179231f08473fd062d4daa556598",
       "profile.html": "06fcbb772487a7deaa0ab7ff25882bdc52629c820858daa639c613bb8318bd9a",
       "lab.html": "f3d727d36fded82a147654ea4091e661b31ca7ba0fd08249e907b8a350aeee49",
       "training.html": "5179954846e46a0dc8383aee837938b19847814e2f708ef950fe09ab8a84eb16",
@@ -258,7 +258,7 @@
       "Explicit statistical comparators"
     ],
     "files": {
-      "index.html": "76ca2c288a05d3092c68cfd69f00bb604a600246fe305272f9930389068e47bc",
+      "index.html": "580414042d64ed5de1c4ae2708f28dd6724b179231f08473fd062d4daa556598",
       "profile.html": "06fcbb772487a7deaa0ab7ff25882bdc52629c820858daa639c613bb8318bd9a",
       "lab.html": "f3d727d36fded82a147654ea4091e661b31ca7ba0fd08249e907b8a350aeee49",
       "training.html": "5179954846e46a0dc8383aee837938b19847814e2f708ef950fe09ab8a84eb16",
@@ -283,5 +283,12 @@
       "portfolio-assets/demo.css": "55f36a7168d2ae599a9f0d06a4c1325cd0745c6d1ca7d8dc98ffc8032e8035ce"
     },
     "note": "Four approved presentation changes. Original runtime bundles, strategy sources, tapes and all published results are retained."
+  },
+  "publicVisual": {
+    "version": "blue-white-home-v1",
+    "files": {
+      "portfolio-assets/home-visual.css": "d445c1cfea5d1abfc277646d319533b105e3e5a2cb43458504800cd8ec0adb66"
+    },
+    "note": "Homepage presentation only. Original terminal, app bundles, source code, tapes, results and routes are retained."
   }
 }
