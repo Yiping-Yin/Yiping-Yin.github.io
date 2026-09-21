@@ -102,7 +102,7 @@ class BrowserAcceptance(unittest.TestCase):
         self.goto('/lab.html')
         self.page.get_by_role('link',name='All 15 published runs',exact=True).click();self.page.wait_for_load_state('networkidle')
         self.assertTrue(self.page.url.endswith('/#published-runs'))
-        self.assertTrue(self.page.locator('#published-runs')).is_visible()
+        self.assertTrue(self.page.locator('#published-runs').is_visible())
     def test_download_all_four_published_strategies(self):
         self.studio();tabs=self.page.locator('.ev-tabs [role="tab"]');self.assertEqual(tabs.count(),4)
         for i in range(tabs.count()):
