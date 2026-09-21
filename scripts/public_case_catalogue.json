@@ -1,0 +1,6 @@
+[
+  {"id":"ire","title":"IRE","subject":"Market microstructure pilot"},
+  {"id":"pxa","title":"PXA","subject":"Practice study"},
+  {"id":"etf-pricing","title":"ETF pricing","subject":"Practice study"},
+  {"id":"algothon","title":"Algothon 2026","subject":"Public report and code","case":"/research-algothon.html","report":"https://github.com/Yiping-Yin/algothon-2026/blob/main/Algothon-Research-Report.pdf","code":"https://github.com/Yiping-Yin/algothon-2026"}
+]
