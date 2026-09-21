@@ -1,6 +1,8 @@
 """Guard the reversible, presentation-only homepage enhancement."""
 import importlib.util
+import json
 import pathlib
+import tempfile
 import unittest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -59,6 +61,22 @@ class VisualGenerator(unittest.TestCase):
         module = self.load()
         with self.assertRaises(ValueError):
             module.transform_home(FIXTURE, '\"><script>')
+
+    def test_visual_manifest_owns_only_its_new_stylesheet(self):
+        module = self.load()
+        # Existing generators refresh index.html in their own manifest groups.
+        # Duplicating that digest in a new group breaks later catalogue edits.
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            (root / 'scripts').mkdir()
+            (root / 'portfolio-assets').mkdir()
+            (root / 'index.html').write_text(FIXTURE)
+            (root / module.STYLE).write_text('/* candidate */')
+            (root / module.VERIFIER).write_text('for group in ' + module.GROUPS + ':\n    pass\n')
+            (root / 'release.json').write_text(json.dumps({'publicEnhancements': {'files': {'index.html': '0'*64}}}))
+            module.apply(root)
+            release = json.loads((root / 'release.json').read_text())
+            self.assertEqual(set(release['publicVisual']['files']), {module.STYLE})
 
     def test_manifest_verifier_retains_previous_generator_anchors(self):
         module = self.load()

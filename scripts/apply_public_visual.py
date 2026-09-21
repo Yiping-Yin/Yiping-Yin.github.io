@@ -87,7 +87,9 @@ def apply(root: Path = ROOT, check: bool = False) -> list[str]:
                     group['files'][name] = digests[name]
     release['publicVisual'] = {
         'version': 'blue-white-home-v1',
-        'files': {**digests, STYLE: css_digest},
+        # Existing groups already own shared HTML/verifier hashes and refresh
+        # them when catalogue content changes. Do not duplicate that ownership.
+        'files': {STYLE: css_digest},
         'note': 'Homepage presentation only. Original terminal, app bundles, source code, tapes, results and routes are retained.',
     }
     updates['release.json'] = json.dumps(release, indent=2, ensure_ascii=False) + '\n'
