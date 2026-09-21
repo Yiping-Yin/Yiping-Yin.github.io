@@ -200,13 +200,35 @@
       "P1-03"
     ],
     "files": {
-      "index.html": "ab0c83fec6f89ba02d45f63ec41362ac6f5889f97095399737f8fe021efc83fd",
-      "profile.html": "8896ef0feabd3ee887bdfc7f8ec8c16e583a7006d4dcdf8cdc5e7b01f8b132eb",
-      "lab.html": "6b33210d7050560464f5c2904dd27926967382d6d9733e31e48a6254bae34cd2",
+      "index.html": "5ab7150f86151979147c3ed341a896f771ccf3a8d1c74620fa438964a0ee4ce4",
+      "profile.html": "dc347fb851d92766727655db8a4ba0ffd5ecd85a6b67bc2100df296d478494ee",
+      "lab.html": "6e03e075695f807770b26ce82a8050c9bb00c9b07cd179c0743d4fdedf7eca99",
       "training.html": "8795ccd6f5c7b672715dd3538e053f432abbad530ec0c2cf9666e4a97f268b24",
       "portfolio-assets/source-export.mjs": "1d5f235933c088d83cc88a430ebd5c19dd49737387e576d58282a5a520f21655",
       "portfolio-assets/p1-evidence.css": "ac9549e86ce782a3f52b279e1a47ee514fe98ebc317e6efdc78bc0c394c93284"
     },
     "note": "Public post-export enhancement; original engine and published data are unchanged."
+  },
+  "publicP2": {
+    "version": "p2-20260921-v1",
+    "baseCommit": "e56b1d175045a0d2bd6551fbc48056b1456f9651",
+    "scope": [
+      "P2-01",
+      "P2-02",
+      "P2-03"
+    ],
+    "files": {
+      "index.html": "5ab7150f86151979147c3ed341a896f771ccf3a8d1c74620fa438964a0ee4ce4",
+      "profile.html": "dc347fb851d92766727655db8a4ba0ffd5ecd85a6b67bc2100df296d478494ee",
+      "lab.html": "6e03e075695f807770b26ce82a8050c9bb00c9b07cd179c0743d4fdedf7eca99",
+      "compare.html": "851a36aca75a7080f81b75613ebe4f92e62c8b4e87afa77760984667256c3b2f",
+      "research-algothon.html": "bb537e1ba329bf9c9ccdff45f817c67f2c95730c6060c051b1c6a3ed561d3891",
+      "sitemap.xml": "1963637c4fd3855d1ec1c4ef7fb54648a6fd4353fbd2613e1bfb395c0ef38ff5",
+      "portfolio-assets/comparison-model.mjs": "b455565fe31ef6518021ade2ac8037cd4e027765a44d960ce4af361b011a5536",
+      "portfolio-assets/comparison-page.mjs": "7a353094c2ddadc23dcab38a93f1a8bfc98202410abee5beecf6b22a6b142d3b",
+      "portfolio-assets/home-runs.mjs": "7100e89cda1da39e5ea90889d13df171376ae5213bad9e818120c76069b2c62c",
+      "portfolio-assets/p2.css": "0a8aa7a244dc46eaac43fba4917a8f75374dda90de633332caf9e602a806196e"
+    },
+    "note": "Read-only public evidence views. Engine, tapes, submitted sources and published runs are unchanged."
   }
 }
