@@ -125,6 +125,8 @@
 <link rel="stylesheet" href="/portfolio-assets/four-fixes.css?v=1">
 <!-- public-polish:v1 -->
 <link rel="stylesheet" href="/portfolio-assets/polish.css?v=1">
+<!-- public-demo:v1 -->
+<link rel="stylesheet" href="/portfolio-assets/demo.css?v=demo-1">
 </head>
 <body class="semicircle-study">
 <a class="skip-link" href="#main">Skip to content</a>
@@ -198,12 +200,33 @@
     </section>
 <!-- pbook-training-overview:start -->
 <section class="s1-desk ground-terminal" aria-labelledby="training">
-  <div class="s1-head"><h2 id="training">Training</h2><a href="/training.html#/training">P.Book <span aria-hidden="true">→</span></a><nav class="s1-doors" aria-label="Training workspaces"><a href="/training.html#/market">Trading <span aria-hidden="true">→</span></a><a href="/training.html#/studio">IDE <span aria-hidden="true">→</span></a></nav></div>
+  <div class="s1-head"><h2 id="training">Training</h2><a href="/training.html?market=historical#/training">P.Book <span aria-hidden="true">→</span></a><nav class="s1-doors" aria-label="Training workspaces"><a href="/training.html?market=historical#/market">Trading <span aria-hidden="true">→</span></a><a href="/training.html?market=historical#/studio">Strategies <span aria-hidden="true">→</span></a></nav></div>
 
-  <div class="s1-runs" id="published-runs" tabindex="-1">
+  <p class="demo-selection-note">Three strategies on the same AAPL session. Selected by method, not by return.</p>
+<section class="demo-featured-runs" aria-label="Selected strategy runs">
+<article data-run-id="3df0ac0f357353bac0e991eed16d3f78458611ddf2f541cfdf44d7839529b1b2">
+<p class="demo-run-market"><span data-demo-symbol>AAPL</span> · 10 Sep 2026</p>
+<h3>5 / 20 minute trend</h3><p class="demo-run-description">Follows the 5 / 20 minute moving-average signal.</p>
+<p class="demo-run-outcome">Net P&amp;L <b class="num-signed num-up">+4.02 USD</b><span>27 fills</span></p>
+<nav aria-label="5 / 20 minute trend example"><a href="/training.html?market=historical#/market?view=replay&amp;run=3df0ac0f357353bac0e991eed16d3f78458611ddf2f541cfdf44d7839529b1b2">Replay</a><a href="/training.html?market=historical#/studio?source=trend">Source</a><a href="/training.html?market=historical#/market?view=review&amp;run=3df0ac0f357353bac0e991eed16d3f78458611ddf2f541cfdf44d7839529b1b2">Report</a></nav>
+</article>
+<article data-run-id="316a1424cebcdc0f3cb3f11266b4ddd2338fb55573b39bcdcdc265094ef04c35">
+<p class="demo-run-market"><span data-demo-symbol>AAPL</span> · 10 Sep 2026</p>
+<h3>One-unit hold</h3><p class="demo-run-description">Buys one unit after the first bar, then holds it.</p>
+<p class="demo-run-outcome">Net P&amp;L <b class="num-signed num-up">+6.68 USD</b><span>1 fills</span></p>
+<nav aria-label="One-unit hold example"><a href="/training.html?market=historical#/market?view=replay&amp;run=316a1424cebcdc0f3cb3f11266b4ddd2338fb55573b39bcdcdc265094ef04c35">Replay</a><a href="/training.html?market=historical#/studio?source=hold">Source</a><a href="/training.html?market=historical#/market?view=review&amp;run=316a1424cebcdc0f3cb3f11266b4ddd2338fb55573b39bcdcdc265094ef04c35">Report</a></nav>
+</article>
+<article data-run-id="c34dc4bca17bca51c20d856031997dbbb4f5b84721d42b69df2c21d4b87f8d10">
+<p class="demo-run-market"><span data-demo-symbol>AAPL</span> · 10 Sep 2026</p>
+<h3>Opening-range breakout</h3><p class="demo-run-description">Enters above the first 15-minute high and exits below its low.</p>
+<p class="demo-run-outcome">Net P&amp;L <b class="num-signed num-up">+3.22 USD</b><span>1 fills</span></p>
+<nav aria-label="Opening-range breakout example"><a href="/training.html?market=historical#/market?view=replay&amp;run=c34dc4bca17bca51c20d856031997dbbb4f5b84721d42b69df2c21d4b87f8d10">Replay</a><a href="/training.html?market=historical#/studio?source=range">Source</a><a href="/training.html?market=historical#/market?view=review&amp;run=c34dc4bca17bca51c20d856031997dbbb4f5b84721d42b69df2c21d4b87f8d10">Report</a></nav>
+</article>
+</section>
+<details class="s1-runs demo-archive" id="published-runs" tabindex="-1"><summary>View all 15 published runs</summary>
     <table class="s1-runs-wide">
       <colgroup><col class="s1-col-strat"><col><col><col><col><col class="s1-col-other"></colgroup>
-      <caption>Published runs <span>Every starter run once on every tape. 100,000 USD start · one unit at a time · 1 bp fee and 1 bp slippage · rebalanced at the next bar open. Net P&amp;L is USD on the 4 historical tapes and SIM on the synthetic tape. The desk’s Rank panel sorts these by net return, net P&amp;L, maximum drawdown and fills.</span></caption>
+      <caption>Published runs <span>Historical outcomes in USD; synthetic outcomes in SIM.</span></caption>
       <thead>
         <tr class="s1-markets"><td></td><th scope="colgroup" colspan="4">Historical · 10 Sep 2026</th><th scope="colgroup" colspan="1" class="s1-split">Synthetic · P.Book</th></tr>
         <tr><th scope="col">Strategy</th><th scope="col" class="s1-c">^GSPC</th><th scope="col" class="s1-c">AAPL</th><th scope="col" class="s1-c">MSFT</th><th scope="col" class="s1-c">NVDA</th><th scope="col" class="s1-c s1-split">ASML</th></tr>
@@ -216,7 +239,7 @@
     </table>
     <table class="s1-runs-phone">
       <colgroup><col><col><col></colgroup>
-      <caption>Published runs <span>Every starter run once on every tape. 100,000 USD start · one unit at a time · 1 bp fee and 1 bp slippage · rebalanced at the next bar open. Net P&amp;L is USD on the 4 historical tapes and SIM on the synthetic tape. The desk’s Rank panel sorts these by net return, net P&amp;L, maximum drawdown and fills.</span></caption>
+      <caption>Published runs <span>Historical outcomes in USD; synthetic outcomes in SIM.</span></caption>
       <thead><tr><th scope="col">Tape</th><th scope="col" class="s1-c">Net P&amp;L</th><th scope="col" class="s1-c">Fills</th></tr></thead>
       <tbody>
 <tr class="s1-pgroup"><th scope="rowgroup" colspan="3">5 / 20 minute trend</th></tr>
@@ -241,16 +264,16 @@
     </table>
     <div class="p2-home-actions"><a id="p2-table-compare" href="/compare.html?a=3df0ac0f357353bac0e991eed16d3f78458611ddf2f541cfdf44d7839529b1b2">Compare two published runs →</a><span class="p2-note">Select a result to open its replay; the replay leads to its source.</span></div>
 <p class="s1-legend"><span aria-hidden="true">▸</span> the run replaying in the terminal above — 27 fills, net +4.02 on 100,000.</p>
-  </div>
+  </details>
 
-  <dl class="s1-spec">
+  <details class="demo-run-rules"><summary>Data and execution rules</summary><p>Every starter run once on every tape. 100,000 USD start · one unit at a time · 1 bp fee and 1 bp slippage · rebalanced at the next bar open. Net P&amp;L is USD on the 4 historical tapes and SIM on the synthetic tape. The desk’s Rank panel sorts these by net return, net P&amp;L, maximum drawdown and fills.</p><dl class="s1-spec">
 <div><dt>Historical data</dt><dd>4 tapes · 390 one-minute bars each<small>^GSPC · AAPL · MSFT · NVDA — 10 Sep 2026, Yahoo Finance, retained</small></dd></div>
 <div><dt>Synthetic market</dt><dd>26 Optibook contracts<small>stocks, dual listings, futures, options, one ETF — fixed-seed scenario, seed 20260914</small></dd></div>
 <div><dt>Book</dt><dd>10 levels a side<small>built from the tape checksum; a deterministic construction</small></dd></div>
 <div><dt>Execution</dt><dd>Next-bar open · 1 bp fee · 1 bp slippage<small>long only · cap 10 units · 100,000 USD start</small></dd></div>
 <div><dt>Engine</dt><dd>CPython, restricted API<small>no imports, no clock, no randomness; runs locally, not on this host</small></dd></div>
 <div><dt>Runs</dt><dd>15 published · 1 book strategy<small>run ids are content hashes of engine version, tape, code and config.</small></dd></div>
-  </dl>
+  </dl></details>
 
   <div class="s1-foot">
     <p data-disclosure data-copy-register="BOTH">Historical and synthetic prices · Simulated trading</p>

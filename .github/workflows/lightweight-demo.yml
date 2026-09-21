@@ -1,0 +1,123 @@
+name: Lightweight demo acceptance
+on:
+  push:
+    branches: [upgrade/lightweight-demo-20260921]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: lightweight-demo-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install browser test dependency
+        run: |
+          python -m pip install playwright==1.57.0
+          python -m playwright install --with-deps chromium
+      - name: Generate only the approved public presentation
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          mkdir -p qa/demo
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            python scripts/apply_public_demo.py --check
+            git diff --exit-code
+          else
+            if [ ! -f portfolio-assets/studio-demo-v1.js ]; then
+              DEMO_BASELINE=1 python tests/demo_browser.py 2>&1 | tee qa/demo/baseline.txt
+            fi
+            python scripts/apply_public_demo.py
+          fi
+          node --check portfolio-assets/training-demo-v1.js
+          node --check portfolio-assets/studio-demo-v1.js
+          git diff --check
+      - name: All static, unit and publication regressions
+        run: |
+          set -euo pipefail
+          for t in p1_acceptance p2_acceptance copy_acceptance four_fixes_acceptance four_fixes_generator_test release_verifier_test publication_integrity_test book_publication_test polish_acceptance polish_generator_test polish_review_test demo_acceptance; do
+            python "tests/$t.py" 2>&1 | tee "qa/demo/$t.txt"
+          done
+          node --test tests/*.test.mjs 2>&1 | tee qa/demo/node.txt
+          python scripts/verify_publication.py --output qa/demo/publication-audit.json
+      - name: Approved journeys and all previous browser regressions
+        run: |
+          set -euo pipefail
+          for t in demo_browser polish_browser p1_browser p2_browser copy_browser four_fixes_browser four_fixes_review_test closeout_browser; do
+            python "tests/$t.py" 2>&1 | tee "qa/demo/$t.txt"
+          done
+      - name: Package the tested public source for review
+        if: always()
+        run: |
+          mkdir -p qa
+          python - <<'PY'
+          import pathlib, subprocess, zipfile
+          paths = set(subprocess.check_output(['git', 'ls-files'], text=True).splitlines())
+          paths.update(['portfolio-assets/training-demo-v1.js', 'portfolio-assets/studio-demo-v1.js'])
+          with zipfile.ZipFile('qa/public-source.zip', 'w', zipfile.ZIP_DEFLATED) as archive:
+              for name in sorted(paths):
+                  if pathlib.Path(name).is_file():
+                      archive.write(name, name)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lightweight-demo-evidence
+          path: qa/
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lightweight-demo-generated
+          path: |
+            index.html
+            training.html
+            release.json
+            README.md
+            portfolio-assets/training-demo-v1.js
+            portfolio-assets/studio-demo-v1.js
+            scripts/apply_public_polish.py
+            scripts/verify_public_release.py
+            tests/copy_browser.py
+            tests/four_fixes_browser.py
+            tests/p1_browser.py
+            tests/polish_browser.py
+          retention-days: 14
+  record-candidate:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/upgrade/lightweight-demo-20260921'
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: lightweight-demo-generated
+          path: /tmp/demo-generated
+      - name: Record tested output on the candidate branch only
+        run: |
+          set -euo pipefail
+          for f in index.html training.html release.json README.md portfolio-assets/training-demo-v1.js portfolio-assets/studio-demo-v1.js scripts/apply_public_polish.py scripts/verify_public_release.py tests/copy_browser.py tests/four_fixes_browser.py tests/p1_browser.py tests/polish_browser.py; do
+            cp "/tmp/demo-generated/$f" "$f"
+            git add "$f"
+          done
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m "Record accepted lightweight demo (run ${GITHUB_RUN_ID})"
+          git push origin HEAD:refs/heads/upgrade/lightweight-demo-20260921

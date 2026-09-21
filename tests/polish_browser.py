@@ -43,7 +43,7 @@ class PolishBrowser(unittest.TestCase):
  def test_ide_details_fold_without_hiding_verdict_or_local_requirement(self):
   for width in [320,390,1440]:
    self.page.set_viewport_size({'width':width,'height':900});self.open('/training.html#/studio');self.begin_edit()
-   engine=self.page.locator('.polish-engine-details');digest=self.page.locator('.polish-source-digest');expect(engine.locator('table')).to_be_hidden();expect(digest.locator('code')).to_be_hidden();expect(self.page.locator('.ev-verdict')).to_be_visible();expect(self.page.locator('.ev-runtime')).to_be_visible()
+   engine=self.page.locator('.polish-engine-details');digest=self.page.locator('.polish-source-digest');expect(engine.locator('table')).to_be_hidden();expect(digest.locator('code')).to_be_hidden();expect(self.page.locator('.ev-verdict')).to_be_visible();expect(self.page.locator('.demo-local-details summary')).to_be_visible();expect(self.page.locator('.demo-local-details p')).to_be_hidden()
    self.page.screenshot(path=str(OUT/f'ide-folded-{width}.png'),full_page=True);self.expand(engine);self.expand(digest);expect(engine.locator('table')).to_be_visible();expect(digest.locator('code')).to_be_visible();self.no_overflow()
  def test_editing_with_folded_specs_keeps_warning_and_exact_export(self):
   self.open('/training.html#/studio');editor=self.begin_edit();code='# 中文 π\n\ndef on_bar(history, account, state):\n    return None\n';editor.fill(code)

@@ -108,14 +108,14 @@ class BrowserAcceptance(unittest.TestCase):
         for i in range(tabs.count()):
             tabs.nth(i).click();self.download()
     def test_download_edited_utf8_draft_and_after_reload(self):
-        self.studio()  # This public editor is editable directly; there is no Edit button.
+        self.studio();self.page.get_by_role('button',name='Edit',exact=True).click()  # Public source is read-only until explicitly edited.
         source='# 中文 π\n\ndef on_bar(history, account, state):\n    return None\n'
         self.page.locator('textarea[aria-label="Edit Python strategy source"]').fill(source)
         self.assertEqual(self.download(),source)
         self.page.reload(wait_until='networkidle');self.page.locator('[data-p1-source-export]').wait_for()
         self.assertEqual(self.download(),source)
     def test_empty_draft_is_not_replaced_by_published_source(self):
-        self.studio()  # This public editor is editable directly; there is no Edit button.
+        self.studio();self.page.get_by_role('button',name='Edit',exact=True).click()  # Public source is read-only until explicitly edited.
         self.page.locator('textarea[aria-label="Edit Python strategy source"]').fill('')
         self.assertEqual(self.download(),'')
     def test_keyboard_download(self):

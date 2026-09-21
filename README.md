@@ -2,7 +2,7 @@
 
 Static site for [yiping-yin.github.io](https://yiping-yin.github.io/), served by GitHub Pages from `main`.
 
-This checkpoint includes a compact homepage terminal, competition results, published P.Book runs and the Lab project/method library; the complete Profile; the Lab's public research structure; and P.Book's Overview, Trading, report/replay and IDE surfaces. The public IDE supports browser-local strategy edits. Python strategy execution requires the local P.Book runtime.
+This checkpoint includes a compact homepage terminal, competition results, published P.Book runs and the Lab project/method library; the complete Profile; the Lab's public research structure; and P.Book's Overview, Trading, report/replay and Strategies surfaces. Strategies defaults to source reading, with optional browser-local edits. Python strategy execution requires the local P.Book runtime.
 
 ## Upgrade plan
 
@@ -17,7 +17,7 @@ See [个人网页升级安排 / Upgrade plan](UPGRADE_PLAN.md) for completed P1/
 - `/training.html#/market` — manual Trading on 26 deterministic synthetic teaching instruments, using `SIM` units.
 - `/training.html?market=historical#/market` — Trading on retained ^GSPC, AAPL, MSFT and NVDA price tapes.
 - `/training.html?market=historical#/market?view=review&run=<runId>` — a published run's report; use `view=replay` for its replay. Synthetic runs use `market=synthetic`.
-- `/training.html#/studio` — strategy IDE with four published source files and their SHA-256 digests, editable browser-local drafts and the 15-run archive.
+- `/training.html#/studio` — strategy source gallery with four published source files and their SHA-256 digests, editable browser-local drafts and the 15-run archive.
 - `/compare.html?a=<runId>&b=<runId>` — matched-condition comparison of two published runs.
 - `/research-algothon.html` — a source-pinned public research case.
 - `/404.html` — self-contained recovery page.

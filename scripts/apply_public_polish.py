@@ -67,11 +67,11 @@ def apply(root=ROOT,check=False):
     root=Path(root);updates={n:transform(n,(root/n).read_text()) for n in ['index.html','lab.html','training.html']}
     updates['portfolio-assets/studio-details-v1.js']=derive_studio(root)
     verifier='scripts/verify_public_release.py'
-    updates[verifier]=replace_once((root/verifier).read_text(), "['publicEnhancements', 'publicP2', 'publicCopy', 'publicFourFixes']", "['publicEnhancements', 'publicP2', 'publicCopy', 'publicFourFixes', 'publicPolish']")
+    updates[verifier]=(root/verifier).read_text() if "'publicDemo'" in (root/verifier).read_text() else replace_once((root/verifier).read_text(), "['publicEnhancements', 'publicP2', 'publicCopy', 'publicFourFixes']", "['publicEnhancements', 'publicP2', 'publicCopy', 'publicFourFixes', 'publicPolish']")
     generator='scripts/apply_public_four_fixes.py'
     updates[generator]=replace_once((root/generator).read_text(), 'updates[verifier] = once((root / verifier).read_text(),', 'updates[verifier] = (root / verifier).read_text() if "\'publicFourFixes\', \'publicPolish\'" in (root / verifier).read_text() else once((root / verifier).read_text(),')
     browser='tests/copy_browser.py'
-    updates[browser]=replace_once((root/browser).read_text(), "'studio-copy-v1.js'}<=loaded", "'studio-details-v1.js'}<=loaded")
+    updates[browser]=(root/browser).read_text() if "'studio-demo-v1.js'}<=loaded" in (root/browser).read_text() else replace_once((root/browser).read_text(), "'studio-copy-v1.js'}<=loaded", "'studio-details-v1.js'}<=loaded")
     release=json.loads((root/'release.json').read_text());sha=lambda data:hashlib.sha256(data).hexdigest()
     hashes={k:sha(v.encode()) for k,v in updates.items()}
     for group in ['publicEnhancements','publicP2','publicCopy','publicFourFixes']:
