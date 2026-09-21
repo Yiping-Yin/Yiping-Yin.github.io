@@ -25,13 +25,12 @@ jobs:
           from datetime import datetime, timezone
           from playwright.sync_api import sync_playwright
           import json
-          import re
           out = Path('evidence')
-          report = {'captured_at': datetime.now(timezone.utc).isoformat(), 'purpose': 'Read-only visual reference study. No original font or media files are exported.', 'pages': []}
+          report = {'captured_at': datetime.now(timezone.utc).isoformat(), 'purpose': 'Read-only reference capture, optional cookies off. No font or media files exported. No eligibility declarations or website changes.', 'pages': []}
           urls = [('home', 'https://www.man.com/'), ('technology', 'https://www.man.com/technology'), ('insights', 'https://www.man.com/insights'), ('about', 'https://www.man.com/about-us')]
           with sync_playwright() as pw:
               browser = pw.chromium.launch(headless=True)
-              context = browser.new_context(viewport={'width':1440,'height':1000}, reduced_motion='reduce')
+              context = browser.new_context(viewport={'width':1440,'height':1000})
               page = context.new_page()
               for name, url in urls:
                   record = {'name': name, 'requested_url': url}
@@ -41,29 +40,32 @@ jobs:
                       page.wait_for_timeout(3500)
                       record.update(url=page.url, status=response.status if response else None, title=page.title())
                       page.screenshot(path=str(out / (name+'-initial.png')))
-                      for selector in ('#onetrust-reject-all-handler', '#onetrust-close-btn-container button', 'button[aria-label="Close"]'):
-                          try:
-                              button=page.locator(selector).first
-                              if button.is_visible():
-                                  button.click(timeout=2000)
-                                  page.wait_for_timeout(400)
-                          except Exception:
-                              pass
-                      global_link=page.get_by_role('link',name='global website',exact=True)
-                      if global_link.count() and global_link.first.is_visible():
-                          global_link.first.click(timeout=3000)
-                          page.wait_for_timeout(2000)
+                      dialog = page.locator('#CybotCookiebotDialog')
+                      if dialog.is_visible():
+                          decline=page.locator('#CybotCookiebotDialogBodyButtonDecline')
+                          if decline.is_visible():
+                              decline.click(timeout=5000)
+                          else:
+                              for category in ('Preferences','Statistics','Marketing'):
+                                  item=page.locator('#CybotCookiebotDialogBodyLevelButton'+category)
+                                  if item.count() and item.is_checked():
+                                      item.evaluate('e=>e.click()')
+                              page.locator('#CybotCookiebotDialogBodyLevelButtonLevelOptinAllowallSelection').click(timeout=5000)
+                          dialog.wait_for(state='hidden', timeout=5000)
+                      record['cookie_dialog_visible']=dialog.is_visible()
+                      page.wait_for_timeout(2500)
                       page.evaluate('document.querySelectorAll("video").forEach(v=>v.pause())')
                       page.screenshot(path=str(out / (name+'-desktop-fold.png')))
                       for y in range(0, min(page.locator('body').evaluate('e=>e.scrollHeight'),14000),800):
-                          page.evaluate('(y)=>window.scrollTo(0,y)', y)
-                          page.wait_for_timeout(180)
+                          page.evaluate('(y)=>window.scrollTo({top:y,behavior:"instant"})', y)
+                          page.wait_for_timeout(250)
                       page.evaluate('window.scrollTo({top:0,behavior:"instant"})')
                       page.wait_for_timeout(500)
                       page.screenshot(path=str(out / (name+'-desktop-full.png')),full_page=True)
                       (out/(name+'.html')).write_text(page.content(),encoding='utf-8')
                       record['text']=page.locator('body').inner_text()
                       record['elements']=page.evaluate('''() => Array.from(document.querySelectorAll('header,nav,main,section,h1,h2,h3,h4,h5,p,a,button,img,video')).filter(e=>e.getBoundingClientRect().width>0&&e.getBoundingClientRect().height>0).map(e=>{const s=getComputedStyle(e),r=e.getBoundingClientRect();return {tag:e.tagName,id:e.id,classes:e.className,text:(e.innerText||e.alt||'').trim().slice(0,180),x:r.x,y:r.y,w:r.width,h:r.height,color:s.color,bg:s.backgroundColor,bgImage:s.backgroundImage,font:s.fontFamily,size:s.fontSize,weight:s.fontWeight,line:s.lineHeight,letter:s.letterSpacing,padding:s.padding,gap:s.gap,border:s.borderRadius,src:e.currentSrc||e.src||'',href:e.href||''}})''')
+                      record['backgrounds']=page.evaluate('''() => Array.from(document.querySelectorAll('div,section,header,footer')).filter(e=>{const r=e.getBoundingClientRect();return r.width>100&&r.height>25&&getComputedStyle(e).backgroundColor!=='rgba(0, 0, 0, 0)'}).map(e=>{const s=getComputedStyle(e),r=e.getBoundingClientRect();return {tag:e.tagName,id:e.id,classes:e.className,x:r.x,y:r.y,w:r.width,h:r.height,bg:s.backgroundColor,padding:s.padding,gap:s.gap}})''')
                       record['stylesheets']=page.locator('link[rel="stylesheet"]').evaluate_all('(es)=>es.map(e=>e.href)')
                       for i, href in enumerate(record['stylesheets']):
                           try:
@@ -71,18 +73,19 @@ jobs:
                               if css.ok: (out/(name+f'-{i}.css')).write_text(css.text(),encoding='utf-8')
                           except Exception:
                               pass
-                      if name in ('home','insights'):
+                      if name in ('home','insights','technology'):
                           page.set_viewport_size({'width':390,'height':844})
-                          page.wait_for_timeout(1000)
+                          page.wait_for_timeout(1200)
                           page.evaluate('window.scrollTo({top:0,behavior:"instant"})')
                           page.screenshot(path=str(out/(name+'-mobile-fold.png')))
                           page.screenshot(path=str(out/(name+'-mobile-full.png')),full_page=True)
                           record['mobile_headings']=page.locator('h1,h2,h3').evaluate_all('(es)=>es.filter(e=>e.getBoundingClientRect().width>0).map(e=>({text:e.innerText,font:getComputedStyle(e).fontFamily,size:getComputedStyle(e).fontSize,line:getComputedStyle(e).lineHeight}))')
                           page.set_viewport_size({'width':1440,'height':1000})
-                      print(name,record['status'],record['url'],record['title'])
+                      print(name,record['status'],record['url'],record['title'],'cookie dialog',record['cookie_dialog_visible'])
                   except Exception as exc:
                       record['error']=str(exc)
                       print(name,'ERROR',str(exc))
+                      page.screenshot(path=str(out/(name+'-error.png')))
                   (out/'report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
               browser.close()
           PY
