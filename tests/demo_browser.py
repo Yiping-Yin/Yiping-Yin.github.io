@@ -50,7 +50,7 @@ class DemoBrowser(unittest.TestCase):
     def capture(self, name):
         # Capture from the document top so sticky headers do not appear halfway
         # through a full-page image after an interaction scrolled the viewport.
-        self.page.evaluate('window.scrollTo(0, 0)')
+        self.page.evaluate("window.scrollTo({top: 0, left: 0, behavior: 'instant'})")
         self.page.wait_for_function('window.scrollY === 0')
         self.page.screenshot(path=str(OUT / name), full_page=True)
 
