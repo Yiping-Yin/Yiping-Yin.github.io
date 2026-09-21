@@ -24,7 +24,7 @@ jobs:
           from pathlib import Path
           from datetime import datetime, timezone
           from playwright.sync_api import sync_playwright
-          import json
+          import json, re
           out = Path('evidence')
           report = {'captured_at': datetime.now(timezone.utc).isoformat(), 'purpose': 'Read-only reference capture, optional cookies off. No font or media files exported. No eligibility declarations or website changes.', 'pages': []}
           urls = [('home', 'https://www.man.com/'), ('technology', 'https://www.man.com/technology'), ('insights', 'https://www.man.com/insights'), ('about', 'https://www.man.com/about-us')]
@@ -42,15 +42,11 @@ jobs:
                       page.screenshot(path=str(out / (name+'-initial.png')))
                       dialog = page.locator('#CybotCookiebotDialog')
                       if dialog.is_visible():
-                          decline=page.locator('#CybotCookiebotDialogBodyButtonDecline')
-                          if decline.is_visible():
-                              decline.click(timeout=5000)
-                          else:
-                              for category in ('Preferences','Statistics','Marketing'):
-                                  item=page.locator('#CybotCookiebotDialogBodyLevelButton'+category)
-                                  if item.count() and item.is_checked():
-                                      item.evaluate('e=>e.click()')
-                              page.locator('#CybotCookiebotDialogBodyLevelButtonLevelOptinAllowallSelection').click(timeout=5000)
+                          for category in ('Preferences','Statistics','Marketing'):
+                              item=page.locator('#CybotCookiebotDialogBodyLevelButton'+category)
+                              if item.count() and item.is_checked():
+                                  item.evaluate('e=>e.click()')
+                          page.get_by_role('button',name=re.compile(r'^(Use necessary cookies only|Allow selected)$')).first.click(timeout=5000)
                           dialog.wait_for(state='hidden', timeout=5000)
                       record['cookie_dialog_visible']=dialog.is_visible()
                       page.wait_for_timeout(2500)
