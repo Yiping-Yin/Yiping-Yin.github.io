@@ -88,7 +88,7 @@ class CopyBrowser(unittest.TestCase):
             else:expect(self.page.locator('body')).to_contain_text('AAPL')
             self.closed_notes()
         loaded={url.split('/')[-1] for url,status in self.js if status==200}
-        self.assertTrue({'training-copy-v1.js','review-copy-v1.js','market-copy-v1.js','studio-copy-v1.js'}<=loaded,loaded)
+        self.assertTrue({'training-copy-v1.js','review-copy-v1.js','market-copy-v1.js','studio-details-v1.js'}<=loaded,loaded)
         self.assertFalse(any(n in loaded for n in ['training-CI29yBEs.js','ReviewPage-DYeWlPpm.js','MarketPage-3-BVK_gJ.js','studioRoute.static-Dtkr_XUq.js']))
     def test_notes_work_with_javascript_disabled(self):
         self.context.close();self.context=self.browser.new_context(java_script_enabled=False);self.page=self.context.new_page()

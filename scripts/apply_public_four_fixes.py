@@ -134,7 +134,7 @@ def apply(root=ROOT, check=False):
     # Extend the existing release verifier's manifest allowlist, without changing
     # any deployment, checksum-comparison, API or credential behavior.
     verifier = 'scripts/verify_public_release.py'
-    updates[verifier] = once((root / verifier).read_text(), "['publicEnhancements', 'publicP2', 'publicCopy']", "['publicEnhancements', 'publicP2', 'publicCopy', 'publicFourFixes']")
+    updates[verifier] = (root / verifier).read_text() if "'publicFourFixes', 'publicPolish'" in (root / verifier).read_text() else once((root / verifier).read_text(), "['publicEnhancements', 'publicP2', 'publicCopy']", "['publicEnhancements', 'publicP2', 'publicCopy', 'publicFourFixes']")
     release = json.loads((root / 'release.json').read_text())
     hashes = {n: hashlib.sha256(updates[n].encode()).hexdigest() for n in PAGES}
     css = 'portfolio-assets/four-fixes.css'
