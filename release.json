@@ -200,10 +200,10 @@
       "P1-03"
     ],
     "files": {
-      "index.html": "ed2ec5bf889b883eb0a7b2d3c5e75e58c7510c514c9cc18b531a159da933ac2e",
-      "profile.html": "666335650c213512fe98cdbde848cefa007a3dacdaa4e3b6d2e08c980c21abdb",
-      "lab.html": "3f8b9947c10c03a772e9f799114dd0ef16f6eddeb99892f47cb50205d215e5d1",
-      "training.html": "501d3fed23f77474ea23b587a6c9af0fe31a7ac4b887b557f1b1c5e5dfbd85a1",
+      "index.html": "ca4fba9f0b2622d7025995a877332c7b6b756b16ce797500b7d5984ca7dc2a6e",
+      "profile.html": "06fcbb772487a7deaa0ab7ff25882bdc52629c820858daa639c613bb8318bd9a",
+      "lab.html": "50fe8f20a8fe0c960e751d3f87b0c83fddc74cc58c59b9a36c94a888a5b90c72",
+      "training.html": "63732d7492a3cfeeb2510854fbf407d52c8d63f39474f3719de7327638ad663f",
       "portfolio-assets/source-export.mjs": "1d5f235933c088d83cc88a430ebd5c19dd49737387e576d58282a5a520f21655",
       "portfolio-assets/p1-evidence.css": "ac9549e86ce782a3f52b279e1a47ee514fe98ebc317e6efdc78bc0c394c93284"
     },
@@ -218,9 +218,9 @@
       "P2-03"
     ],
     "files": {
-      "index.html": "ed2ec5bf889b883eb0a7b2d3c5e75e58c7510c514c9cc18b531a159da933ac2e",
-      "profile.html": "666335650c213512fe98cdbde848cefa007a3dacdaa4e3b6d2e08c980c21abdb",
-      "lab.html": "3f8b9947c10c03a772e9f799114dd0ef16f6eddeb99892f47cb50205d215e5d1",
+      "index.html": "ca4fba9f0b2622d7025995a877332c7b6b756b16ce797500b7d5984ca7dc2a6e",
+      "profile.html": "06fcbb772487a7deaa0ab7ff25882bdc52629c820858daa639c613bb8318bd9a",
+      "lab.html": "50fe8f20a8fe0c960e751d3f87b0c83fddc74cc58c59b9a36c94a888a5b90c72",
       "compare.html": "1a7f994ddf95c11e72e4ea639ed0096e77e215d716bc548a2ddac86c1c9977d9",
       "research-algothon.html": "bb537e1ba329bf9c9ccdff45f817c67f2c95730c6060c051b1c6a3ed561d3891",
       "sitemap.xml": "1963637c4fd3855d1ec1c4ef7fb54648a6fd4353fbd2613e1bfb395c0ef38ff5",
@@ -236,10 +236,10 @@
     "version": "copy-20260921-v1",
     "baseCommit": "9325be3f3b0cef5e6aadc2a44d6e1e695c53151e",
     "files": {
-      "index.html": "ed2ec5bf889b883eb0a7b2d3c5e75e58c7510c514c9cc18b531a159da933ac2e",
-      "profile.html": "666335650c213512fe98cdbde848cefa007a3dacdaa4e3b6d2e08c980c21abdb",
-      "lab.html": "3f8b9947c10c03a772e9f799114dd0ef16f6eddeb99892f47cb50205d215e5d1",
-      "training.html": "501d3fed23f77474ea23b587a6c9af0fe31a7ac4b887b557f1b1c5e5dfbd85a1",
+      "index.html": "ca4fba9f0b2622d7025995a877332c7b6b756b16ce797500b7d5984ca7dc2a6e",
+      "profile.html": "06fcbb772487a7deaa0ab7ff25882bdc52629c820858daa639c613bb8318bd9a",
+      "lab.html": "50fe8f20a8fe0c960e751d3f87b0c83fddc74cc58c59b9a36c94a888a5b90c72",
+      "training.html": "63732d7492a3cfeeb2510854fbf407d52c8d63f39474f3719de7327638ad663f",
       "portfolio-assets/training-copy-v1.js": "ee57ceacf9a523e3ae68debcf7aca68d1c2d7eee8296931f9df49bc6da79efe9",
       "portfolio-assets/market-copy-v1.js": "6ba9e8109265993432804cbfdb2c3496c0238db161095802a11e13ca0cb91c87",
       "portfolio-assets/review-copy-v1.js": "bb903e3c739ed9c38948817b9db154eb96f46e5a5fc598b0dd72b89aee3cc880",
@@ -247,5 +247,24 @@
       "portfolio-assets/presentation-copy.css": "825bc96948cb70194d5802d262218ee6a47ad6bbae839d446c199789d4cb4d1d"
     },
     "note": "Reviewed presentation strings and UI import paths only. Original exported bundles, all data and published strategy sources are retained unchanged."
+  },
+  "publicFourFixes": {
+    "version": "four-fixes-20260921-v1",
+    "baseCommit": "7acdc4732ce09294bc21f27c9b688484ef2fc7f5",
+    "scope": [
+      "Mobile research entry",
+      "Mobile desk navigation",
+      "Shared case catalogue",
+      "Explicit statistical comparators"
+    ],
+    "files": {
+      "index.html": "ca4fba9f0b2622d7025995a877332c7b6b756b16ce797500b7d5984ca7dc2a6e",
+      "profile.html": "06fcbb772487a7deaa0ab7ff25882bdc52629c820858daa639c613bb8318bd9a",
+      "lab.html": "50fe8f20a8fe0c960e751d3f87b0c83fddc74cc58c59b9a36c94a888a5b90c72",
+      "training.html": "63732d7492a3cfeeb2510854fbf407d52c8d63f39474f3719de7327638ad663f",
+      "portfolio-assets/four-fixes.css": "4ea762728a3558933f64c8c75c5822c5113ef7527b1ed45648f4bef4b4fe7559"
+    },
+    "catalogueSHA256": "1e87a5c5b705d806b92c6ab9e62a374b22833ab9f7105d095b4c4dad186bd3fc",
+    "note": "Presentation only. Original runtime assets, generated UI modules, strategy sources, tapes and published results are unchanged."
   }
 }

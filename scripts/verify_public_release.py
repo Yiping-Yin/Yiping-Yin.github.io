@@ -36,7 +36,7 @@ def declared_hashes(release: dict) -> dict[str, str]:
     if not release.get('publicEnhancements', {}).get('files'):
         raise ValueError('Public enhancement manifest is missing')
     hashes = {}
-    for group in ['publicEnhancements', 'publicP2', 'publicCopy']:
+    for group in ['publicEnhancements', 'publicP2', 'publicCopy', 'publicFourFixes']:
         for name, digest in release.get(group, {}).get('files', {}).items():
             if not isinstance(digest, str) or not re.fullmatch(r'[a-f0-9]{64}', digest):
                 raise ValueError('Invalid declared digest: ' + str(name))
