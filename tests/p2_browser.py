@@ -86,7 +86,7 @@ class Browser(unittest.TestCase):
    self.goto(path);self.assertGreater(self.page.locator('a[href="/research-algothon.html"]').count(),0)
   self.goto('/research-algothon.html');expect(self.page.locator('#results')).to_contain_text('1,085.169047')
   for part in ['question','data','method','results','limits','sources']:self.assertEqual(self.page.locator('#'+part).count(),1)
-  self.goto('/compare.html');expect(self.page.locator('noscript')).to_contain_text('Interactive comparison needs JavaScript')
+  self.goto('/compare.html');fallback=self.page.locator('noscript .p2-notice');expect(fallback).to_be_visible();expect(fallback).to_contain_text('Interactive comparison needs JavaScript')
  def test_desktop_short_phone_small_phone_and_dark_mode(self):
   for width,height in [(1440,900),(1440,600),(390,844),(320,740)]:
    self.page.set_viewport_size({'width':width,'height':height})
