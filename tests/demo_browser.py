@@ -58,6 +58,47 @@ class DemoBrowser(unittest.TestCase):
         self.page.goto('about:blank')
         self.page.goto(self.base + path, wait_until='networkidle')
 
+    def test_edit_button_has_a_full_unobstructed_header(self):
+        import re
+        css = (ROOT / 'portfolio-assets/demo.css').read_text()
+        # Reproduce the reviewed regression by serving the same stylesheet
+        # with just the header reservation removed, not by changing the button.
+        old_css = re.sub(r'\.ev-page \.ev-pane-head\s*\{[^}]*\}\n?', '', css)
+        self.assertNotEqual(css, old_css, 'Expected the header reservation fix')
+        pattern = '**/portfolio-assets/demo.css*'
+        self.page.route(pattern, lambda route: route.fulfill(status=200, content_type='text/css', body=old_css))
+        self.open('/training.html#/studio')
+        header = self.page.locator('.ev-pane-head').bounding_box()
+        button = self.page.get_by_role('button', name='Edit', exact=True).bounding_box()
+        self.assertGreater(button['height'], header['height'] + 10)
+        print(f"Header regression reproduced: {header['height']}px header / {button['height']}px button")
+        self.page.unroute(pattern)
+        measurements = []
+        for width in (320, 390, 761, 1440):
+            self.page.set_viewport_size({'width': width, 'height': 900})
+            self.open('/training.html#/studio')
+            for name in ('Edit', 'Done'):
+                control = self.page.get_by_role('button', name=name, exact=True)
+                control.scroll_into_view_if_needed()
+                shape = control.evaluate('''button => {
+                    const b = button.getBoundingClientRect();
+                    const h = button.parentElement.getBoundingClientRect();
+                    const points = [[b.left+2,b.top+2],[b.right-2,b.top+2],
+                                    [b.left+2,b.bottom-2],[b.right-2,b.bottom-2]];
+                    return {headerHeight:h.height, buttonHeight:b.height,
+                            top:b.top-h.top, bottom:h.bottom-b.bottom,
+                            hit:points.every(([x,y]) => button.contains(document.elementFromPoint(x,y)))};
+                }''')
+                self.assertGreaterEqual(shape['buttonHeight'], 44)
+                self.assertGreaterEqual(shape['top'], -0.5)
+                self.assertGreaterEqual(shape['bottom'], -0.5)
+                self.assertTrue(shape['hit'], (width, name, shape))
+                measurements.append({'width': width, 'button': name, **shape})
+                control.click(position={'x': 2, 'y': 2})
+                expect(self.page.get_by_role('button', name='Done' if name == 'Edit' else 'Edit', exact=True)).to_be_visible()
+        import json
+        (OUT / 'edit-hit-area.json').write_text(json.dumps(measurements, indent=2))
+
     def test_home_enters_historical_demo(self):
         self.open('/')
         link = self.page.locator('.s1-doors a').filter(has_text='Trading')
@@ -158,7 +199,8 @@ class DemoBrowser(unittest.TestCase):
 
 if __name__ == '__main__':
     if os.environ.get('DEMO_BASELINE') == '1':
-        result = unittest.TextTestRunner(verbosity=2).run(unittest.defaultTestLoader.loadTestsFromTestCase(DemoBrowser))
+        suite = unittest.TestSuite(test for test in unittest.defaultTestLoader.loadTestsFromTestCase(DemoBrowser) if 'edit_button_has_a_full' not in test.id())
+        result = unittest.TextTestRunner(verbosity=2).run(suite)
         expected = result.testsRun == 4 and len(result.failures) == 4 and not result.errors
         print('EXPECTED BASELINE: four missing behaviors reproduced' if expected else 'UNEXPECTED BASELINE RESULT')
         raise SystemExit(0 if expected else 1)

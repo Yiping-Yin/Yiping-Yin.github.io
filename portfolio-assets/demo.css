@@ -19,6 +19,7 @@
 .demo-strategy-intro h2 { margin:0 0 8px; font-size:18px; line-height:1.4; }
 .demo-strategy-intro p { margin:4px 0; font-size:13px; line-height:1.6; }
 .demo-strategy-intro .demo-source-note { color:var(--muted); }
+.ev-page .ev-pane-head { height:auto; min-height:44px; }
 .ev-page .ev-edit-toggle { display:inline-flex; align-items:center; justify-content:center; min-width:44px; min-height:44px; background:transparent; color:var(--ink); border:0; font:13px var(--font-text); cursor:pointer; }
 .ev-source[data-editing="false"] textarea { display:none; }
 .ev-source[data-editing="false"] .ev-code { display:block; pointer-events:auto; user-select:text; }
