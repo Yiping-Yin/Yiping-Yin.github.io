@@ -17,6 +17,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -28,12 +29,18 @@ jobs:
           python -m pip install playwright==1.57.0
           python -m playwright install --with-deps chromium
       - name: Reproduce all four original browser regressions
+        env:
+          BASELINE_SHA: 7acdc4732ce09294bc21f27c9b688484ef2fc7f5
         run: |
           set -euo pipefail
           mkdir -p qa/four-fixes
-          if ! grep -q '<!-- public-four-fixes:v1 -->' index.html; then
-            python tests/four_fixes_browser.py --expect-regressions 2>&1 | tee qa/four-fixes/before.txt
-          fi
+          baseline=$(mktemp -d)
+          trap 'rm -rf "$baseline"' EXIT
+          git archive "$BASELINE_SHA" | tar -x -C "$baseline"
+          cp tests/four_fixes_browser.py "$baseline/tests/four_fixes_browser.py"
+          printf '%s\n' "$BASELINE_SHA" > qa/four-fixes/baseline-commit.txt
+          export FOUR_FIXES_EVIDENCE="$PWD/qa/four-fixes/baseline"
+          python "$baseline/tests/four_fixes_browser.py" --expect-regressions 2>&1 | tee qa/four-fixes/before.txt
       - name: Generate only the four approved fixes
         run: |
           python scripts/apply_public_four_fixes.py
@@ -52,7 +59,7 @@ jobs:
       - name: Mobile journeys and all existing browser regressions
         run: |
           set -euo pipefail
-          for t in four_fixes_browser p1_browser p2_browser copy_browser closeout_browser; do
+          for t in four_fixes_review_test four_fixes_browser p1_browser p2_browser copy_browser closeout_browser; do
             python "tests/$t.py" 2>&1 | tee "qa/four-fixes/$t.txt"
           done
       - uses: actions/upload-artifact@v4
