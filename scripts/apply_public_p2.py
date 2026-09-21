@@ -66,7 +66,7 @@ def transform(name,text,runs):
 def apply(root=ROOT,check=False):
     root=Path(root);runs=run_map(root)
     updates={n:transform(n,(root/n).read_text(encoding='utf-8'),runs) for n in ['index.html','profile.html','lab.html']}
-    updates.update(pages())
+    updates.update({n:t.replace('/portfolio-assets/comparison-page.mjs?v=p2-1', '/portfolio-assets/comparison-page.mjs?v=p2-2') for n,t in pages().items()})
     sitemap=(root/'sitemap.xml').read_text()
     for n in pages():
         url='https://yiping-yin.github.io/'+n
@@ -74,11 +74,11 @@ def apply(root=ROOT,check=False):
     updates['sitemap.xml']=sitemap
     release=json.loads((root/'release.json').read_text())
     hashes={n:hashlib.sha256(t.encode('utf-8')).hexdigest() for n,t in updates.items()}
-    for name in ['portfolio-assets/comparison-model.mjs','portfolio-assets/comparison-page.mjs','portfolio-assets/home-runs.mjs','portfolio-assets/p2.css']:
+    for name in ['portfolio-assets/comparison-model.mjs','portfolio-assets/comparison-page.mjs','portfolio-assets/home-runs.mjs','portfolio-assets/p2.css','portfolio-assets/chart-ticks.mjs']:
         hashes[name]=hashlib.sha256((root/name).read_bytes()).hexdigest()
     # Keep P1 independently reproducible and preserve original engine/tape provenance.
     for n in ['index.html','profile.html','lab.html']:release['publicEnhancements']['files'][n]=hashes[n]
-    release['publicP2']={'version':'p2-20260921-v1','baseCommit':BASE,'scope':['P2-01','P2-02','P2-03'],'files':hashes,'note':'Read-only public evidence views. Engine, tapes, submitted sources and published runs are unchanged.'}
+    release['publicP2']={'version':'p2-20260921-v2','baseCommit':BASE,'scope':['P2-01','P2-02','P2-03'],'files':hashes,'note':'Read-only public evidence views. Engine, tapes, submitted sources and published runs are unchanged.'}
     updates['release.json']=json.dumps(release,indent=2,ensure_ascii=False)+'\n'
     changed=[n for n,t in updates.items() if not (root/n).exists() or (root/n).read_text(encoding='utf-8')!=t]
     if check:

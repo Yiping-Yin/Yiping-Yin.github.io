@@ -16,6 +16,9 @@ python tests/p2_acceptance.py
 node --test tests/source-export.test.mjs tests/comparison.test.mjs
 python tests/p1_browser.py
 python tests/p2_browser.py
+node --test tests/chart-ticks.test.mjs
+python tests/release_verifier_test.py
+python tests/closeout_browser.py
 ```
 
 Browser checks use Python Playwright 1.57.0 and Chromium. The generator rejects missing P1 markup, unexpected hero identities and a changed 15-run set; do not silence these checks when updating a snapshot. Review the integration when the upstream format changes. Both generators are idempotent on the final public pages.
@@ -30,7 +33,7 @@ Browser checks use Python Playwright 1.57.0 and Chromium. The generator rejects 
 
 The comparator verifies both published data files against `release.json`, checks each source digest, decodes only the documented six-number v1 equity tuples and independently reconciles recorded summaries with the full path/fills. It rejects differences in symbol, tape, time window, unit, initial capital, execution policy, runtime source digests, costs, position limits or benchmark. Missing matching evidence does not count as equality.
 
-The SVG contains all 390 recorded observations, with no smoothing or resampling. A is solid, B dashed and the common benchmark dotted. Equity includes idle cash; the y-axis is fitted and labelled in USD or SIM. Every numerical difference is B minus A, with return/drawdown differences in percentage points. Minute labels use the source bar's open time; values are completed-bar equity. Slider and full HTML table provide keyboard/touch access without hover.
+The SVG contains all 390 recorded observations, with no smoothing or resampling. A is solid, B dashed and the common benchmark dotted. Time labels use 2–4 ticks according to plot width; all observations remain in the paths and table. Keep `portfolio-assets/chart-ticks.mjs` when reapplying P2. Equity includes idle cash; the y-axis is fitted and labelled in USD or SIM. Every numerical difference is B minus A, with return/drawdown differences in percentage points. Minute labels use the source bar's open time; values are completed-bar equity. Slider and full HTML table provide keyboard/touch access without hover.
 
 `release.json.publicP2` records the new public files separately from original tape, runtime and hero provenance. P1 page hashes are updated for shared pages. Original trading bundles, data and published runs must remain byte-identical unless separately reviewed.
 
