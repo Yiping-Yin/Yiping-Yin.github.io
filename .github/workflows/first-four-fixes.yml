@@ -1,0 +1,100 @@
+name: First four audit fixes
+on:
+  push:
+    branches: [upgrade/first-four-fixes-20260921]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: first-four-fixes-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install isolated browser test dependency
+        run: |
+          python -m pip install playwright==1.57.0
+          python -m playwright install --with-deps chromium
+      - name: Reproduce all four original browser regressions
+        run: |
+          set -euo pipefail
+          mkdir -p qa/four-fixes
+          if ! grep -q '<!-- public-four-fixes:v1 -->' index.html; then
+            python tests/four_fixes_browser.py --expect-regressions 2>&1 | tee qa/four-fixes/before.txt
+          fi
+      - name: Generate only the four approved fixes
+        run: |
+          python scripts/apply_public_four_fixes.py
+          python scripts/apply_public_p1.py --check
+          python scripts/apply_public_p2.py --check
+          python scripts/apply_public_copy.py --check
+          python scripts/apply_public_four_fixes.py --check
+          git diff --check
+      - name: Static contracts, reproducibility and all existing unit regressions
+        run: |
+          set -euo pipefail
+          for t in four_fixes_acceptance four_fixes_generator_test p1_acceptance p2_acceptance copy_acceptance release_verifier_test; do
+            python "tests/$t.py" 2>&1 | tee "qa/four-fixes/$t.txt"
+          done
+          node --test tests/*.test.mjs 2>&1 | tee qa/four-fixes/node.txt
+      - name: Mobile journeys and all existing browser regressions
+        run: |
+          set -euo pipefail
+          for t in four_fixes_browser p1_browser p2_browser copy_browser closeout_browser; do
+            python "tests/$t.py" 2>&1 | tee "qa/four-fixes/$t.txt"
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: first-four-fixes-evidence
+          path: qa/
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: first-four-fixes-generated
+          path: |
+            index.html
+            profile.html
+            lab.html
+            training.html
+            release.json
+            scripts/verify_public_release.py
+          retention-days: 14
+  record-candidate:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/upgrade/first-four-fixes-20260921'
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: first-four-fixes-generated
+          path: /tmp/first-four-fixes-generated
+      - name: Record accepted files on the candidate branch only
+        run: |
+          set -euo pipefail
+          for f in index.html profile.html lab.html training.html release.json scripts/verify_public_release.py; do
+            cp "/tmp/first-four-fixes-generated/$f" "$f"
+            git add "$f"
+          done
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m "Record accepted first four audit fixes (run ${GITHUB_RUN_ID})"
+          git push origin HEAD:refs/heads/upgrade/first-four-fixes-20260921

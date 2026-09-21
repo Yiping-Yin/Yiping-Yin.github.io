@@ -1,0 +1,17 @@
+/* Four approved audit fixes; inherit existing colors and typography. */
+.lab-phone-featured { margin: 16px 0 8px; padding: 16px 0; border-block: var(--thin) solid var(--line); }
+.lab-phone-featured h3 { margin: 0; font-size: var(--t-16); color: var(--ink); }
+.lab-phone-featured .p2-case-entry { display: flex; align-items: center; min-height: 44px; margin: 4px 0 0; font-size: var(--t-13); }
+.lab-phone-featured .p1-evidence-links { margin: 0; }
+.lab-phone-featured a:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+#project-algothon .evaluation-comparisons { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; }
+#project-algothon .evaluation-comparisons p { margin: 0; font-size: var(--t-13); line-height: 1.6; }
+
+@media (max-width: 700px) {
+  .training-app { --desk-rail: 106px; }
+  .deskrail { display: grid; grid-template-columns: minmax(0, 1fr); height: auto; gap: 8px; padding: 0 14px 10px; overflow: visible; }
+  .deskrail nav { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; min-width: 0; width: 100%; }
+  .deskrail-market { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); min-width: 0; width: 100%; }
+  .deskrail nav a, .deskrail-market a { box-sizing: border-box; height: 44px; min-height: 44px; padding: 0 6px; }
+  .deskrail-mark, .deskrail-end { display: none; }
+}
