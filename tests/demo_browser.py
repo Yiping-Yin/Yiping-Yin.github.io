@@ -48,9 +48,25 @@ class DemoBrowser(unittest.TestCase):
         self.assertEqual(self.posts, [])
 
     def capture(self, name):
-        # Capture from the document top so sticky headers do not appear halfway
-        # through a full-page image after an interaction scrolled the viewport.
-        self.page.evaluate("window.scrollTo({top: 0, left: 0, behavior: 'instant'})")
+        # Keyboard focus and native details expansion can still have a pending
+        # scroll/anchor adjustment after the open attribute is observable. Let
+        # that settle before positioning the capture, not after it. No page
+        # styles, focused elements or interaction assertions are changed.
+        state = self.page.evaluate('''async () => {
+            let previous = window.scrollY, stable = 0, frames = 0;
+            for (; frames < 90 && stable < 3; frames++) {
+                await new Promise(requestAnimationFrame);
+                const current = window.scrollY;
+                stable = current === previous ? stable + 1 : 0;
+                previous = current;
+            }
+            window.scrollTo({top: 0, left: 0, behavior: 'instant'});
+            await new Promise(requestAnimationFrame);
+            await new Promise(requestAnimationFrame);
+            return {frames, settled: stable >= 3, y: window.scrollY};
+        }''')
+        print(f'Capture {name}: {state}')
+        self.assertTrue(state['settled'], 'Native scrolling did not settle before capture')
         self.page.wait_for_function('window.scrollY === 0')
         self.page.screenshot(path=str(OUT / name), full_page=True)
 
