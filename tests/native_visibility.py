@@ -3,7 +3,6 @@ A separate headed process lets actual tab activation produce visibilitychange.
 """
 import base64
 import json
-import os
 from pathlib import Path
 import subprocess
 import tempfile
@@ -16,10 +15,10 @@ def observe_native_replay(executable, url, out):
     out.mkdir(parents=True, exist_ok=True)
     errors = []
     with tempfile.TemporaryDirectory() as tmp, (out/'native-browser.log').open('w') as log:
-        args = [executable, '--no-first-run', '--no-default-browser-check',
+        # Match Playwright's isolated CI launch; these runner images do not
+        # provide Chromium's setuid/user-namespace sandbox. Test pages only.
+        args = [executable, '--no-sandbox', '--no-first-run', '--no-default-browser-check',
                 '--remote-debugging-port=0', '--user-data-dir='+tmp, 'about:blank']
-        if hasattr(os, 'geteuid') and os.geteuid() == 0:
-            args.insert(1, '--no-sandbox')  # Root-only local test containers.
         process = subprocess.Popen(args, stdout=log, stderr=log)
         ws = None
         try:
