@@ -287,14 +287,15 @@
   "publicQuality": {
     "version": "quality-20260921-v1",
     "files": {
-      "portfolio-assets/training-quality-v1.js": "1ba0d8367534500f724c49fe2600b55bf9bbb0be0d5ebf405504d5ae5eb4089e",
+      "portfolio-assets/training-quality-v1.js": "5327cdbddf8f53c309ed1f4a48093db644553abb1ed0e05906f83c84777d8da8",
       "portfolio-assets/review-quality-v1.js": "12d310fd94d7c64c648de3cd1f5f5874379fc37c83f949f06e102c736811f7b8",
       "portfolio-assets/market-quality-v1.js": "d3eaf66af70d0cd9e266db8836c0c50e16157b6a12f74fb1cba2245d23bf4155",
       "portfolio-assets/quality-model.mjs": "7cd6386025f7f1329178b6b7ebbae9b870ed3c00b2e421a15f6738a186746651",
       "portfolio-assets/quality-ui.mjs": "0ff0bad79c1dc253a75cae521fbc51bd2e4486c97c71022b0b88e75fbc21c4f1",
       "portfolio-assets/quality.css": "8269207bd10d05bbc4e245925b9ac097ff51846be09bf40129ddb487acf8b89c",
       "portfolio-assets/clean.css": "59504555efa1b66408dc186632db5bfd6d879821469e94ccb2d3f7efdad80206",
-      "portfolio-assets/playback-lifecycle.mjs": "bca21ac3b4be8269ba0451c4e64b50b4361f045c47d8f681d84ae528ae8549d6"
+      "portfolio-assets/playback-lifecycle.mjs": "bca21ac3b4be8269ba0451c4e64b50b4361f045c47d8f681d84ae528ae8549d6",
+      "portfolio-assets/plot-viewport.mjs": "26da8b6d6fb328af74ee6a41d830813d2e8cb396e16a89a4e27de06fa6692686"
     },
     "note": "Presentation-only: consistent entrances, chronological drawdown labels, public replay bookmarks and narrow-screen reading. Original inputs and results are unchanged."
   }
