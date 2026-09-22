@@ -1,5 +1,5 @@
 """Real browser layout, navigation, theme and foreground/background regressions."""
-import functools, http.server, json, os, subprocess, tempfile, threading, time, unittest
+import functools, http.server, json, sys, threading, unittest
 from pathlib import Path
 from playwright.sync_api import sync_playwright, expect
 ROOT = Path(__file__).resolve().parents[1]
@@ -97,46 +97,21 @@ class DetailBrowser(unittest.TestCase):
             p.locator('#published-runs>summary').click(); expect(p.locator('#published-runs')).to_have_attribute('open','')
             p.screenshot(path=str(OUT/'home-noscript-320.png'),full_page=True)
     def test_hidden_tab_pauses_without_automatic_restart(self):
-        # Independent native Chromium, not a spoofed visibilitychange or hidden property.
-        with tempfile.TemporaryDirectory() as profile:
-            proc=subprocess.Popen([self.pw.chromium.executable_path,'--no-sandbox','--no-first-run','--no-default-browser-check','--remote-debugging-port=0','--user-data-dir='+profile,'about:blank'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
-            remote=None
-            try:
-                portfile=Path(profile)/'DevToolsActivePort'
-                for _ in range(100):
-                    if portfile.exists(): break
-                    time.sleep(.1)
-                self.assertTrue(portfile.exists(),'native browser did not expose its debugging port')
-                remote=self.pw.chromium.connect_over_cdp('http://127.0.0.1:'+portfile.read_text().splitlines()[0])
-                c=remote.contexts[0]; p=c.pages[0]
-                p.goto(self.base+'/training.html?market=historical#/market?view=replay&run='+RUN,wait_until='networkidle')
-                slider=p.locator('input.tm-scrubber'); slider.focus(); slider.press('Home')
-                for _ in range(40): slider.press('ArrowRight')
-                expect(slider).to_have_value('40')
-                p.get_by_role('button',name='Play replay',exact=True).click()
-                p.wait_for_function('Number(document.querySelector(".tm-scrubber").value)>40')
-                other=c.new_page(); other.goto(self.base+'/profile.html'); other.bring_to_front()
-                p.wait_for_function('document.hidden===true')
-                time.sleep(.25); hidden=int(p.locator('.tm-scrubber').input_value()); time.sleep(1)
-                self.assertEqual(int(p.locator('.tm-scrubber').input_value()),hidden)
-                p.bring_to_front(); p.wait_for_function('document.hidden===false'); time.sleep(.6)
-                self.assertEqual(int(p.locator('.tm-scrubber').input_value()),hidden)
-                expect(p.get_by_role('button',name='Play replay',exact=True)).to_be_visible()
-                p.get_by_role('button',name='Play replay',exact=True).click()
-                p.wait_for_function('(n)=>Number(document.querySelector(".tm-scrubber").value)>n',arg=hidden)
-                (OUT/'background-playback.json').write_text(json.dumps({'hiddenCursor':hidden,'resumedCursor':int(p.locator('.tm-scrubber').input_value()),'realVisibility':True}))
-                # Manual tape uses the other controller and must also remain paused on return.
-                p.goto(self.base+'/training.html?market=historical#/market',wait_until='networkidle')
-                p.get_by_role('button',name='Play the tape',exact=True).click()
-                expect(p.get_by_role('button',name='Pause the tape',exact=True)).to_be_visible()
-                other.bring_to_front(); p.wait_for_function('document.hidden===true'); time.sleep(.6)
-                expect(p.get_by_role('button',name='Play the tape',exact=True)).to_be_visible()
-                p.bring_to_front(); p.wait_for_function('document.hidden===false'); time.sleep(.6)
-                expect(p.get_by_role('button',name='Play the tape',exact=True)).to_be_visible()
-            finally:
-                if remote: remote.close()
-                if proc.poll() is None: proc.terminate()
-                try: proc.wait(timeout=5)
-                except subprocess.TimeoutExpired: proc.kill(); proc.wait()
+        # Raw CDP avoids Playwright's renderer-focus emulation in background tabs.
+        sys.path.insert(0, str(ROOT/'tests'))
+        from native_visibility import observe_native_replay
+        pack=json.loads((ROOT/'data/published-runs-historical.json').read_text())
+        run=next(r for r in pack['markets']['historical']['runs'] if r['result']['runId']==RUN)['result']
+        url=self.base+f'/training.html?market=historical#/market?view=replay&run={RUN}&tape={run["datasetChecksum"]}&minute=40'
+        result=observe_native_replay(self.pw.chromium.executable_path,url,OUT)
+        self.assertTrue(result['hidden']); self.assertFalse(result['returned_hidden'])
+        self.assertEqual(result['page_errors'],[])
+        self.assertEqual(result['cursor_hidden_first'],result['cursor_hidden_second'])
+        self.assertEqual(result['cursor_returned'],result['cursor_hidden_second'])
+        self.assertTrue(result['paused'])
+        self.assertGreater(result['cursor_resumed'],result['cursor_returned'])
+        self.assertTrue(result['manual_hidden_paused'])
+        self.assertTrue(result['manual_returned_paused'])
+        self.assertTrue(result['manual_explicit_resume'])
 
 if __name__=='__main__': unittest.main(verbosity=2)
