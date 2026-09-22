@@ -17,22 +17,22 @@ def text(html):
     parser=Text(); parser.feed(html); return ' '.join(parser.parts)
 
 class CopyAcceptance(unittest.TestCase):
-    def test_home_primary_disclosure_is_short(self):
+    def test_home_primary_disclosure_is_removed(self):
         page=(ROOT/'index.html').read_text()
-        self.assertIn('class="th-say th-say-wide">Historical prices · Simulated trading</p>',page)
+        self.assertNotIn('class="th-say',page)
         self.assertNotIn('Not live · Not advice',page)
-    def test_static_pages_have_keyboard_native_details(self):
+    def test_static_pages_omit_redundant_explanations(self):
         for name in ['index.html','profile.html','lab.html','training.html']:
             page=(ROOT/name).read_text()
-            self.assertIn('<summary>Data &amp; simulation details</summary>',page,name)
-            self.assertIn('No live market connection or real orders.',page,name)
+            self.assertNotIn('<summary>Data &amp; simulation details</summary>',page,name)
+            self.assertNotIn('No live market connection or real orders.',page,name)
             self.assertNotIn('synthetic Optibook tapes',page,name)
     def test_training_describes_local_execution_without_execution_claim(self):
         page=(ROOT/'training.html').read_text()
         self.assertIn('an interactive trading simulator',page)
-        self.assertIn('Python execution requires the local P.Book runtime.',page)
-        self.assertIn('not investment advice',page)
-        self.assertIn('390 one-minute bars',page)
+        self.assertIn('Python execution requires the local P.Book runtime.',(ROOT/'README.md').read_text())
+        self.assertIn('not investment advice',(ROOT/'README.md').read_text())
+        self.assertIn('390 one-minute bars',(ROOT/'README.md').read_text())
     def test_research_and_numeric_qualifications_stay(self):
         page=(ROOT/'research-algothon.html').read_text()
         for value in ['not a confidence interval','not an investment return','500-day window','1,085.169047']:
@@ -42,9 +42,9 @@ class CopyAcceptance(unittest.TestCase):
         page=(ROOT/'profile.html').read_text()
         self.assertIn('one-hour Optibook simulation',page)
         self.assertIn('1,222 lots',page)
-    def test_training_notes_use_desk_theme(self):
+    def test_training_has_no_empty_notes_footer(self):
         page=(ROOT/'training.html').read_text()
-        self.assertIn('<footer class="pt-desk copy-site-notes"',page)
+        self.assertNotIn('copy-site-notes',page)
     def test_original_inputs_and_data_have_not_changed(self):
         manifest=ROOT/'scripts/presentation_copy.json'
         self.assertTrue(manifest.exists(),'Reviewed copy map is missing')

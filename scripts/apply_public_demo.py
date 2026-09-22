@@ -10,6 +10,7 @@ from html import escape
 import json
 from pathlib import Path
 import re
+from public_clean import studio as clean_studio
 
 ROOT = Path(__file__).resolve().parents[1]
 MARK = '<!-- public-demo:v1 -->'
@@ -74,7 +75,7 @@ def derive_studio(source):
     source = once(source, old, new)
     source = once(source, 'return window.addEventListener("hashchange",h),()=>window.removeEventListener("hashchange",h)', 'return window.addEventListener("hashchange",h),window.addEventListener("popstate",h),()=>{window.removeEventListener("hashchange",h);window.removeEventListener("popstate",h)}')
     source = once(source, 'e.jsx(q,{evidence:g,missing:s.missing,initialTaskId:p},p||"default")', 'e.jsx(q,{evidence:g,missing:s.missing,initialTaskId:p,onTaskChange:m})')
-    return source
+    return clean_studio(source)
 
 
 def selected_runs(root):

@@ -200,10 +200,10 @@
       "P1-03"
     ],
     "files": {
-      "index.html": "f55b127d0626800b7861122f456dbeaf653a8000ec47aa2740e248e2cc106d2e",
-      "profile.html": "723312647fe403dd2f0f432210f58d83ab5fcea4f2968dfed108308d1cac4687",
-      "lab.html": "812d96985c718a54bbf3e4a1565c134044e5a56067aabdcc86ee980eba78c0b4",
-      "training.html": "c49920872174c92782d92d981a82db7748f3a02e9791410c3b3c10c432014c69",
+      "index.html": "722106442a0e6ae812765c34813995154d3c7d3bec461be1a53c1af410c97526",
+      "profile.html": "fc9292aba49b9dc529dc1368f7d5a36d19f578e7eab7fb98955ee4e106df53cd",
+      "lab.html": "f5dc6289d59694d88b17458671a2f673afaecc7933ed21d5eac06fb663897554",
+      "training.html": "983b8c3b0701ee0cf751e6d1c02c4904da53f61b5cc9f304fd5fec67ac25c0e3",
       "portfolio-assets/source-export.mjs": "1d5f235933c088d83cc88a430ebd5c19dd49737387e576d58282a5a520f21655",
       "portfolio-assets/p1-evidence.css": "ac9549e86ce782a3f52b279e1a47ee514fe98ebc317e6efdc78bc0c394c93284"
     },
@@ -218,9 +218,9 @@
       "P2-03"
     ],
     "files": {
-      "index.html": "f55b127d0626800b7861122f456dbeaf653a8000ec47aa2740e248e2cc106d2e",
-      "profile.html": "723312647fe403dd2f0f432210f58d83ab5fcea4f2968dfed108308d1cac4687",
-      "lab.html": "812d96985c718a54bbf3e4a1565c134044e5a56067aabdcc86ee980eba78c0b4",
+      "index.html": "722106442a0e6ae812765c34813995154d3c7d3bec461be1a53c1af410c97526",
+      "profile.html": "fc9292aba49b9dc529dc1368f7d5a36d19f578e7eab7fb98955ee4e106df53cd",
+      "lab.html": "f5dc6289d59694d88b17458671a2f673afaecc7933ed21d5eac06fb663897554",
       "compare.html": "a88aed1748326be400cf54f38180d014142409eee15411cc835bbdcd05054124",
       "research-algothon.html": "5e7f294b5fc5b260faa5ecc919d9735dd7f56b2a81c783b010b8f8274d744754",
       "sitemap.xml": "1963637c4fd3855d1ec1c4ef7fb54648a6fd4353fbd2613e1bfb395c0ef38ff5",
@@ -236,10 +236,10 @@
     "version": "copy-20260921-v1",
     "baseCommit": "9325be3f3b0cef5e6aadc2a44d6e1e695c53151e",
     "files": {
-      "index.html": "f55b127d0626800b7861122f456dbeaf653a8000ec47aa2740e248e2cc106d2e",
-      "profile.html": "723312647fe403dd2f0f432210f58d83ab5fcea4f2968dfed108308d1cac4687",
-      "lab.html": "812d96985c718a54bbf3e4a1565c134044e5a56067aabdcc86ee980eba78c0b4",
-      "training.html": "c49920872174c92782d92d981a82db7748f3a02e9791410c3b3c10c432014c69",
+      "index.html": "722106442a0e6ae812765c34813995154d3c7d3bec461be1a53c1af410c97526",
+      "profile.html": "fc9292aba49b9dc529dc1368f7d5a36d19f578e7eab7fb98955ee4e106df53cd",
+      "lab.html": "f5dc6289d59694d88b17458671a2f673afaecc7933ed21d5eac06fb663897554",
+      "training.html": "983b8c3b0701ee0cf751e6d1c02c4904da53f61b5cc9f304fd5fec67ac25c0e3",
       "portfolio-assets/training-copy-v1.js": "ee57ceacf9a523e3ae68debcf7aca68d1c2d7eee8296931f9df49bc6da79efe9",
       "portfolio-assets/market-copy-v1.js": "6ba9e8109265993432804cbfdb2c3496c0238db161095802a11e13ca0cb91c87",
       "portfolio-assets/review-copy-v1.js": "bb903e3c739ed9c38948817b9db154eb96f46e5a5fc598b0dd72b89aee3cc880",
@@ -258,10 +258,10 @@
       "Explicit statistical comparators"
     ],
     "files": {
-      "index.html": "f55b127d0626800b7861122f456dbeaf653a8000ec47aa2740e248e2cc106d2e",
-      "profile.html": "723312647fe403dd2f0f432210f58d83ab5fcea4f2968dfed108308d1cac4687",
-      "lab.html": "812d96985c718a54bbf3e4a1565c134044e5a56067aabdcc86ee980eba78c0b4",
-      "training.html": "c49920872174c92782d92d981a82db7748f3a02e9791410c3b3c10c432014c69",
+      "index.html": "722106442a0e6ae812765c34813995154d3c7d3bec461be1a53c1af410c97526",
+      "profile.html": "fc9292aba49b9dc529dc1368f7d5a36d19f578e7eab7fb98955ee4e106df53cd",
+      "lab.html": "f5dc6289d59694d88b17458671a2f673afaecc7933ed21d5eac06fb663897554",
+      "training.html": "983b8c3b0701ee0cf751e6d1c02c4904da53f61b5cc9f304fd5fec67ac25c0e3",
       "portfolio-assets/four-fixes.css": "817e17e92a92b2b1626296cc26e76554088af04f5bd0a310dd0d926e759e90f5"
     },
     "catalogueSHA256": "1e87a5c5b705d806b92c6ab9e62a374b22833ab9f7105d095b4c4dad186bd3fc",
@@ -279,7 +279,7 @@
     "version": "demo-20260921-v1",
     "files": {
       "portfolio-assets/training-demo-v1.js": "f7f43e91b51bff04cc8eea608312fbe96390dfd5e1315c7259d6f3a1e7284fff",
-      "portfolio-assets/studio-demo-v1.js": "61fbc1a798553557010eb58192ae1be54ba84116fae7b0453f5bc5fc57468e68",
+      "portfolio-assets/studio-demo-v1.js": "37de95214010dd458a4c230290ab2346bd226be6ffe16ed013880b8f8747d1ff",
       "portfolio-assets/demo.css": "55f36a7168d2ae599a9f0d06a4c1325cd0745c6d1ca7d8dc98ffc8032e8035ce"
     },
     "note": "Four approved presentation changes. Original runtime bundles, strategy sources, tapes and all published results are retained."
@@ -287,12 +287,13 @@
   "publicQuality": {
     "version": "quality-20260921-v1",
     "files": {
-      "portfolio-assets/training-quality-v1.js": "0f564022f62d28ce6a22edc117834654657175e60b33df15d584ce0a063a0353",
-      "portfolio-assets/review-quality-v1.js": "7eab1956bdf494bcea8970ddee72cadbc4141170897a3a7f6ac810fb44e1119d",
+      "portfolio-assets/training-quality-v1.js": "41571b7db02a65da48d5ec031ab2841f93fe48999e5aeb0bcf7126db6892beae",
+      "portfolio-assets/review-quality-v1.js": "12d310fd94d7c64c648de3cd1f5f5874379fc37c83f949f06e102c736811f7b8",
       "portfolio-assets/market-quality-v1.js": "e26747b0b998e306969f2bd7bfb7edc50f55b7c3c7e1225027e8512ce525584d",
       "portfolio-assets/quality-model.mjs": "7cd6386025f7f1329178b6b7ebbae9b870ed3c00b2e421a15f6738a186746651",
       "portfolio-assets/quality-ui.mjs": "0ff0bad79c1dc253a75cae521fbc51bd2e4486c97c71022b0b88e75fbc21c4f1",
-      "portfolio-assets/quality.css": "8269207bd10d05bbc4e245925b9ac097ff51846be09bf40129ddb487acf8b89c"
+      "portfolio-assets/quality.css": "8269207bd10d05bbc4e245925b9ac097ff51846be09bf40129ddb487acf8b89c",
+      "portfolio-assets/clean.css": "31f3c2cb53d444c2513b87a5b6709871062a46c228d45c38342d43bbcae069fd"
     },
     "note": "Presentation-only: consistent entrances, chronological drawdown labels, public replay bookmarks and narrow-screen reading. Original inputs and results are unchanged."
   }
