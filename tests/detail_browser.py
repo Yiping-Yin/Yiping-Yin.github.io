@@ -26,6 +26,8 @@ class DetailBrowser(unittest.TestCase):
     def tearDown(self):
         self.context.close(); self.assertEqual(self.errors,[]); self.assertEqual(self.failed,[])
     def open(self,path='/'):
+        # Each matrix cell needs a fresh document, not a hash-only SPA jump.
+        self.page.goto('about:blank')
         response=self.page.goto(self.base+path,wait_until='networkidle'); self.assertEqual(response.status,200)
     def no_overflow(self):
         self.assertFalse(self.page.evaluate('document.documentElement.scrollWidth > innerWidth+1'))
