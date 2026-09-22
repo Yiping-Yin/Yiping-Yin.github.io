@@ -39,6 +39,7 @@ jobs:
       - name: Assemble candidate or check committed PR files
         env:
           EVENT_NAME: ${{ github.event_name }}
+          SOURCE_BRANCH: ${{ github.head_ref || github.ref_name }}
         run: |
           set -euo pipefail
           mkdir -p qa/clean
@@ -54,11 +55,14 @@ jobs:
           for name in training-quality-v1 review-quality-v1 studio-demo-v1; do node --check "portfolio-assets/${name}.js"; done
           git diff --check
           if [ "$EVENT_NAME" = pull_request ]; then git diff --exit-code; fi
-          git diff --exit-code db4c7e336231c86d3dc564527d8fdf7af24200ee -- assets data portfolio-assets/terminal-hero.js portfolio-assets/terminal-hero.css portfolio-assets/market-quality-v1.js portfolio-assets/quality-ui.mjs portfolio-assets/quality-model.mjs
+          # This fixed snapshot bounds this cleanup, not unrelated future PRs.
+          if [ "$SOURCE_BRANCH" = 'fix/clean-presentation-20260922' ]; then
+            git diff --exit-code db4c7e336231c86d3dc564527d8fdf7af24200ee -- assets data portfolio-assets/terminal-hero.js portfolio-assets/terminal-hero.css portfolio-assets/market-quality-v1.js portfolio-assets/quality-ui.mjs portfolio-assets/quality-model.mjs
+          fi
       - name: Full static, unit and data verification
         run: |
           set -euo pipefail
-          for t in p1_acceptance p2_acceptance copy_acceptance four_fixes_acceptance four_fixes_generator_test release_verifier_test publication_integrity_test book_publication_test polish_acceptance polish_generator_test polish_review_test demo_acceptance quality_acceptance clean_acceptance; do
+          for t in p1_acceptance p2_acceptance copy_acceptance four_fixes_acceptance four_fixes_generator_test release_verifier_test publication_integrity_test book_publication_test polish_acceptance polish_generator_test polish_review_test demo_acceptance quality_acceptance clean_acceptance clean_workflow_test; do
             python "tests/$t.py" 2>&1 | tee "qa/clean/$t.txt"
           done
           node --test tests/*.test.mjs 2>&1 | tee qa/clean/node.txt
