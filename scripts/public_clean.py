@@ -90,4 +90,5 @@ def page(name, text):
         text = text[:match.start(1)] + json.dumps(imports, separators=(',', ':')) + text[match.end(1):]
         text = text.replace('crossorigin src="/portfolio-assets/training-quality-v1.js"',
                             'crossorigin src="/portfolio-assets/training-quality-v1.js?v=clean-1"')
-    return text
+    # Removing a whole component can leave indentation-only HTML lines.
+    return re.sub(r'(?m)^[ \t]+$', '', text)
