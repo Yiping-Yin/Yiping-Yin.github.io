@@ -1,0 +1,230 @@
+diff --git a/portfolio-assets/clean.css b/portfolio-assets/clean.css
+index 4702b66..2efbdee 100644
+--- a/portfolio-assets/clean.css
++++ b/portfolio-assets/clean.css
+@@ -2,3 +2,47 @@
+ [data-clean="v1"] .terminal-hero .th-footer { justify-content: flex-end; }
+ [data-clean="v1"] .ev-disclosure { justify-content: flex-end; }
+ [data-clean="v1"] .d-r thead th:first-child { white-space: nowrap; }
++
++/* Detail pass: same colours and components, a clearer reading rhythm. */
++[data-clean="v1"] .demo-featured-runs article { display:flex; flex-direction:column; }
++[data-clean="v1"] .demo-featured-runs nav { margin-top:auto; padding-top:10px; gap:4px 16px; }
++[data-clean="v1"] .demo-featured-runs nav a { text-decoration:none; }
++[data-clean="v1"] .demo-featured-runs nav a:hover { text-decoration:underline; }
++[data-clean="v1"] .demo-run-outcome { margin-bottom:6px; }
++[data-clean="v1"] .demo-featured-runs article:last-child { padding-right:0; }
++[data-clean="v1"] .demo-archive>summary,
++[data-clean="v1"] .demo-run-rules>summary { padding-block:16px; }
++[data-clean="v1"] #current-run :is(p,code) { overflow-wrap:anywhere; }
++
++@media (min-width:701px) and (max-width:1000px) {
++  [data-clean="v1"] .terminal-hero .th-replay-tag { display:inline-flex; }
++}
++@media (max-width:700px) {
++  /* Width-bounded, rather than a near-full-screen chart on tall phones.
++     Keep the established depth solver's independent, fixed main-track input. */
++  [data-clean="v1"] .terminal-hero { --th-head:44px; height:clamp(450px,120vw,520px); }
++  [data-clean="v1"] .terminal-hero .th-terminal { grid-template-rows:96px minmax(0,1fr) 44px; padding-block:8px; row-gap:8px; }
++  [data-clean="v1"] .terminal-hero .th-header { flex-wrap:wrap; gap:0; }
++  [data-clean="v1"] .terminal-hero .th-tabs { flex:1 0 100%; justify-content:space-between; padding:4px; margin:0; }
++  [data-clean="v1"] .terminal-hero .th-tab { min-width:44px; padding-inline:9px; }
++  [data-clean="v1"] .terminal-hero .th-tab-name { font-size:12px; }
++  [data-clean="v1"] .terminal-hero .th-transport { width:100%; min-height:44px; justify-content:flex-end; gap:12px; }
++  [data-clean="v1"] .terminal-hero .th-replay-tag { display:inline-flex; order:-1; margin-right:auto; font-size:10px; }
++  [data-clean="v1"] .terminal-hero .th-clock-date { display:inline; }
++  [data-clean="v1"] .terminal-hero .th-clock-sep { display:inline; }
++  [data-clean="v1"] .terminal-hero .th-clock { font-size:10px; }
++  [data-clean="v1"] .terminal-hero .th-footer { min-height:44px; align-items:center; flex-wrap:nowrap; }
++  [data-clean="v1"] .terminal-hero .th-footer a { display:inline-flex; align-items:center; min-height:44px; padding:8px 0; font-size:13px; }
++  [data-clean="v1"] .terminal-hero .th-footer a::after { display:none; }
++  [data-clean="v1"] .demo-featured-runs article { padding-block:22px; }
++  [data-clean="v1"] :is(.demo-selection-note,.demo-run-description,.demo-run-outcome,.demo-featured-runs nav a,#current-run p) { font-size:14px; line-height:1.65; }
++  [data-clean="v1"] .demo-featured-runs nav { justify-content:space-between; gap:4px 12px; padding-top:8px; }
++  [data-clean="v1"] #current-run { padding-block:20px; }
++  /* The static fallback has a full, untrimmed ladder: allow it its natural
++     height instead of clipping data when the runtime is unavailable. */
++  :root:not(.js) [data-clean="v1"] .terminal-hero { height:auto; }
++  :root:not(.js) [data-clean="v1"] .terminal-hero .th-frame { height:auto; }
++  :root:not(.js) [data-clean="v1"] .terminal-hero .th-terminal { height:auto; grid-template-rows:96px auto 44px; }
++  :root:not(.js) [data-clean="v1"] .terminal-hero .th-main { grid-template-rows:auto auto; }
++  :root:not(.js) [data-clean="v1"] .terminal-hero .th-chart-panel { grid-template-rows:200px auto auto; }
++}
+ diff --git a/scripts/apply_public_demo.py b/scripts/apply_public_demo.py
+index 2953f9e..260a420 100644
+--- a/scripts/apply_public_demo.py
++++ b/scripts/apply_public_demo.py
+@@ -109,8 +109,8 @@ def featured_html(runs):
+         rows.append(f'''<article data-run-id="{ident}">
+ <p class="demo-run-market"><span data-demo-symbol>AAPL</span> · 10 Sep 2026</p>
+ <h3>{escape(run['title'])}</h3><p class="demo-run-description">{escape(DESCRIPTIONS[task])}</p>
+-<p class="demo-run-outcome">Net P&amp;L <b class="num-signed {tone}">{pnl:+.2f} USD</b><span>{metrics['fillCount']} fills</span></p>
+-<nav aria-label="{escape(run['title'])} example"><a href="{replay}">Replay</a><a href="{source}">Source</a><a href="{report}">Report</a></nav>
++<p class="demo-run-outcome">Net P&amp;L <b class="num-signed {tone}">{pnl:+.2f} USD</b><span>{metrics['fillCount']} {'fill' if metrics['fillCount'] == 1 else 'fills'}</span></p>
++<nav aria-label="{escape(run['title'])} example"><a href="{replay}">Watch replay</a><a href="{source}">View source</a><a href="{report}">Read report</a></nav>
+ </article>''')
+     rows.append('</section>')
+     return '\n'.join(rows)
+diff --git a/scripts/apply_public_quality.py b/scripts/apply_public_quality.py
+index 60bedaa..fbd17b7 100644
+--- a/scripts/apply_public_quality.py
++++ b/scripts/apply_public_quality.py
+@@ -37,7 +37,11 @@ def derive_training(source):
+ R.useEffect(()=>{if(!dt||!Zt?.published)return;const moment=qualityReadMoment(qualityHref,Zt);if(moment.status==="valid")Nn(moment.cursor);else if(moment.status==="invalid")Nn(dt.fills[0]?.barIndex||0)},[qualityHref,dt?.runId]);
+ '''
+     source = once(source, 'async function Qn(', hook + 'async function Qn(')
+-    return 'import {readReplayMoment as qualityReadMoment} from "./quality-model.mjs";\n' + clean_training(source)
++    source = once(source, 'const H=b.current,V=H.pause;',
++                  'const H=b.current,V=H.pause;R.useEffect(()=>pauseWhenHidden(V),[V]);')
++    source = once(source, 'window.setTimeout(()=>{H.run(!0)},1e3/k)',
++                  'window.setTimeout(()=>{if(!document.hidden)H.run(!0)},1e3/k)')
++    return 'import {pauseWhenHidden} from "./playback-lifecycle.mjs";\nimport {readReplayMoment as qualityReadMoment} from "./quality-model.mjs";\n' + clean_training(source)
+ 
+ def derive_review(source):
+     source = names(source)
+@@ -56,7 +60,11 @@ def derive_market(source):
+     source = names(source)
+     source = once(source, 'children:[D,m?.published&&te&&',
+                   'children:[D,e.jsx(QualityReplayShare,{entry:m,cursor:a,onPause:()=>j(!1),loading:T}),m?.published&&te&&')
+-    return 'import {ReplayShare as QualityReplayShare} from "./quality-ui.mjs";\n' + source
++    source = once(source, 'o.useEffect(()=>{j(!1)},[ee]),',
++                  'o.useEffect(()=>{j(!1)},[ee]),o.useEffect(()=>pauseWhenHidden(()=>j(!1)),[]),')
++    source = once(source, 'window.setInterval(()=>L(r=>Math.min(u,r+1)),1e3/U)',
++                  'window.setInterval(()=>{if(!document.hidden)L(r=>Math.min(u,r+1))},1e3/U)')
++    return 'import {pauseWhenHidden} from "./playback-lifecycle.mjs";\nimport {ReplayShare as QualityReplayShare} from "./quality-ui.mjs";\n' + source
+ 
+ def page(name, text):
+     # General entrances only. Exact-run URLs and explicit synthetic links survive.
+@@ -101,7 +109,7 @@ def apply(root=ROOT, check=False):
+     test = 'tests/demo_acceptance.py'
+     text = (root/test).read_text()
+     text = once(text, "self.assertEqual(imports['/portfolio-assets/training-copy-v1.js'], '/portfolio-assets/training-demo-v1.js')",
+-        "entry = '/portfolio-assets/training-quality-v1.js?v=clean-1' if 'public-clean:v1' in page else ('/portfolio-assets/training-quality-v1.js' if 'public-quality:v1' in page else '/portfolio-assets/training-demo-v1.js')\n        self.assertEqual(imports['/portfolio-assets/training-copy-v1.js'], entry)")
++        "entry = '/portfolio-assets/training-quality-v1.js?v=detail-1' if 'public-clean:v1' in page else ('/portfolio-assets/training-quality-v1.js' if 'public-quality:v1' in page else '/portfolio-assets/training-demo-v1.js')\n        self.assertEqual(imports['/portfolio-assets/training-copy-v1.js'], entry)")
+     text = once(text, "self.assertIn('crossorigin src=\"/portfolio-assets/training-demo-v1.js\"', page)", "self.assertIn('crossorigin src=\"' + entry + '\"', page)")
+     updates[test] = text
+     test = 'tests/copy_browser.py'
+@@ -115,7 +123,7 @@ def apply(root=ROOT, check=False):
+         for name in release[group]['files']:
+             if name in hashes: release[group]['files'][name] = hashes[name]
+     files = {name:digest for name,digest in hashes.items() if name.endswith('-quality-v1.js')}
+-    for name in ('quality-model.mjs','quality-ui.mjs','quality.css','clean.css'):
++    for name in ('quality-model.mjs','quality-ui.mjs','quality.css','clean.css','playback-lifecycle.mjs'):
+         path='portfolio-assets/'+name
+         files[path]=hashlib.sha256((root/path).read_bytes()).hexdigest()
+     release['publicQuality']={'version':'quality-20260921-v1','files':files,
+diff --git a/scripts/public_clean.py b/scripts/public_clean.py
+index f3f9eab..67900b3 100644
+--- a/scripts/public_clean.py
++++ b/scripts/public_clean.py
+@@ -7,7 +7,7 @@ import json
+ import re
+ 
+ MARK = '<!-- public-clean:v1 -->'
+-STYLE = '<link rel="stylesheet" href="/portfolio-assets/clean.css?v=clean-1">'
++STYLE = '<link rel="stylesheet" href="/portfolio-assets/clean.css?v=detail-1">'
+ PAGES = ('index.html', 'profile.html', 'lab.html', 'training.html')
+ 
+ 
+@@ -75,6 +75,16 @@ def page(name, text):
+         text, count = re.subn(r'<body(?=[\s>])', '<body data-clean="v1"', text, count=1)
+         if count != 1:
+             raise ValueError('Missing page body: '+name)
++    # Fine refinements remain in the existing presentation pipeline.
++    text = text.replace('/portfolio-assets/clean.css?v=clean-1', '/portfolio-assets/clean.css?v=detail-1')
++    if name == 'index.html':
++        text, count = re.subn(r'(<div class="th-footer"><a [^>]+>)(?:Training|Open full demo)( <span aria-hidden="true">→</span></a></div>)',
++                              r'\1Open full demo\2', text)
++        if count != 1:
++            raise ValueError('Expected one terminal handoff')
++    elif name == 'profile.html':
++        duplicate = ' The final technical result was 0.4 of one block’s standard error from the public-data replay mean, 3.7 points behind second place.'
++        text = text.replace(duplicate, '')
+     if name == 'training.html':
+         match = re.search(r'<script type="importmap">(.*?)</script>', text)
+         if not match:
+@@ -86,9 +96,13 @@ def page(name, text):
+             ('studio-demo-v1.js', ('studio-copy-v1.js','studio-details-v1.js','studio-demo-v1.js')),
+         ):
+             for alias in aliases:
+-                imports['imports']['/portfolio-assets/'+alias] = '/portfolio-assets/'+module+'?v=clean-1'
++                imports['imports']['/portfolio-assets/'+alias] = '/portfolio-assets/'+module+('?v=detail-1' if module=='training-quality-v1.js' else '?v=clean-1')
++        for alias in ('market-copy-v1.js', 'market-quality-v1.js'):
++            imports['imports']['/portfolio-assets/'+alias] = '/portfolio-assets/market-quality-v1.js?v=detail-1'
+         text = text[:match.start(1)] + json.dumps(imports, separators=(',', ':')) + text[match.end(1):]
+         text = text.replace('crossorigin src="/portfolio-assets/training-quality-v1.js"',
+-                            'crossorigin src="/portfolio-assets/training-quality-v1.js?v=clean-1"')
++                            'crossorigin src="/portfolio-assets/training-quality-v1.js?v=detail-1"')
++        text = text.replace('crossorigin src="/portfolio-assets/training-quality-v1.js?v=clean-1"',
++                            'crossorigin src="/portfolio-assets/training-quality-v1.js?v=detail-1"')
+     # Removing a whole component can leave indentation-only HTML lines.
+     return re.sub(r'(?m)^[ \t]+$', '', text)
+diff --git a/tests/clean_acceptance.py b/tests/clean_acceptance.py
+index f7695c7..1a49fc4 100644
+--- a/tests/clean_acceptance.py
++++ b/tests/clean_acceptance.py
+@@ -35,7 +35,7 @@ class CleanAcceptance(unittest.TestCase):
+     def test_changed_entry_and_imports_share_one_versioned_runtime(self):
+         text = (ROOT/'training.html').read_text()
+         imports = json.loads(re.search(r'<script type="importmap">(.*?)</script>', text)[1])['imports']
+-        entry = '/portfolio-assets/training-quality-v1.js?v=clean-1'
++        entry = '/portfolio-assets/training-quality-v1.js?v=detail-1'
+         self.assertIn('crossorigin src="'+entry+'"', text)
+         for name in ('training-copy-v1.js', 'training-demo-v1.js', 'training-quality-v1.js'):
+             self.assertEqual(imports['/portfolio-assets/'+name], entry)
+diff --git a/tests/demo_acceptance.py b/tests/demo_acceptance.py
+index 9c6bf9e..842f0e9 100644
+--- a/tests/demo_acceptance.py
++++ b/tests/demo_acceptance.py
+@@ -20,7 +20,7 @@ class DemoAcceptance(unittest.TestCase):
+             ident = run['result']['runId']
+             block = re.search(r'<article data-run-id="' + ident + r'">(.*?)</article>', text, re.S)[1]
+             self.assertIn(f"{run['result']['metrics']['netPnl']:+.2f} USD", block)
+-            self.assertIn(f"{run['result']['metrics']['fillCount']} fills", block)
++            self.assertIn(f"{run['result']['metrics']['fillCount']} {'fill' if run['result']['metrics']['fillCount'] == 1 else 'fills'}", block)
+             self.assertIn('source=' + run['taskId'], block)
+             self.assertIn('view=replay&amp;run=' + ident, block)
+         self.assertIn('Selected by method, not by return.', text)
+@@ -40,7 +40,7 @@ class DemoAcceptance(unittest.TestCase):
+             subprocess.run(['node', '--check', str(ROOT / 'portfolio-assets' / new)], check=True, capture_output=True)
+         page = (ROOT / 'training.html').read_text()
+         imports = json.loads(re.search(r'<script type="importmap">(.*?)</script>', page)[1])['imports']
+-        entry = '/portfolio-assets/training-quality-v1.js?v=clean-1' if 'public-clean:v1' in page else ('/portfolio-assets/training-quality-v1.js' if 'public-quality:v1' in page else '/portfolio-assets/training-demo-v1.js')
++        entry = '/portfolio-assets/training-quality-v1.js?v=detail-1' if 'public-clean:v1' in page else ('/portfolio-assets/training-quality-v1.js' if 'public-quality:v1' in page else '/portfolio-assets/training-demo-v1.js')
+         self.assertEqual(imports['/portfolio-assets/training-copy-v1.js'], entry)
+         self.assertIn('crossorigin src="' + entry + '"', page)
+ 
+diff --git a/tests/demo_browser.py b/tests/demo_browser.py
+index e76cd2e..3ac7e22 100644
+--- a/tests/demo_browser.py
++++ b/tests/demo_browser.py
+@@ -142,10 +142,10 @@ class DemoBrowser(unittest.TestCase):
+             ids = cards.evaluate_all('cards => cards.map(c => c.dataset.runId)')
+             self.assertEqual(len(set(ids)), 3)
+             for card in cards.all():
+-                replay = card.get_by_role('link', name='Replay', exact=True)
++                replay = card.get_by_role('link', name='Watch replay', exact=True)
+                 self.assertIn('market=historical', replay.get_attribute('href'))
+                 self.assertTrue(replay.get_attribute('href').endswith(card.get_attribute('data-run-id')))
+-                expect(card.get_by_role('link', name='Source', exact=True)).to_be_visible()
++                expect(card.get_by_role('link', name='View source', exact=True)).to_be_visible()
+             self.capture(f'home-folded-{width}.png')
+             archive = self.page.locator('#published-runs')
+             self.assertEqual(archive.evaluate('e => e.tagName'), 'DETAILS')
+diff --git a/tests/quality_acceptance.py b/tests/quality_acceptance.py
+index 94cbadb..04f2f73 100644
+--- a/tests/quality_acceptance.py
++++ b/tests/quality_acceptance.py
+@@ -17,9 +17,9 @@ class QualityAcceptance(unittest.TestCase):
+         for name,digest in {**inputs,**INPUTS}.items():self.assertEqual(hashlib.sha256((ROOT/name).read_bytes()).hexdigest(),digest,name)
+     def test_one_runtime_for_all_import_aliases(self):
+         text=(ROOT/'training.html').read_text();imports=json.loads(re.search(r'<script type="importmap">(.*?)</script>',text)[1])['imports']
+-        for name in ('training-copy-v1.js','training-demo-v1.js'):self.assertEqual(imports['/portfolio-assets/'+name],'/portfolio-assets/training-quality-v1.js?v=clean-1')
+-        self.assertIn('crossorigin src="/portfolio-assets/training-quality-v1.js?v=clean-1"',text)
+-        for view in ('review','market'):self.assertEqual(imports[f'/portfolio-assets/{view}-copy-v1.js'],f'/portfolio-assets/{view}-quality-v1.js'+('?v=clean-1' if view=='review' else ''))
++        for name in ('training-copy-v1.js','training-demo-v1.js'):self.assertEqual(imports['/portfolio-assets/'+name],'/portfolio-assets/training-quality-v1.js?v=detail-1')
++        self.assertIn('crossorigin src="/portfolio-assets/training-quality-v1.js?v=detail-1"',text)
++        for view in ('review','market'):self.assertEqual(imports[f'/portfolio-assets/{view}-copy-v1.js'],f'/portfolio-assets/{view}-quality-v1.js'+('?v=clean-1' if view=='review' else '?v=detail-1'))
+     def test_general_links_and_names_do_not_keep_old_labels(self):
+         for p in ROOT.glob('*.html'):self.assertNotRegex(p.read_text(),r'href="/training\.html#/(market|training|studio)"',p.name)
+         for name in ('training','review','market'):
