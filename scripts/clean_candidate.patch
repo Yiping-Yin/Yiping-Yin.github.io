@@ -129,7 +129,7 @@ index 12d611f..a71bfc6 100644
 +            expect(self.page.locator('details.copy-details')).to_have_count(0)
 +            self.assertGreater(self.page.locator('a[href*="training.html"]').count(), 0)
 +            self.closed_notes()
-+        expect(self.page.locator('#lab-publication-scope')).to_contain_text('private')
++        expect(self.page.locator('#lab-publication-scope')).to_contain_text('Private')
 @@ -86 +77,2 @@ class CopyBrowser(unittest.TestCase):
 -                expect(self.page.locator('.ev-disclosure')).to_contain_text('Historical and synthetic prices · Simulated trading')
 +                expect(self.page.locator('.ev-disclosure [data-copy-register]')).to_have_count(0)
