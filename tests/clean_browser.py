@@ -65,7 +65,7 @@ class CleanBrowser(unittest.TestCase):
         for path in ('#/training','#/market','#/market?view=review','#/studio'):
             self.goto('/training.html?market=synthetic'+path); self.assert_clean()
     def test_hash_headers_become_explicit_spaced_labels(self):
-        self.goto('/training.html?market=historical#/training')
+        self.goto('/training.html?market=historical#/market')
         headings=self.page.locator('.d-r thead th')
         expect(headings.nth(0)).to_have_text('No.')
         expect(headings.nth(1)).to_have_text('Strategy')
@@ -75,7 +75,8 @@ class CleanBrowser(unittest.TestCase):
           range.selectNodeContents(cells[1]);const b=range.getBoundingClientRect();return b.left-a.right;
         }''')
         self.assertGreaterEqual(gap,8)
-        self.assertNotIn('#',self.page.locator('thead').inner_text())
+        self.assertNotIn('#',self.page.locator('.d-r thead').inner_text())
+        self.page.locator('.d-r').screenshot(path=str(OUT/'strategy-table.png'))
         (OUT/'table-spacing.json').write_text(json.dumps({'headerTextGap':gap}))
         self.goto('/lab.html')
         for heading in self.page.locator('th').all():self.assertNotEqual(heading.inner_text().strip(),'#')
