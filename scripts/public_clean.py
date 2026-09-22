@@ -7,7 +7,7 @@ import json
 import re
 
 MARK = '<!-- public-clean:v1 -->'
-STYLE = '<link rel="stylesheet" href="/portfolio-assets/clean.css?v=clean-1">'
+STYLE = '<link rel="stylesheet" href="/portfolio-assets/clean.css?v=detail-1">'
 PAGES = ('index.html', 'profile.html', 'lab.html', 'training.html')
 
 
@@ -75,6 +75,16 @@ def page(name, text):
         text, count = re.subn(r'<body(?=[\s>])', '<body data-clean="v1"', text, count=1)
         if count != 1:
             raise ValueError('Missing page body: '+name)
+    # Fine refinements remain in the existing presentation pipeline.
+    text = text.replace('/portfolio-assets/clean.css?v=clean-1', '/portfolio-assets/clean.css?v=detail-1')
+    if name == 'index.html':
+        text, count = re.subn(r'(<div class="th-footer"><a [^>]+>)(?:Training|Open full demo)( <span aria-hidden="true">→</span></a></div>)',
+                              r'\1Open full demo\2', text)
+        if count != 1:
+            raise ValueError('Expected one terminal handoff')
+    elif name == 'profile.html':
+        duplicate = ' The final technical result was 0.4 of one block’s standard error from the public-data replay mean, 3.7 points behind second place.'
+        text = text.replace(duplicate, '')
     if name == 'training.html':
         match = re.search(r'<script type="importmap">(.*?)</script>', text)
         if not match:
@@ -86,9 +96,13 @@ def page(name, text):
             ('studio-demo-v1.js', ('studio-copy-v1.js','studio-details-v1.js','studio-demo-v1.js')),
         ):
             for alias in aliases:
-                imports['imports']['/portfolio-assets/'+alias] = '/portfolio-assets/'+module+'?v=clean-1'
+                imports['imports']['/portfolio-assets/'+alias] = '/portfolio-assets/'+module+('?v=detail-1' if module=='training-quality-v1.js' else '?v=clean-1')
+        for alias in ('market-copy-v1.js', 'market-quality-v1.js'):
+            imports['imports']['/portfolio-assets/'+alias] = '/portfolio-assets/market-quality-v1.js?v=detail-1'
         text = text[:match.start(1)] + json.dumps(imports, separators=(',', ':')) + text[match.end(1):]
         text = text.replace('crossorigin src="/portfolio-assets/training-quality-v1.js"',
-                            'crossorigin src="/portfolio-assets/training-quality-v1.js?v=clean-1"')
+                            'crossorigin src="/portfolio-assets/training-quality-v1.js?v=detail-1"')
+        text = text.replace('crossorigin src="/portfolio-assets/training-quality-v1.js?v=clean-1"',
+                            'crossorigin src="/portfolio-assets/training-quality-v1.js?v=detail-1"')
     # Removing a whole component can leave indentation-only HTML lines.
     return re.sub(r'(?m)^[ \t]+$', '', text)

@@ -37,7 +37,11 @@ def derive_training(source):
 R.useEffect(()=>{if(!dt||!Zt?.published)return;const moment=qualityReadMoment(qualityHref,Zt);if(moment.status==="valid")Nn(moment.cursor);else if(moment.status==="invalid")Nn(dt.fills[0]?.barIndex||0)},[qualityHref,dt?.runId]);
 '''
     source = once(source, 'async function Qn(', hook + 'async function Qn(')
-    return 'import {readReplayMoment as qualityReadMoment} from "./quality-model.mjs";\n' + clean_training(source)
+    source = once(source, 'const H=b.current,V=H.pause;',
+                  'const H=b.current,V=H.pause;R.useEffect(()=>pauseWhenHidden(V),[V]);')
+    source = once(source, 'window.setTimeout(()=>{H.run(!0)},1e3/k)',
+                  'window.setTimeout(()=>{if(!document.hidden)H.run(!0)},1e3/k)')
+    return 'import {pauseWhenHidden} from "./playback-lifecycle.mjs";\nimport {readReplayMoment as qualityReadMoment} from "./quality-model.mjs";\n' + clean_training(source)
 
 def derive_review(source):
     source = names(source)
@@ -56,7 +60,11 @@ def derive_market(source):
     source = names(source)
     source = once(source, 'children:[D,m?.published&&te&&',
                   'children:[D,e.jsx(QualityReplayShare,{entry:m,cursor:a,onPause:()=>j(!1),loading:T}),m?.published&&te&&')
-    return 'import {ReplayShare as QualityReplayShare} from "./quality-ui.mjs";\n' + source
+    source = once(source, 'o.useEffect(()=>{j(!1)},[ee]),',
+                  'o.useEffect(()=>{j(!1)},[ee]),o.useEffect(()=>pauseWhenHidden(()=>j(!1)),[]),')
+    source = once(source, 'window.setInterval(()=>L(r=>Math.min(u,r+1)),1e3/U)',
+                  'window.setInterval(()=>{if(!document.hidden)L(r=>Math.min(u,r+1))},1e3/U)')
+    return 'import {pauseWhenHidden} from "./playback-lifecycle.mjs";\nimport {ReplayShare as QualityReplayShare} from "./quality-ui.mjs";\n' + source
 
 def page(name, text):
     # General entrances only. Exact-run URLs and explicit synthetic links survive.
@@ -101,7 +109,7 @@ def apply(root=ROOT, check=False):
     test = 'tests/demo_acceptance.py'
     text = (root/test).read_text()
     text = once(text, "self.assertEqual(imports['/portfolio-assets/training-copy-v1.js'], '/portfolio-assets/training-demo-v1.js')",
-        "entry = '/portfolio-assets/training-quality-v1.js?v=clean-1' if 'public-clean:v1' in page else ('/portfolio-assets/training-quality-v1.js' if 'public-quality:v1' in page else '/portfolio-assets/training-demo-v1.js')\n        self.assertEqual(imports['/portfolio-assets/training-copy-v1.js'], entry)")
+        "entry = '/portfolio-assets/training-quality-v1.js?v=detail-1' if 'public-clean:v1' in page else ('/portfolio-assets/training-quality-v1.js' if 'public-quality:v1' in page else '/portfolio-assets/training-demo-v1.js')\n        self.assertEqual(imports['/portfolio-assets/training-copy-v1.js'], entry)")
     text = once(text, "self.assertIn('crossorigin src=\"/portfolio-assets/training-demo-v1.js\"', page)", "self.assertIn('crossorigin src=\"' + entry + '\"', page)")
     updates[test] = text
     test = 'tests/copy_browser.py'
@@ -115,7 +123,7 @@ def apply(root=ROOT, check=False):
         for name in release[group]['files']:
             if name in hashes: release[group]['files'][name] = hashes[name]
     files = {name:digest for name,digest in hashes.items() if name.endswith('-quality-v1.js')}
-    for name in ('quality-model.mjs','quality-ui.mjs','quality.css','clean.css'):
+    for name in ('quality-model.mjs','quality-ui.mjs','quality.css','clean.css','playback-lifecycle.mjs'):
         path='portfolio-assets/'+name
         files[path]=hashlib.sha256((root/path).read_bytes()).hexdigest()
     release['publicQuality']={'version':'quality-20260921-v1','files':files,

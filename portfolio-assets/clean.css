@@ -2,3 +2,47 @@
 [data-clean="v1"] .terminal-hero .th-footer { justify-content: flex-end; }
 [data-clean="v1"] .ev-disclosure { justify-content: flex-end; }
 [data-clean="v1"] .d-r thead th:first-child { white-space: nowrap; }
+
+/* Detail pass: same colours and components, a clearer reading rhythm. */
+[data-clean="v1"] .demo-featured-runs article { display:flex; flex-direction:column; }
+[data-clean="v1"] .demo-featured-runs nav { margin-top:auto; padding-top:10px; gap:4px 16px; }
+[data-clean="v1"] .demo-featured-runs nav a { text-decoration:none; }
+[data-clean="v1"] .demo-featured-runs nav a:hover { text-decoration:underline; }
+[data-clean="v1"] .demo-run-outcome { margin-bottom:6px; }
+[data-clean="v1"] .demo-featured-runs article:last-child { padding-right:0; }
+[data-clean="v1"] .demo-archive>summary,
+[data-clean="v1"] .demo-run-rules>summary { padding-block:16px; }
+[data-clean="v1"] #current-run :is(p,code) { overflow-wrap:anywhere; }
+
+@media (min-width:701px) and (max-width:1000px) {
+  [data-clean="v1"] .terminal-hero .th-replay-tag { display:inline-flex; }
+}
+@media (max-width:700px) {
+  /* Width-bounded, rather than a near-full-screen chart on tall phones.
+     Keep the established depth solver's independent, fixed main-track input. */
+  [data-clean="v1"] .terminal-hero { --th-head:44px; height:clamp(450px,120vw,520px); }
+  [data-clean="v1"] .terminal-hero .th-terminal { grid-template-rows:96px minmax(0,1fr) 44px; padding-block:8px; row-gap:8px; }
+  [data-clean="v1"] .terminal-hero .th-header { flex-wrap:wrap; gap:0; }
+  [data-clean="v1"] .terminal-hero .th-tabs { flex:1 0 100%; justify-content:space-between; padding:4px; margin:0; }
+  [data-clean="v1"] .terminal-hero .th-tab { min-width:44px; padding-inline:9px; }
+  [data-clean="v1"] .terminal-hero .th-tab-name { font-size:12px; }
+  [data-clean="v1"] .terminal-hero .th-transport { width:100%; min-height:44px; justify-content:flex-end; gap:12px; }
+  [data-clean="v1"] .terminal-hero .th-replay-tag { display:inline-flex; order:-1; margin-right:auto; font-size:10px; }
+  [data-clean="v1"] .terminal-hero .th-clock-date { display:inline; }
+  [data-clean="v1"] .terminal-hero .th-clock-sep { display:inline; }
+  [data-clean="v1"] .terminal-hero .th-clock { font-size:10px; }
+  [data-clean="v1"] .terminal-hero .th-footer { min-height:44px; align-items:center; flex-wrap:nowrap; }
+  [data-clean="v1"] .terminal-hero .th-footer a { display:inline-flex; align-items:center; min-height:44px; padding:8px 0; font-size:13px; }
+  [data-clean="v1"] .terminal-hero .th-footer a::after { display:none; }
+  [data-clean="v1"] .demo-featured-runs article { padding-block:22px; }
+  [data-clean="v1"] :is(.demo-selection-note,.demo-run-description,.demo-run-outcome,.demo-featured-runs nav a,#current-run p) { font-size:14px; line-height:1.65; }
+  [data-clean="v1"] .demo-featured-runs nav { justify-content:space-between; gap:4px 12px; padding-top:8px; }
+  [data-clean="v1"] #current-run { padding-block:20px; }
+  /* The static fallback has a full, untrimmed ladder: allow it its natural
+     height instead of clipping data when the runtime is unavailable. */
+  :root:not(.js) [data-clean="v1"] .terminal-hero { height:auto; }
+  :root:not(.js) [data-clean="v1"] .terminal-hero .th-frame { height:auto; }
+  :root:not(.js) [data-clean="v1"] .terminal-hero .th-terminal { height:auto; grid-template-rows:96px auto 44px; }
+  :root:not(.js) [data-clean="v1"] .terminal-hero .th-main { grid-template-rows:auto auto; }
+  :root:not(.js) [data-clean="v1"] .terminal-hero .th-chart-panel { grid-template-rows:200px auto auto; }
+}

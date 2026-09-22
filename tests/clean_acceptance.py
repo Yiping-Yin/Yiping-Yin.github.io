@@ -35,7 +35,7 @@ class CleanAcceptance(unittest.TestCase):
     def test_changed_entry_and_imports_share_one_versioned_runtime(self):
         text = (ROOT/'training.html').read_text()
         imports = json.loads(re.search(r'<script type="importmap">(.*?)</script>', text)[1])['imports']
-        entry = '/portfolio-assets/training-quality-v1.js?v=clean-1'
+        entry = '/portfolio-assets/training-quality-v1.js?v=detail-1'
         self.assertIn('crossorigin src="'+entry+'"', text)
         for name in ('training-copy-v1.js', 'training-demo-v1.js', 'training-quality-v1.js'):
             self.assertEqual(imports['/portfolio-assets/'+name], entry)
