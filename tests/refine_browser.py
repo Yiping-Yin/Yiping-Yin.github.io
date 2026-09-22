@@ -23,7 +23,7 @@ class RefineBrowser(unittest.TestCase):
         threading.Thread(target=cls.server.serve_forever,daemon=True).start()
         cls.base = f'http://127.0.0.1:{cls.server.server_port}'
         cls.pw = sync_playwright().start()
-        cls.browser = cls.pw.chromium.launch(headless=not bool(os.environ.get('DISPLAY')))
+        cls.browser = cls.pw.chromium.launch(headless=True)
     @classmethod
     def tearDownClass(cls):
         cls.browser.close(); cls.pw.stop(); cls.server.shutdown(); cls.server.server_close()
@@ -32,8 +32,11 @@ class RefineBrowser(unittest.TestCase):
         self.page=self.context.new_page();self.errors=[]
         self.page.on('pageerror',lambda e:self.errors.append(str(e)))
     def tearDown(self):
-        self.page.screenshot(path=str(OUT/(self._testMethodName+'.png')),full_page=True)
-        self.context.close();self.assertEqual(self.errors,[])
+        try:
+            self.page.screenshot(path=str(OUT/(self._testMethodName+'.png')),full_page=True)
+        finally:
+            self.context.close()
+        self.assertEqual(self.errors,[])
     def home(self):
         self.page.goto(self.base+'/',wait_until='networkidle')
     def replay(self,task='hold',kind='historical',minute=40):
@@ -81,23 +84,17 @@ class RefineBrowser(unittest.TestCase):
         if not os.environ.get('DISPLAY'):
             self.skipTest('Native tab visibility requires headed Chromium; use xvfb-run')
         self.replay()
-        play=self.page.get_by_role('button',name='Play replay',exact=True)
-        play.click()
-        self.page.wait_for_function('Number(document.querySelector("input.tm-scrubber").value)>39')
-        other=self.context.new_page();other.goto('about:blank');other.bring_to_front()
-        self.page.wait_for_function('document.hidden===true')
-        self.page.wait_for_timeout(400)
-        cursor=self.page.locator('input.tm-scrubber').input_value()
-        self.page.wait_for_timeout(900)
-        self.assertEqual(self.page.locator('input.tm-scrubber').input_value(),cursor)
-        self.page.bring_to_front();self.page.wait_for_function('document.hidden===false')
-        expect(play).to_be_visible()
-        self.page.wait_for_timeout(500)
-        expect(self.page.locator('input.tm-scrubber')).to_have_value(cursor)
-        play.click()
-        self.page.wait_for_function('(v)=>Number(document.querySelector("input.tm-scrubber").value)>Number(v)',arg=cursor)
-        self.page.get_by_role('button',name='Pause replay',exact=True).click()
-        other.close()
+        # Playwright forces renderer focus, so this specific test uses a separate
+        # headed browser and raw CDP. No hidden-property or event mocking.
+        from native_visibility import observe_native_replay
+        result=observe_native_replay(self.pw.chromium.executable_path,self.page.url,OUT)
+        self.assertTrue(result['hidden'])
+        self.assertFalse(result['returned_hidden'])
+        self.assertEqual(result['page_errors'],[])
+        self.assertEqual(result['cursor_hidden_first'],result['cursor_hidden_second'])
+        self.assertEqual(result['cursor_returned'],result['cursor_hidden_second'])
+        self.assertTrue(result['paused'])
+        self.assertGreater(result['cursor_resumed'],result['cursor_returned'])
     def test_layout_matrix_and_no_script(self):
         for w,h in ((320,568),(390,844),(700,800),(800,900),(1000,800),(1440,900)):
             for theme in ('light','dark'):

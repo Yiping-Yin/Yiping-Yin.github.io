@@ -26,7 +26,7 @@ jobs:
           python-version: '3.12'
       - name: Install browser test dependency
         run: |
-          python -m pip install playwright==1.57.0
+          python -m pip install playwright==1.57.0 websocket-client==1.8.0
           python -m playwright install --with-deps chromium
       - name: Reproduce the four findings on exact current main
         if: github.event_name == 'push'
@@ -34,7 +34,7 @@ jobs:
           set -euo pipefail
           mkdir -p /tmp/refine-baseline qa/refine
           git archive db4c7e336231c86d3dc564527d8fdf7af24200ee | tar -x -C /tmp/refine-baseline
-          cp tests/refine_browser.py /tmp/refine-baseline/tests/
+          cp tests/refine_browser.py tests/native_visibility.py /tmp/refine-baseline/tests/
           REFINE_BASELINE=1 REFINE_EVIDENCE="$PWD/qa/refine/baseline" xvfb-run -a python /tmp/refine-baseline/tests/refine_browser.py 2>&1 | tee qa/refine/baseline.txt
       - name: Generate candidate or check committed PR output
         env:
