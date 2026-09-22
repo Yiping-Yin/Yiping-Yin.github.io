@@ -29,7 +29,7 @@ jobs:
           python -m pip install playwright==1.57.0 websocket-client==1.8.0
           python -m playwright install --with-deps chromium
       - name: Reproduce layout and playback defects on the exact baseline
-        if: github.event_name == 'push' && hashFiles('scripts/detail_candidate.patch') != ''
+        if: github.event_name == 'push' && hashFiles('scripts/*_candidate.patch') != ''
         run: |
           set -euo pipefail
           mkdir -p qa/detail /tmp/detail-baseline
@@ -39,10 +39,10 @@ jobs:
           import importlib.util, unittest
           spec=importlib.util.spec_from_file_location('baseline','/tmp/detail-baseline/tests/detail_browser.py')
           module=importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
-          names=('test_phone_terminal_is_compact_and_all_controls_are_visible','test_hidden_tab_pauses_without_automatic_restart')
+          names=('test_phone_terminal_is_compact_and_all_controls_are_visible','test_hidden_tab_pauses_without_automatic_restart','test_candlestick_labels_keep_pixel_size_when_the_viewport_changes')
           result=unittest.TextTestRunner(verbosity=2).run(unittest.TestSuite(module.DetailBrowser(n) for n in names))
-          if result.errors or len(result.failures)!=2: raise SystemExit('Expected two baseline assertion failures, not errors or unexpected passes')
-          print('Both baseline defects reproduced; these expected failures are NOT passing candidate tests.')
+          if result.errors or len(result.failures)!=len(names): raise SystemExit('Expected three baseline assertion failures, not errors or unexpected passes')
+          print('All three baseline defects reproduced; these expected failures are NOT passing candidate tests.')
           PY
       - name: Assemble candidate or verify committed PR files
         env:
@@ -56,6 +56,14 @@ jobs:
             git apply --check scripts/detail_candidate.patch
             git apply scripts/detail_candidate.patch
             rm scripts/detail_candidate.patch
+          fi
+          if [ -f scripts/plot_candidate.patch ]; then
+            test "$EVENT_NAME" = push
+            git apply --check scripts/plot_candidate.patch
+            git apply scripts/plot_candidate.patch
+            rm scripts/plot_candidate.patch
+          fi
+          if [ "$EVENT_NAME" = push ]; then
             python scripts/apply_public_demo.py
             python scripts/apply_public_quality.py
           fi
@@ -131,7 +139,7 @@ jobs:
           import zipfile
           with zipfile.ZipFile('/tmp/detail-candidate/public-source.zip') as z: z.extractall('.')
           PY
-          git rm --ignore-unmatch scripts/detail_candidate.patch
+          git rm --ignore-unmatch scripts/detail_candidate.patch scripts/plot_candidate.patch
           git add -u
           if git diff --cached --quiet; then exit 0; fi
           git config user.name 'github-actions[bot]'

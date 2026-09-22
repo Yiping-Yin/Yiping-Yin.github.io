@@ -47,6 +47,14 @@ class DetailAcceptance(unittest.TestCase):
             self.assertEqual(imports['/portfolio-assets/'+alias], '/portfolio-assets/market-quality-v1.js?v=detail-1')
         for name in ('index.html','profile.html','lab.html','training.html'):
             self.assertIn('/portfolio-assets/clean.css?v=detail-1', (ROOT/name).read_text())
+    def test_candlestick_coordinates_follow_the_rendered_viewport(self):
+        source = (ROOT/'portfolio-assets/training-quality-v1.js').read_text()
+        chart = source[source.index('function My('):source.index('function ', source.index('function My(')+1)]
+        self.assertIn('observePlotSize', chart)
+        self.assertIn('viewBox:`0 0 ${plotWidth} ${b}`', chart)
+        self.assertNotIn('1e3-y', chart)
+        self.assertNotIn('width*1e3', chart)
+
     def test_original_assets_and_published_records_are_unchanged(self):
         inputs = json.loads((ROOT/'scripts/presentation_copy.json').read_text())['immutableInputs']
         for name, sha in inputs.items():

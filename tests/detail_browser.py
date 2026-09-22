@@ -98,6 +98,35 @@ class DetailBrowser(unittest.TestCase):
             expect(p.locator('.th-footer a')).to_have_attribute('href',__import__('re').compile('view=replay'))
             p.locator('#published-runs>summary').click(); expect(p.locator('#published-runs')).to_have_attribute('open','')
             p.screenshot(path=str(OUT/'home-noscript-320.png'),full_page=True)
+    def test_candlestick_labels_keep_pixel_size_when_the_viewport_changes(self):
+        results=[]
+        for name,path in (('overview','/training.html?market=historical#/training'),('desk','/training.html?market=historical#/market')):
+            self.open(path)
+            svg=self.page.locator('.d-plot svg')
+            expect(svg).to_be_visible()
+            for width in (320,390,760,1440):
+                self.page.set_viewport_size({'width':width,'height':900})
+                self.page.evaluate('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))')
+                data=svg.evaluate('''e=>{
+                    const rect=e.getBoundingClientRect(), box=e.viewBox.baseVal;
+                    const labels=[...e.querySelectorAll('.axis-label,.d-price-tag')].map(t=>{
+                        const m=t.getScreenCTM(),size=parseFloat(getComputedStyle(t).fontSize),r=t.getBoundingClientRect();
+                        return {text:t.textContent,xSize:size*Math.hypot(m.a,m.b),ySize:size*Math.hypot(m.c,m.d),
+                          fits:r.left>=rect.left-1&&r.right<=rect.right+1&&r.top>=rect.top-1&&r.bottom<=rect.bottom+1};
+                    });
+                    return {width:rect.width,height:rect.height,viewWidth:box.width,viewHeight:box.height,labels};
+                }''')
+                self.assertGreater(len(data['labels']),5)
+                for label in data['labels']:
+                    self.assertGreaterEqual(label['xSize'],9.5,(name,width,label))
+                    self.assertGreaterEqual(label['ySize'],9.5,(name,width,label))
+                    self.assertTrue(label['fits'],(name,width,label))
+                self.assertAlmostEqual(data['viewWidth'],data['width'],delta=1)
+                self.assertAlmostEqual(data['viewHeight'],data['height'],delta=1)
+                self.no_overflow(); results.append({'page':name,'viewportWidth':width,**data})
+                if width in (390,1440):self.capture(f'axes-{name}-{width}.png')
+        (OUT/'chart-viewport.json').write_text(json.dumps(results,indent=2))
+
     def test_hidden_tab_pauses_without_automatic_restart(self):
         # Raw CDP avoids Playwright's renderer-focus emulation in background tabs.
         sys.path.insert(0, str(ROOT/'tests'))

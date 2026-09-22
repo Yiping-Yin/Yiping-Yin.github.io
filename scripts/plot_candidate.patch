@@ -1,0 +1,44 @@
+--- a/scripts/apply_public_quality.py
++++ b/scripts/apply_public_quality.py
+@@ -30,6 +30,22 @@
+         text = text.replace(old,new)
+     return text
+ 
++def responsive_candlesticks(source):
++    # Keep the accepted renderer and data; replace only its fixed coordinate box.
++    start = source.index('function My(')
++    end = source.index('function ', start + 1)
++    chart = source[start:end]
++    chart = once(chart, 'const b=Math.max(120,Math.round(p/Math.max(1,p)*p)),v=8',
++        'const plotNode=R.useRef(null),[plotSize,setPlotSize]=R.useState(null);R.useLayoutEffect(()=>observePlotSize(plotNode.current,setPlotSize),[!!a?.length]);const plotWidth=plotSize?.width||1e3,b=Math.max(120,plotSize?.height||p),v=8')
++    chart = once(chart, '(1e3-v-y)', '(plotWidth-v-y)')
++    chart = once(chart, 'Math.floor((W.clientX-Q.left)/Q.width*1e3/ve)',
++        'Math.floor(((W.clientX-Q.left)/Q.width*plotWidth-v)/ve)')
++    chart = once(chart, 'viewBox:`0 0 1000 ${b}`', 'ref:plotNode,viewBox:`0 0 ${plotWidth} ${b}`')
++    if chart.count('1e3-y') != 5:
++        raise ValueError('Unreviewed candlestick axis structure')
++    chart = chart.replace('1e3-y', 'plotWidth-y')
++    return source[:start] + chart + source[end:]
++
+ def derive_training(source):
+     source = names(source)
+     source = once(source, '[Bn,Nn]=R.useState(0),', '[Bn,Nn]=R.useState(0),[qualityHref,qualitySetHref]=R.useState(()=>location.href),')
+@@ -41,7 +57,8 @@
+                   'const H=b.current,V=H.pause;R.useEffect(()=>pauseWhenHidden(V),[V]);')
+     source = once(source, 'window.setTimeout(()=>{H.run(!0)},1e3/k)',
+                   'window.setTimeout(()=>{if(!document.hidden)H.run(!0)},1e3/k)')
+-    return 'import {pauseWhenHidden} from "./playback-lifecycle.mjs";\nimport {readReplayMoment as qualityReadMoment} from "./quality-model.mjs";\n' + clean_training(source)
++    source = responsive_candlesticks(source)
++    return 'import {observePlotSize} from "./plot-viewport.mjs";\nimport {pauseWhenHidden} from "./playback-lifecycle.mjs";\nimport {readReplayMoment as qualityReadMoment} from "./quality-model.mjs";\n' + clean_training(source)
+ 
+ def derive_review(source):
+     source = names(source)
+@@ -123,7 +140,7 @@
+         for name in release[group]['files']:
+             if name in hashes: release[group]['files'][name] = hashes[name]
+     files = {name:digest for name,digest in hashes.items() if name.endswith('-quality-v1.js')}
+-    for name in ('quality-model.mjs','quality-ui.mjs','quality.css','clean.css','playback-lifecycle.mjs'):
++    for name in ('quality-model.mjs','quality-ui.mjs','quality.css','clean.css','playback-lifecycle.mjs','plot-viewport.mjs'):
+         path='portfolio-assets/'+name
+         files[path]=hashlib.sha256((root/path).read_bytes()).hexdigest()
+     release['publicQuality']={'version':'quality-20260921-v1','files':files,
