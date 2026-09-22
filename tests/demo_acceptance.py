@@ -20,7 +20,7 @@ class DemoAcceptance(unittest.TestCase):
             ident = run['result']['runId']
             block = re.search(r'<article data-run-id="' + ident + r'">(.*?)</article>', text, re.S)[1]
             self.assertIn(f"{run['result']['metrics']['netPnl']:+.2f} USD", block)
-            self.assertIn(f"{run['result']['metrics']['fillCount']} fills", block)
+            self.assertIn(f"{run['result']['metrics']['fillCount']} {'fill' if run['result']['metrics']['fillCount'] == 1 else 'fills'}", block)
             self.assertIn('source=' + run['taskId'], block)
             self.assertIn('view=replay&amp;run=' + ident, block)
         self.assertIn('Selected by method, not by return.', text)
@@ -40,7 +40,7 @@ class DemoAcceptance(unittest.TestCase):
             subprocess.run(['node', '--check', str(ROOT / 'portfolio-assets' / new)], check=True, capture_output=True)
         page = (ROOT / 'training.html').read_text()
         imports = json.loads(re.search(r'<script type="importmap">(.*?)</script>', page)[1])['imports']
-        entry = '/portfolio-assets/training-quality-v1.js?v=clean-1' if 'public-clean:v1' in page else ('/portfolio-assets/training-quality-v1.js' if 'public-quality:v1' in page else '/portfolio-assets/training-demo-v1.js')
+        entry = '/portfolio-assets/training-quality-v1.js?v=detail-1' if 'public-clean:v1' in page else ('/portfolio-assets/training-quality-v1.js' if 'public-quality:v1' in page else '/portfolio-assets/training-demo-v1.js')
         self.assertEqual(imports['/portfolio-assets/training-copy-v1.js'], entry)
         self.assertIn('crossorigin src="' + entry + '"', page)
 

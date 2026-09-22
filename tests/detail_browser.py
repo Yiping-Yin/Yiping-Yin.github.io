@@ -1,0 +1,148 @@
+"""Real browser layout, navigation, theme and foreground/background regressions."""
+import functools, http.server, json, sys, threading, unittest
+from pathlib import Path
+from playwright.sync_api import sync_playwright, expect
+ROOT = Path(__file__).resolve().parents[1]
+OUT = ROOT/'qa/detail'
+RUN = '3df0ac0f357353bac0e991eed16d3f78458611ddf2f541cfdf44d7839529b1b2'
+class Handler(http.server.SimpleHTTPRequestHandler):
+    def log_message(self, *args): pass
+class DetailBrowser(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        OUT.mkdir(parents=True,exist_ok=True)
+        cls.server=http.server.ThreadingHTTPServer(('127.0.0.1',0),functools.partial(Handler,directory=str(ROOT)))
+        threading.Thread(target=cls.server.serve_forever,daemon=True).start()
+        cls.base=f'http://127.0.0.1:{cls.server.server_port}'
+        cls.pw=sync_playwright().start(); cls.browser=cls.pw.chromium.launch(headless=True)
+    @classmethod
+    def tearDownClass(cls):
+        cls.browser.close(); cls.pw.stop(); cls.server.shutdown(); cls.server.server_close()
+    def setUp(self):
+        self.context=self.browser.new_context(viewport={'width':1440,'height':900},reduced_motion='reduce')
+        self.page=self.context.new_page(); self.errors=[]; self.failed=[]
+        self.page.on('pageerror',lambda e:self.errors.append(str(e)))
+        self.page.on('response',lambda r:self.failed.append((r.url,r.status)) if r.status>=400 else None)
+    def tearDown(self):
+        self.context.close(); self.assertEqual(self.errors,[]); self.assertEqual(self.failed,[])
+    def open(self,path='/'):
+        # Each matrix cell needs a fresh document, not a hash-only SPA jump.
+        self.page.goto('about:blank')
+        response=self.page.goto(self.base+path,wait_until='networkidle'); self.assertEqual(response.status,200)
+    def no_overflow(self):
+        self.assertFalse(self.page.evaluate('document.documentElement.scrollWidth > innerWidth+1'))
+    def capture(self,name):
+        self.page.evaluate('window.scrollTo({top:0,behavior:"instant"})')
+        self.page.screenshot(path=str(OUT/name),full_page=True)
+    def test_phone_terminal_is_compact_and_all_controls_are_visible(self):
+        measurements=[]
+        for width in (320,390,700):
+            heights=[]
+            for height in (667,1000):
+                self.page.set_viewport_size({'width':width,'height':height}); self.open()
+                expect(self.page.locator('.th-replay-tag')).to_be_visible()
+                expect(self.page.locator('.th-footer a')).to_have_text('Open full demo →')
+                data=self.page.locator('.terminal-hero').evaluate('''e=>{
+                  const rect=s=>e.querySelector(s).getBoundingClientRect();
+                  const tabs=[...e.querySelectorAll('.th-tab')].map(t=>t.getBoundingClientRect());
+                  const strip=rect('.th-tabs'),book=rect('.th-book-panel');
+                  return {hero:e.getBoundingClientRect().height,chart:rect('.th-chart').height,
+                    tabsVisible:tabs.every(t=>t.left>=strip.left-1&&t.right<=strip.right+1),
+                    bookFits:[...e.querySelectorAll('.th-ladder tbody tr')].every(r=>r.getBoundingClientRect().bottom<=book.bottom+1)};
+                }''')
+                self.assertLessEqual(data['hero'],540); self.assertGreaterEqual(data['chart'],140)
+                self.assertTrue(data['tabsVisible']); self.assertTrue(data['bookFits'])
+                heights.append(data['hero']); measurements.append({'width':width,'height':height,**data}); self.no_overflow()
+            self.assertLessEqual(abs(heights[1]-heights[0]),1,'Phone terminal should follow width, not grow with screen height')
+            self.capture(f'home-{width}.png')
+        (OUT/'phone-layout.json').write_text(json.dumps(measurements,indent=2))
+    def test_home_actions_and_profile_have_clean_copy(self):
+        self.open(); cards=self.page.locator('.demo-featured-runs article'); expect(cards).to_have_count(3)
+        for card in cards.all():
+            self.assertNotIn('1 fills',card.inner_text())
+            for label in ('Watch replay','View source','Read report'):
+                expect(card.get_by_role('link',name=label,exact=True)).to_be_visible()
+        cards.first.get_by_role('link',name='Watch replay',exact=True).click()
+        expect(self.page.locator('.tm-scrubber')).to_be_visible(); self.assertIn(RUN,self.page.url)
+        self.open('/profile.html#project-algothon')
+        feature=self.page.locator('#project-algothon'); self.assertEqual(feature.inner_text().count('3.7 points'),1)
+        expect(feature.get_by_text('Method · evidence limits',exact=True)).to_be_visible()
+    def test_main_pages_at_breakpoints_and_both_themes(self):
+        routes={'home':'/','profile':'/profile.html','lab':'/lab.html','overview':'/training.html?market=historical#/training','trading':'/training.html?market=historical#/market','strategy':'/training.html?market=historical#/studio'}
+        for theme in ('light','dark'):
+            self.page.emulate_media(color_scheme=theme)
+            for width in (320,390,760,1000,1440):
+                self.page.set_viewport_size({'width':width,'height':900})
+                for name,path in routes.items():
+                    with self.subTest(theme=theme,width=width,page=name):
+                        self.open(path); self.no_overflow()
+                        self.assertEqual(self.page.locator('.blue-white-home,.home-intro,.copy-details').count(),0)
+                        self.assertEqual(self.page.locator('h1').count(),1)
+                        if width in (390,1440): self.capture(f'{name}-{width}-{theme}.png')
+    def test_keyboard_controls_and_theme_survive_navigation(self):
+        self.page.set_viewport_size({'width':320,'height':800}); self.open()
+        self.page.locator('#th-tab-0').focus(); self.page.keyboard.press('End')
+        expect(self.page.locator('#th-tab-3')).to_be_focused(); expect(self.page.locator('#th-tab-3')).to_have_attribute('aria-selected','true')
+        self.page.keyboard.press('Home'); expect(self.page.locator('#th-tab-0')).to_have_attribute('aria-selected','true')
+        button=self.page.locator('#theme'); button.click(); button.click()
+        expect(self.page.locator('html')).to_have_attribute('data-theme','dark')
+        self.page.get_by_role('link',name='Profile',exact=True).click()
+        expect(self.page.locator('html')).to_have_attribute('data-theme','dark')
+        self.page.locator('#project-market-making > summary').focus(); self.page.keyboard.press('Enter')
+        expect(self.page.locator('#project-market-making')).to_have_attribute('open','')
+    def test_no_javascript_preserves_terminal_and_project_links(self):
+        with self.browser.new_context(java_script_enabled=False,viewport={'width':320,'height':800}) as c:
+            p=c.new_page(); p.goto(self.base,wait_until='networkidle')
+            expect(p.locator('.th-replay-tag')).to_be_visible()
+            self.assertFalse(p.evaluate('document.documentElement.scrollWidth>innerWidth+1'))
+            expect(p.locator('.th-footer a')).to_have_attribute('href',__import__('re').compile('view=replay'))
+            p.locator('#published-runs>summary').click(); expect(p.locator('#published-runs')).to_have_attribute('open','')
+            p.screenshot(path=str(OUT/'home-noscript-320.png'),full_page=True)
+    def test_candlestick_labels_keep_pixel_size_when_the_viewport_changes(self):
+        results=[]
+        for name,path in (('overview','/training.html?market=historical#/training'),('desk','/training.html?market=historical#/market')):
+            self.open(path)
+            svg=self.page.locator('.d-plot svg')
+            expect(svg).to_be_visible()
+            for width in (320,390,760,1440):
+                self.page.set_viewport_size({'width':width,'height':900})
+                self.page.evaluate('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))')
+                data=svg.evaluate('''e=>{
+                    const rect=e.getBoundingClientRect(), box=e.viewBox.baseVal;
+                    const labels=[...e.querySelectorAll('.axis-label,.d-price-tag')].map(t=>{
+                        const m=t.getScreenCTM(),size=parseFloat(getComputedStyle(t).fontSize),r=t.getBoundingClientRect();
+                        return {text:t.textContent,xSize:size*Math.hypot(m.a,m.b),ySize:size*Math.hypot(m.c,m.d),
+                          fits:r.left>=rect.left-1&&r.right<=rect.right+1&&r.top>=rect.top-1&&r.bottom<=rect.bottom+1};
+                    });
+                    return {width:rect.width,height:rect.height,viewWidth:box.width,viewHeight:box.height,labels};
+                }''')
+                self.assertGreater(len(data['labels']),5)
+                for label in data['labels']:
+                    self.assertGreaterEqual(label['xSize'],9.5,(name,width,label))
+                    self.assertGreaterEqual(label['ySize'],9.5,(name,width,label))
+                    self.assertTrue(label['fits'],(name,width,label))
+                self.assertAlmostEqual(data['viewWidth'],data['width'],delta=1)
+                self.assertAlmostEqual(data['viewHeight'],data['height'],delta=1)
+                self.no_overflow(); results.append({'page':name,'viewportWidth':width,**data})
+                if width in (390,1440):self.capture(f'axes-{name}-{width}.png')
+        (OUT/'chart-viewport.json').write_text(json.dumps(results,indent=2))
+
+    def test_hidden_tab_pauses_without_automatic_restart(self):
+        # Raw CDP avoids Playwright's renderer-focus emulation in background tabs.
+        sys.path.insert(0, str(ROOT/'tests'))
+        from native_visibility import observe_native_replay
+        pack=json.loads((ROOT/'data/published-runs-historical.json').read_text())
+        run=next(r for r in pack['markets']['historical']['runs'] if r['result']['runId']==RUN)['result']
+        url=self.base+f'/training.html?market=historical#/market?view=replay&run={RUN}&tape={run["datasetChecksum"]}&minute=40'
+        result=observe_native_replay(self.pw.chromium.executable_path,url,OUT)
+        self.assertTrue(result['hidden']); self.assertFalse(result['returned_hidden'])
+        self.assertEqual(result['page_errors'],[])
+        self.assertEqual(result['cursor_hidden_first'],result['cursor_hidden_second'])
+        self.assertEqual(result['cursor_returned'],result['cursor_hidden_second'])
+        self.assertTrue(result['paused'])
+        self.assertGreater(result['cursor_resumed'],result['cursor_returned'])
+        self.assertTrue(result['manual_hidden_paused'])
+        self.assertTrue(result['manual_returned_paused'])
+        self.assertTrue(result['manual_explicit_resume'])
+
+if __name__=='__main__': unittest.main(verbosity=2)
