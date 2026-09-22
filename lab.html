@@ -310,8 +310,10 @@ hr, .rule { border: 0; border-top: var(--thin) solid var(--line); margin: 0; }
 <link rel="stylesheet" href="/portfolio-assets/polish.css?v=1">
 <!-- public-quality:v1 -->
 <link rel="stylesheet" href="/portfolio-assets/quality.css?v=quality-1">
+<!-- public-clean:v1 -->
+<link rel="stylesheet" href="/portfolio-assets/clean.css?v=clean-1">
 </head>
-<body data-quality="v1" class="public-lab-page">
+<body data-clean="v1" data-quality="v1" class="public-lab-page">
 <a class="skip-link" href="#main">Skip to content</a>
 <div class="topbar" id="topbar" data-ground="navy">
   <div class="topbar-in">
@@ -358,7 +360,7 @@ hr, .rule { border: 0; border-top: var(--thin) solid var(--line); margin: 0; }
       <thead>
         <tr>
           <td class="rail c-rail" aria-hidden="true"></td>
-          <th scope="col" class="idx c-idx">#</th>
+          <th scope="col" class="idx c-idx">No.</th>
           <th scope="col" class="c-domain">Domain</th>
           <th scope="col" class="c-emits">Emits</th>
           <th scope="col" class="c-to">To</th>
@@ -403,7 +405,7 @@ hr, .rule { border: 0; border-top: var(--thin) solid var(--line); margin: 0; }
         <h3>Stages and their governing method note</h3>
         <table class="lab-ledger">
           <thead>
-            <tr><th scope="col" class="idx c-idx">#</th><th scope="col" class="c-stage">Stage</th><th scope="col">Governing method note</th></tr>
+            <tr><th scope="col" class="idx c-idx">No.</th><th scope="col" class="c-stage">Stage</th><th scope="col">Governing method note</th></tr>
           </thead>
           <tbody><tr><td class="idx">01</td><th scope="row">Define</th><td class="soft" rowspan="2">01 Define, Source and Data Contract</td></tr><tr><td class="idx">02</td><th scope="row">Source</th></tr><tr><td class="idx">03</td><th scope="row">Build</th><td class="soft" rowspan="2">02 Build, Model and Decision Construction</td></tr><tr><td class="idx">04</td><th scope="row">Model</th></tr><tr><td class="idx">05</td><th scope="row">Test</th><td class="soft" rowspan="2">03 Test and Reproducible Evidence</td></tr><tr><td class="idx">&#9671;</td><th scope="row">Decide</th></tr><tr><td class="idx">06</td><th scope="row">Operate</th><td class="soft">04 Operate, Monitor and Agent Control</td></tr>
           </tbody>
@@ -413,7 +415,7 @@ hr, .rule { border: 0; border-top: var(--thin) solid var(--line); margin: 0; }
         <h3>Case archives</h3>
         <table class="lab-ledger">
           <thead>
-            <tr><th scope="col" class="idx c-idx">#</th><th scope="col" class="c-arch">Archive</th><th scope="col">Subject</th></tr>
+            <tr><th scope="col" class="idx c-idx">No.</th><th scope="col" class="c-arch">Archive</th><th scope="col">Subject</th></tr>
           </thead>
           <tbody><tr data-case-id="ire"><td class="idx">01</td><th scope="row">IRE</th><td class="soft">Market microstructure pilot</td></tr><tr data-case-id="pxa"><td class="idx">02</td><th scope="row">PXA</th><td class="soft">Practice study</td></tr><tr data-case-id="etf-pricing"><td class="idx">03</td><th scope="row">ETF pricing</th><td class="soft">Practice study</td></tr><tr id="archive-algothon" data-case-id="algothon"><td class="idx">04</td><th scope="row">Algothon 2026</th><td class="soft">Public report and code<span class="p1-evidence-links"><a href="https://github.com/Yiping-Yin/algothon-2026/blob/main/Algothon-Research-Report.pdf">Research report · PDF</a><a href="https://github.com/Yiping-Yin/algothon-2026">Code and materials</a></span></td></tr><tr class="p2-case-entry"><td colspan="3"><a class="p2-case-entry" href="/research-algothon.html">Read the research case →</a></td></tr></tbody>
         </table>
@@ -434,11 +436,7 @@ hr, .rule { border: 0; border-top: var(--thin) solid var(--line); margin: 0; }
     <p>The method is demonstrated on this site: <span class="num">15</span> published runs — <span class="num">12</span> historical across <span class="num">4</span> instruments at <span class="num">390</span> one-minute bars each, 10 Sep 2026, and <span class="num">3</span> synthetic.</p>
     <span class="p1-evidence-links"><a href="/training.html?market=historical#/market?view=review&amp;run=3df0ac0f357353bac0e991eed16d3f78458611ddf2f541cfdf44d7839529b1b2">AAPL trend report</a><a href="/training.html?market=historical#/market?view=replay&amp;run=3df0ac0f357353bac0e991eed16d3f78458611ddf2f541cfdf44d7839529b1b2">Replay AAPL trend</a><a href="/#published-runs">All 15 published runs</a> <a class="p2-case-entry" href="/compare.html">Compare published strategies →</a><a href="/training.html?market=historical#/market">Historical desk</a></span>
   </div>
-  <p class="lab-say">Published simulations · Historical and synthetic prices</p><details class="copy-details"><summary>Data &amp; simulation details</summary>
-<div class="copy-details-body"><p>Historical prices: retained Yahoo Finance one-minute OHLC for 10 Sep 2026, with 390 one-minute bars per instrument. Synthetic prices: scenarios generated by P.Book.</p>
-<p>The order book, trading activity and account results are simulated. No live market connection or real orders.</p>
-<p>Synthetic contract definitions reference retained Optibook course metadata; the generated prices come from P.Book. This site does not connect to Optibook.</p>
-<p>Edit and export strategies in the browser. Python execution requires the local P.Book runtime.</p><p>Catalogue counts describe a private research vault. Only the linked reports and code are public.</p></div></details>
+
 </div></main>
 <footer class="colophon" aria-labelledby="colophon-title">
 <h2 id="colophon-title" class="sr-only">Site information</h2>

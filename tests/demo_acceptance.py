@@ -40,7 +40,7 @@ class DemoAcceptance(unittest.TestCase):
             subprocess.run(['node', '--check', str(ROOT / 'portfolio-assets' / new)], check=True, capture_output=True)
         page = (ROOT / 'training.html').read_text()
         imports = json.loads(re.search(r'<script type="importmap">(.*?)</script>', page)[1])['imports']
-        entry = '/portfolio-assets/training-quality-v1.js' if 'public-quality:v1' in page else '/portfolio-assets/training-demo-v1.js'
+        entry = '/portfolio-assets/training-quality-v1.js?v=clean-1' if 'public-clean:v1' in page else ('/portfolio-assets/training-quality-v1.js' if 'public-quality:v1' in page else '/portfolio-assets/training-demo-v1.js')
         self.assertEqual(imports['/portfolio-assets/training-copy-v1.js'], entry)
         self.assertIn('crossorigin src="' + entry + '"', page)
 

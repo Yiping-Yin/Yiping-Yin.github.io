@@ -1,0 +1,4 @@
+/* Existing palette and layout. Close gaps left by removed explanatory blocks. */
+[data-clean="v1"] .terminal-hero .th-footer { justify-content: flex-end; }
+[data-clean="v1"] .ev-disclosure { justify-content: flex-end; }
+[data-clean="v1"] .d-r thead th:first-child { white-space: nowrap; }
