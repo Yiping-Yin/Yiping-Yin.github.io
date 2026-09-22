@@ -1,0 +1,29 @@
+/* Final, homepage-only refinements over the reviewed blue/white design.
+   Use content-sized phone tracks: text enlargement grows the hero instead of
+   clipping its links. Keep the original terminal runtime and payload intact. */
+.blue-white-home .demo-featured-runs nav { flex-wrap: wrap; gap: 4px 18px; }
+.blue-white-home .demo-featured-runs nav a { min-height: 44px; display: inline-flex; align-items: center; }
+@media (max-width: 700px) {
+  .blue-white-home .home-intro-inner { padding-top: 22px; padding-bottom: 24px; gap: 18px; }
+  .blue-white-home .home-role { margin-top: 10px; }
+  .blue-white-home .terminal-hero { height: auto; overflow: visible; }
+  .blue-white-home .th-frame { height: auto; }
+  .blue-white-home .th-terminal { height: auto; grid-template-rows: 44px auto auto; padding: 10px 0; row-gap: 8px; }
+  .blue-white-home .th-main { grid-template-rows: auto auto; }
+  .blue-white-home .th-chart { height: clamp(180px, 24svh, 215px); min-height: 180px; }
+  .blue-white-home .th-replay-tag { display: inline; font-size: 10px; }
+  .blue-white-home .th-transport { gap: 6px; }
+  .blue-white-home .th-footer { gap: 4px; }
+  .blue-white-home .th-footer a { min-height: 44px; display: inline-flex; align-items: center; padding: 8px 0 8px 12px; font-size: 12px; }
+  .blue-white-home .th-footer a::after { content: none; }
+  /* Keep the two quotes nearest each side of the spread. Hidden outer rows
+     remain in the unmodified payload. Without :has support, retain all rows
+     in the auto-sized panel rather than clipping or fabricating depth. */
+  @supports selector(tr:has(+ tr)) {
+    .blue-white-home .th-ladder tbody tr { display: none; }
+    .blue-white-home .th-ladder tbody tr:has(+ .th-ask-edge),
+    .blue-white-home .th-ladder tbody .th-ask-edge,
+    .blue-white-home .th-ladder tbody .th-ask-edge + tr,
+    .blue-white-home .th-ladder tbody .th-ask-edge + tr + tr { display: table-row; }
+  }
+}
