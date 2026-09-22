@@ -19,7 +19,9 @@ class QualityAcceptance(unittest.TestCase):
         text=(ROOT/'training.html').read_text();imports=json.loads(re.search(r'<script type="importmap">(.*?)</script>',text)[1])['imports']
         for name in ('training-copy-v1.js','training-demo-v1.js'):self.assertEqual(imports['/portfolio-assets/'+name],'/portfolio-assets/training-quality-v1.js')
         self.assertIn('crossorigin src="/portfolio-assets/training-quality-v1.js"',text)
-        for view in ('review','market'):self.assertEqual(imports[f'/portfolio-assets/{view}-copy-v1.js'],f'/portfolio-assets/{view}-quality-v1.js')
+        for view in ('review','market'):
+            variant='refine' if view=='market' and 'public-refine:v1' in text else 'quality'
+            self.assertEqual(imports[f'/portfolio-assets/{view}-copy-v1.js'],f'/portfolio-assets/{view}-{variant}-v1.js')
     def test_general_links_and_names_do_not_keep_old_labels(self):
         for p in ROOT.glob('*.html'):self.assertNotRegex(p.read_text(),r'href="/training\.html#/(market|training|studio)"',p.name)
         for name in ('training','review','market'):

@@ -20,7 +20,7 @@ class DemoAcceptance(unittest.TestCase):
             ident = run['result']['runId']
             block = re.search(r'<article data-run-id="' + ident + r'">(.*?)</article>', text, re.S)[1]
             self.assertIn(f"{run['result']['metrics']['netPnl']:+.2f} USD", block)
-            self.assertIn(f"{run['result']['metrics']['fillCount']} fills", block)
+            self.assertIn(f"{run['result']['metrics']['fillCount']} {'fill' if run['result']['metrics']['fillCount'] == 1 else 'fills'}", block)
             self.assertIn('source=' + run['taskId'], block)
             self.assertIn('view=replay&amp;run=' + ident, block)
         self.assertIn('Selected by method, not by return.', text)

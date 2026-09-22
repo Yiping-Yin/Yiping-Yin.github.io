@@ -67,6 +67,7 @@ def page(name, text):
         imports = json.loads(match[1])
         for old,new in [('training-copy-v1.js','training-quality-v1.js'),('training-demo-v1.js','training-quality-v1.js'),
                         ('review-copy-v1.js','review-quality-v1.js'),('market-copy-v1.js','market-quality-v1.js')]:
+            if '<!-- public-refine:v1 -->' in text and old == 'market-copy-v1.js': new = 'market-refine-v1.js'
             imports['imports']['/portfolio-assets/'+old] = '/portfolio-assets/'+new
         text = text[:match.start(1)] + json.dumps(imports,separators=(',',':')) + text[match.end(1):]
         text = text.replace('crossorigin src="/portfolio-assets/training-demo-v1.js"', 'crossorigin src="/portfolio-assets/training-quality-v1.js"')

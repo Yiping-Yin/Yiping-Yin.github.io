@@ -108,8 +108,8 @@ def featured_html(runs):
         rows.append(f'''<article data-run-id="{ident}">
 <p class="demo-run-market"><span data-demo-symbol>AAPL</span> · 10 Sep 2026</p>
 <h3>{escape(run['title'])}</h3><p class="demo-run-description">{escape(DESCRIPTIONS[task])}</p>
-<p class="demo-run-outcome">Net P&amp;L <b class="num-signed {tone}">{pnl:+.2f} USD</b><span>{metrics['fillCount']} fills</span></p>
-<nav aria-label="{escape(run['title'])} example"><a href="{replay}">Replay</a><a href="{source}">Source</a><a href="{report}">Report</a></nav>
+<p class="demo-run-outcome">Net P&amp;L <b class="num-signed {tone}">{pnl:+.2f} USD</b><span>{metrics['fillCount']} {'fill' if metrics['fillCount'] == 1 else 'fills'}</span></p>
+<nav aria-label="{escape(run['title'])} example"><a href="{replay}">Watch replay</a><a href="{source}">View source</a><a href="{report}">Read report</a></nav>
 </article>''')
     rows.append('</section>')
     return '\n'.join(rows)

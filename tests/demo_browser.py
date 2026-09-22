@@ -142,10 +142,10 @@ class DemoBrowser(unittest.TestCase):
             ids = cards.evaluate_all('cards => cards.map(c => c.dataset.runId)')
             self.assertEqual(len(set(ids)), 3)
             for card in cards.all():
-                replay = card.get_by_role('link', name='Replay', exact=True)
+                replay = card.get_by_role('link', name='Watch replay', exact=True)
                 self.assertIn('market=historical', replay.get_attribute('href'))
                 self.assertTrue(replay.get_attribute('href').endswith(card.get_attribute('data-run-id')))
-                expect(card.get_by_role('link', name='Source', exact=True)).to_be_visible()
+                expect(card.get_by_role('link', name='View source', exact=True)).to_be_visible()
             self.capture(f'home-folded-{width}.png')
             archive = self.page.locator('#published-runs')
             self.assertEqual(archive.evaluate('e => e.tagName'), 'DETAILS')
